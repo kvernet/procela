@@ -99,3 +99,8 @@ clean:  ## Clean build and cache artifacts
 # --------------------------------------------------------------------
 
 ci: lint type-check test  ## Run CI checks (no mutation)
+
+
+ci-act:  ## Run CI checks with act and no upload
+	act -W .github/workflows/ci.yaml -j ci --artifact-server-path \
+		/tmp/act-artifacts --env ACT_SKIP_UPLOAD=true
