@@ -63,8 +63,7 @@ test:  ## Run tests
 # Formatting (code mutation)
 # --------------------------------------------------------------------
 
-format:  ## Format code
-	isort procela tests
+format: isort  ## Format code
 	black procela tests
 	ruff check --fix procela tests
 
@@ -98,7 +97,7 @@ clean:  ## Clean build and cache artifacts
 # CI
 # --------------------------------------------------------------------
 
-ci: lint type-check test  ## Run CI checks (no mutation)
+ci: isort lint type-check test  ## Run CI checks (no mutation)
 
 
 ci-act:  ## Run CI checks with act and no upload
