@@ -11,7 +11,8 @@ import secrets
 
 import pytest
 
-from procela.symbols import Key, SemanticViolation, generate_key
+from procela.core.exceptions import SemanticViolation
+from procela.symbols import Key, generate_key
 
 
 class TestKeyCreation:

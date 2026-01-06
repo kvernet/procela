@@ -1,7 +1,8 @@
 # Key Semantics
-## Version: Semantic-1.0 | 2026-01-05
-Status: Locked
-Date: 2026-01-05
+
+* Version: 0.1.0
+* Status: **Locked**
+* Date: 2026-01-05
 
 ---
 

@@ -1,7 +1,9 @@
 """
 Key: Pure identity token for Procela.
 
-Semantics Reference: https://procela.org/docs/semantics/key.html
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/symbols/key.html
 """
 
 from __future__ import annotations
@@ -9,16 +11,7 @@ from __future__ import annotations
 import secrets
 from typing import Any, NoReturn
 
-
-class SemanticViolation(TypeError):
-    """
-    Raised when an operation violates Key semantics.
-
-    This includes attempts to order, compose, or derive meaning from Keys,
-    which are prohibited by the Key semantic specification.
-    """
-
-    pass
+from ..core.exceptions import SemanticViolation
 
 
 class Key:

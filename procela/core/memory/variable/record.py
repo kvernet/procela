@@ -1,0 +1,140 @@
+"""
+Immutable record of a Variable value in Procela.
+
+Captures a single observation of a Variable, including value,
+temporal information, provenance, confidence, and optional explanation.
+This forms the atomic unit of Variable memory - each record is a
+timestamped, attributed observation that can be reasoned about.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/memory/variable/record.html
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Any, Mapping, Optional
+
+from ....symbols.key import Key
+from ....symbols.time import TimePoint
+
+
+@dataclass(frozen=True, eq=True)
+class VariableRecord:
+    """
+    Immutable record of a Variable value in Procela.
+
+    Attributes
+    ----------
+        value: The value held by the Variable (type depends on domain).
+        time: Optional TimePoint or temporal indicator associated with
+              this record. Enables temporal reasoning and ordering.
+        source: Optional Key indicating origin (e.g., producing Variable
+                or mechanism). Critical for conflict resolution.
+        confidence: Optional confidence score [0, 1] in the validity
+                   of this record. Used in weighted decision making.
+        metadata: Arbitrary key-value store for additional semantic
+                 annotations. Enables extensibility without schema changes.
+        explanation: Optional string explaining the rationale or provenance.
+                    Supports debugging and transparency.
+        _key: Private unique identity token for this record (Key).
+
+    Example:
+        >>> from procela.core.memory import VariableRecord
+        >>> from procela.symbols import Key, TimePoint
+        >>>
+        >>> record = VariableRecord(
+        ...     value=42,
+        ...     time=TimePoint(),
+        ...     source=Key(),
+        ...     confidence=0.95,
+        ...     explanation="Produced by linear regression mechanism"
+        ... )
+        >>> record.describe()
+        "VariableRecord(key=<Key>, value=42, time=TimePoint(<Key>), ...)"
+    """
+
+    value: Any = field(compare=False)
+    time: Optional[TimePoint] = field(default=None, compare=False)
+    source: Optional[Key] = None
+    confidence: Optional[float] = None
+    metadata: dict[str, Any] = field(default_factory=dict, compare=False)
+    explanation: Optional[str] = field(default=None, compare=False)
+
+    _key: Key = field(
+        init=False,
+        repr=False,
+        compare=True,
+        hash=True,
+    )
+
+    def __post_init__(self) -> None:
+        """
+        Validate record invariants.
+
+        Ensures confidence values are within valid bounds if provided.
+
+        Raises
+        ------
+            TypeError: If any type error found
+            ValueError: If confidence is provided and not in [0, 1]
+        """
+        # --- Time ---
+        if self.time is not None and not isinstance(self.time, TimePoint):
+            raise TypeError("time must be a TimePoint or None")
+
+        # --- Source ---
+        if self.source is not None and not isinstance(self.source, Key):
+            raise TypeError("source must be a Key or None")
+
+        # --- Confidence ---
+        if self.confidence is not None:
+            if not isinstance(self.confidence, float):
+                raise TypeError("confidence must be a float")
+            if not 0.0 <= self.confidence <= 1.0:
+                raise ValueError(
+                    f"Confidence must be between 0 and 1, got {self.confidence}"
+                )
+
+        # --- Metadata ---
+        if not isinstance(self.metadata, Mapping):
+            raise TypeError("metadata must be a mapping")
+
+        # Defensive immutability
+        object.__setattr__(self, "metadata", dict(self.metadata))
+
+        from ...key_authority import KeyAuthority
+
+        """Assign a unique identity key issued by KeyAuthority."""
+        object.__setattr__(self, "_key", KeyAuthority.issue(self))
+
+    def key(self) -> Key:
+        """Return the identity key of this record."""
+        return self._key
+
+    def describe(self) -> str:
+        """
+        Return a human-readable description of this record.
+
+        Returns
+        -------
+            String representation suitable for debugging and logging.
+            Includes all non-None fields in a readable format.
+
+        Note:
+            This is distinct from __repr__ which is more terse and
+            focuses on identity rather than content.
+        """
+        parts = [f"key={self._key}", f"value={self.value!r}"]
+        if self.time:
+            parts.append(f"time={self.time}")
+        if self.source:
+            parts.append(f"source={self.source}")
+        if self.confidence is not None:
+            parts.append(f"confidence={self.confidence}")
+        if self.metadata:
+            parts.append(f"metadata={self.metadata}")
+        if self.explanation:
+            parts.append(f"explanation={self.explanation!r}")
+        return f"VariableRecord({', '.join(parts)})"

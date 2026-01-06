@@ -1,6 +1,8 @@
 # TimePoint Semantics
 
-## Version: Semantic-1.1-2026-01-05
+* Version: 0.1.0
+* Status: **Locked**
+* Date: 2026-01-05
 
 ### 1. Definition
 
@@ -11,7 +13,6 @@ It **carries no information** about relationships, ordering, or duration. All te
 
 ```text
 TimePoint()
-TimePoint(_key=<existing Key>)
 ```
 
 * Each TimePoint has a unique `Key`.
@@ -62,12 +63,7 @@ from procela.symbols import Key, TimePoint
 t0 = TimePoint()
 t1 = TimePoint()
 
-# Wrap an existing Key
-k = Key()
-t2 = TimePoint(_key=k)
-
 # Identity equality
-assert t2 == TimePoint(_key=k)
 assert t0 != t1
 ```
 

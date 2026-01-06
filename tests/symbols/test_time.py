@@ -10,7 +10,8 @@ import pickle
 
 import pytest
 
-from procela.symbols import Key, SemanticViolation, TimePoint, create_timepoint
+from procela.core.exceptions import SemanticViolation
+from procela.symbols import Key, TimePoint, create_timepoint
 
 
 class TestTimePointCreation:
@@ -30,13 +31,6 @@ class TestTimePointCreation:
         assert isinstance(key, Key)
         assert tp._key == key
 
-    def test_from_key_constructor(self):
-        """Test creating TimePoint from existing Key."""
-        key = Key()
-        tp = TimePoint.from_key(key)
-        assert tp.key() == key
-        assert tp._key == key
-
     def test_create_timepoint_helper(self):
         """Test create_timepoint() factory function."""
         tp1 = create_timepoint()
@@ -46,46 +40,18 @@ class TestTimePointCreation:
         assert tp1 != tp2
 
     def test_equality_based_on_key(self):
-        """Test equality is based solely on Key identity."""
-        key = Key()
-        tp1 = TimePoint(_key=key)
-        tp2 = TimePoint(_key=key)
-        tp3 = TimePoint()
+        """Test equality on Key identity."""
+        tp1 = TimePoint()
+        tp2 = TimePoint()
 
-        assert tp1 == tp2
-        assert tp1 != tp3
-        assert tp2 != tp3
+        assert tp1 != tp2
 
-    def test_hash_consistency_with_equality(self):
-        """Test hashing is consistent with equality."""
-        key = Key()
-        tp1 = TimePoint(_key=key)
-        tp2 = TimePoint(_key=key)
-        tp3 = TimePoint()
+    def test_hash_with_equality(self):
+        """Test hashing with equality."""
+        tp1 = TimePoint()
+        tp2 = TimePoint()
 
-        assert hash(tp1) == hash(tp2)
-        assert hash(tp1) != hash(tp3)
-
-        # Same instance, same hash
-        assert hash(tp1) == hash(tp1)
-
-    def test_post_init_with_bytes(self):
-        """Test __post_init__ handles bytes for deserialization."""
-        key = Key()
-        key_bytes = key.to_bytes()
-
-        # Create TimePoint with bytes (simulating deserialization)
-        tp = TimePoint(_key=key_bytes)
-        assert isinstance(tp._key, Key)
-        assert tp._key == key
-
-    def test_post_init_invalid_type(self):
-        """Test __post_init__ rejects invalid _key types."""
-        with pytest.raises(TypeError, match="must be Key or bytes"):
-            TimePoint(_key="invalid")
-
-        with pytest.raises(TypeError, match="must be Key or bytes"):
-            TimePoint(_key=123)
+        assert hash(tp1) != hash(tp2)
 
 
 class TestTimePointRepresentation:
@@ -226,30 +192,6 @@ class TestTimePointSerialization:
         assert isinstance(data, bytes)
         assert len(data) == 32  # Same as Key serialization
 
-    def test_from_bytes_round_trip(self):
-        """Test from_bytes() round-trip preserves equality."""
-        tp1 = TimePoint()
-        data = tp1.to_bytes()
-        tp2 = TimePoint.from_bytes(data)
-
-        assert tp1 == tp2
-        assert tp1.key() == tp2.key()
-
-    def test_from_bytes_invalid_data(self):
-        """Test from_bytes() with invalid data."""
-        with pytest.raises(ValueError):
-            TimePoint.from_bytes(b"invalid data")
-
-    def test_serialization_with_from_key(self):
-        """Test serialization works with from_key()."""
-        key = Key()
-        tp1 = TimePoint.from_key(key)
-        data = tp1.to_bytes()
-        tp2 = TimePoint.from_bytes(data)
-
-        assert tp1 == tp2
-        assert tp1.key() == key
-
 
 class TestTimePointContainerUsage:
     """Test TimePoint usage in containers."""
@@ -299,15 +241,6 @@ class TestTimePointImmutability:
 
         with pytest.raises(Exception):
             tp.new_attribute = "value"  # type: ignore
-
-    def test_identity_immutability(self):
-        """Test identity cannot change."""
-        key = Key()
-        tp = TimePoint(_key=key)
-
-        # Key remains the same
-        assert tp.key() == key
-        assert tp._key == key
 
 
 class TestTimePointAtomicity:
