@@ -11,7 +11,7 @@ import secrets
 
 import pytest
 
-from procela.core.exceptions import SemanticViolation
+from procela.core.exceptions import ProcelaException, SemanticViolation
 from procela.symbols import Key, generate_key
 
 
@@ -380,7 +380,7 @@ class TestSemanticViolationException:
 
     def test_exception_hierarchy(self):
         """SemanticViolation is a TypeError."""
-        assert issubclass(SemanticViolation, TypeError)
+        assert issubclass(SemanticViolation, ProcelaException)
 
     def test_exception_instantiation(self):
         """Can create and raise SemanticViolation."""
@@ -463,7 +463,7 @@ def test_key_excluded_middle():
 
 def test_semantic_violation_is_type_error():
     """Ensure SemanticViolation is a TypeError subtype."""
-    assert issubclass(SemanticViolation, TypeError)
+    assert issubclass(SemanticViolation, ProcelaException)
     with pytest.raises(SemanticViolation):
         Key() < Key()
 

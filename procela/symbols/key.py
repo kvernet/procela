@@ -114,7 +114,7 @@ class Key:
 
         Notes
         -----
-        This implements §3.5 (Opaqueness) of the semantic specification.
+        This implements (Opaqueness) of the semantic specification.
         The representation reveals no semantic information about the Key.
         """
         return "<Key>"
@@ -168,7 +168,7 @@ class Key:
 
         Notes
         -----
-        Implements §5.5 (No ordering) of the semantic specification.
+        Implements (No ordering) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be ordered")
 
@@ -188,7 +188,7 @@ class Key:
 
         Notes
         -----
-        Implements §5.5 (No ordering) of the semantic specification.
+        Implements (No ordering) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be ordered")
 
@@ -208,7 +208,7 @@ class Key:
 
         Notes
         -----
-        Implements §5.5 (No ordering) of the semantic specification.
+        Implements (No ordering) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be ordered")
 
@@ -228,7 +228,7 @@ class Key:
 
         Notes
         -----
-        Implements §5.5 (No ordering) of the semantic specification.
+        Implements (No ordering) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be ordered")
 
@@ -252,7 +252,7 @@ class Key:
 
         Notes
         -----
-        Implements §7.4 (No composition) of the semantic specification.
+        Implements (No composition) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be concatenated or composed")
 
@@ -272,7 +272,7 @@ class Key:
 
         Notes
         -----
-        Implements §7.4 (No composition) of the semantic specification.
+        Implements (No composition) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be concatenated or composed")
 
@@ -292,7 +292,7 @@ class Key:
 
         Notes
         -----
-        Implements §7.4 (No composition) of the semantic specification.
+        Implements (No composition) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be composed")
 
@@ -312,7 +312,7 @@ class Key:
 
         Notes
         -----
-        Implements §7.4 (No composition) of the semantic specification.
+        Implements (No composition) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be composed")
 
@@ -332,7 +332,7 @@ class Key:
 
         Notes
         -----
-        Implements §7.4 (No composition) of the semantic specification.
+        Implements (No composition) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be unioned or merged")
 
@@ -352,7 +352,7 @@ class Key:
 
         Notes
         -----
-        Implements §7.4 (No composition) of the semantic specification.
+        Implements (No composition) of the semantic specification.
         """
         raise SemanticViolation("Keys cannot be intersected or merged")
 

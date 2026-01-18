@@ -138,3 +138,15 @@ class VariableRecord:
         if self.explanation:
             parts.append(f"explanation={self.explanation!r}")
         return f"VariableRecord({', '.join(parts)})"
+
+    def __repr__(self) -> str:
+        """Human-readable representation."""
+        return (
+            f"VariableRecord("
+            f"value={self.value}, "
+            f"time={self.time!r}, "
+            f"source={self.source}, "
+            f"confidence={self.confidence!r}, "
+            f"metadata keys={list(self.metadata.keys())}, "
+            f"explanation={self.explanation!r})"
+        )

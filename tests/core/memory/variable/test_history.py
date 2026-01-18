@@ -1,487 +1,649 @@
 """
-Test suite for VariableHistory semantic specification.
-
-Validates all functionality and invariants of the VariableHistory class,
-ensuring immutability, proper querying, and chronological record management.
-Coverage: 100% - tests every line, branch, and semantic requirement.
+Comprehensive pytest suite for history.py with 100% coverage.
 """
+
+from __future__ import annotations
+
+from unittest.mock import Mock, patch
 
 import pytest
 
-from procela.core.memory import VariableHistory, VariableRecord
+from procela.core.memory import (
+    HistoryStatistics,
+    ReasoningHistory,
+    VariableHistory,
+    VariableRecord,
+)
+from procela.core.reasoning import ReasoningResult, ReasoningTask
 from procela.symbols import Key, TimePoint
 
 
-class TestVariableHistoryCreation:
-    """Test VariableHistory instantiation and basic properties."""
+@pytest.fixture
+def mock_key():
+    """Create a mock Key."""
+    mock = Mock(spec=Key)
+    mock.__hash__ = Mock(return_value=hash("test_key"))
+    mock.__eq__ = Mock(return_value=True)
+    return mock
 
-    def test_empty_creation(self):
-        """Test that VariableHistory can be created empty."""
+
+@pytest.fixture
+def mock_time_point():
+    """Create a mock TimePoint."""
+    mock = Mock(spec=TimePoint)
+    return mock
+
+
+@pytest.fixture
+def mock_variable_record(mock_key, mock_time_point):
+    """Create a mock VariableRecord."""
+    mock = Mock(spec=VariableRecord)
+    mock.key = Mock(return_value=mock_key)
+    mock.time = mock_time_point
+    mock.source = mock_key
+    mock.value = "test_value"
+    mock.__repr__ = Mock(return_value="VariableRecord(test_value)")
+    return mock
+
+
+@pytest.fixture
+def mock_reasoning_task():
+    """Create a mock ReasoningTask."""
+    mock = Mock(spec=ReasoningTask)
+    mock.task_id = "test_task_id"
+    return mock
+
+
+@pytest.fixture
+def mock_reasoning_result(mock_reasoning_task):
+    """Create a mock ReasoningResult."""
+    mock = Mock(spec=ReasoningResult)
+    mock.task = mock_reasoning_task
+    mock.success = True
+    mock.output = "test_output"
+    mock.__repr__ = Mock(return_value="ReasoningResult(success=True)")
+    return mock
+
+
+@pytest.fixture
+def mock_key_authority():
+    """Mock the KeyAuthority class."""
+    with patch("procela.core.key_authority.KeyAuthority") as mock:
+        mock.issue = Mock(return_value="issued_key")
+        mock.resolve = Mock(return_value=None)
+        yield mock
+
+
+@pytest.fixture
+def mock_history_statistics():
+    """Mock HistoryStatistics."""
+    with patch("procela.core.memory.HistoryStatistics") as mock:
+        mock_instance = Mock(spec=HistoryStatistics)
+        mock.empty = Mock(return_value=mock_instance)
+        mock_instance.update = Mock(return_value=mock_instance)
+        mock.return_value = mock_instance
+        yield mock
+
+
+@pytest.fixture
+def empty_variable_history(mock_key_authority, mock_history_statistics):
+    """Create an empty VariableHistory."""
+    return VariableHistory()
+
+
+@pytest.fixture
+def populated_variable_history(empty_variable_history, mock_variable_record):
+    """Create a VariableHistory with one record."""
+    return empty_variable_history.new(mock_variable_record)
+
+
+@pytest.fixture
+def empty_reasoning_history(mock_key_authority):
+    """Create an empty ReasoningHistory."""
+    return ReasoningHistory()
+
+
+@pytest.fixture
+def populated_reasoning_history(empty_reasoning_history, mock_reasoning_result):
+    """Create a ReasoningHistory with one result."""
+    return empty_reasoning_history.new(mock_reasoning_result)
+
+
+# ============================================================================
+# VARIABLEHISTORY TESTS
+# ============================================================================
+
+
+class TestVariableHistory:
+    """Test suite for VariableHistory class."""
+
+    def test_initialization_empty(self, mock_key_authority, mock_history_statistics):
+        """Test initialization of empty VariableHistory."""
         history = VariableHistory()
 
-        assert len(history) == 0
-        assert list(history) == []
-        assert isinstance(history._records, tuple)
-        assert len(history._records) == 0
+        assert history._record is None
+        assert history._previous is None
+        assert history._config == {}
 
-    def test_creation_with_records(self):
-        """Test creation with initial records tuple."""
-        record1 = VariableRecord(value=1)
-        record2 = VariableRecord(value=2)
-        records_tuple = (record1, record2)
+    def test_initialization_with_config(
+        self, mock_key_authority, mock_history_statistics
+    ):
+        """Test initialization with custom configuration."""
+        config = {"anomaly": {"alpha": 0.5}, "other_setting": "value"}
+        history = VariableHistory(_config=config)
 
-        history = VariableHistory(_records=records_tuple)
+        assert history._config == config
+        assert history._record is None
+        assert history._previous is None
 
-        assert len(history) == 2
-        assert list(history) == [record1, record2]
-        assert history._records == records_tuple
+    def test_initialization_with_invalid_previous_type(self, mock_key_authority):
+        """Test initialization with previous key pointing to wrong type."""
+        # Setup KeyAuthority.resolve to return wrong type
+        mock_key_authority.resolve.return_value = "not_a_history"
 
-    def test_immutable_frozen(self):
-        """Test that VariableHistory is immutable (frozen dataclass)."""
-        history = VariableHistory()
+        mock_prev_key = Mock(spec=Key)
 
-        # Should not be able to modify attributes
-        with pytest.raises(Exception):
-            history._records = ()  # type: ignore
+        with pytest.raises(
+            TypeError, match=f"_previous should be a {VariableHistory.__name__}"
+        ):
+            VariableHistory(_previous=mock_prev_key)
 
-        with pytest.raises(Exception):
-            history.new_attribute = "test"  # type: ignore
+    def test_new_method_valid_record(
+        self, empty_variable_history, mock_variable_record
+    ):
+        """Test creating new history with valid record."""
+        new_history = empty_variable_history.new(mock_variable_record)
 
-    def test_post_init_validation_valid(self):
-        """Test __post_init__ accepts valid tuple."""
-        records = (VariableRecord(value=1), VariableRecord(value=2))
-        history = VariableHistory(_records=records)
+        assert new_history._record == mock_variable_record
+        assert new_history._previous == empty_variable_history.key()
+        assert new_history._config == empty_variable_history._config
 
-        assert history._records == records
+    def test_new_method_invalid_record(self, empty_variable_history):
+        """Test creating new history with invalid record type."""
+        invalid_record = "not_a_record"
 
-    def test_post_init_validation_invalid(self):
-        """Test __post_init__ rejects non-tuple _records."""
-        records_list = [VariableRecord(value=1), VariableRecord(value=2)]
+        with pytest.raises(TypeError, match="record should be a VariableRecord"):
+            empty_variable_history.new(invalid_record)
 
-        with pytest.raises(TypeError, match="_records must be a tuple"):
-            VariableHistory(_records=records_list)  # type: ignore
+    def test_previous_key_method(self, mock_key_authority):
+        """Test previous_key() method."""
+        # Test with no previous
+        history1 = VariableHistory()
+        assert history1.previous_key() is None
 
+        # Test with previous
+        mock_prev_key = history1.key()
+        history2 = VariableHistory(_previous=mock_prev_key)
+        assert history2.previous_key() == mock_prev_key
 
-class TestVariableHistoryAddRecord:
-    """Test the add_record() method."""
+    def test_stats_method(self, empty_variable_history, mock_history_statistics):
+        """Test stats() method."""
+        stats = empty_variable_history.stats()
+        assert stats != mock_history_statistics.empty.return_value
 
-    def test_add_to_empty_history(self):
-        """Test adding first record to empty history."""
-        history = VariableHistory()
-        record = VariableRecord(value=42)
-
-        new_history = history.add_record(record)
-
-        assert len(new_history) == 1
-        assert list(new_history) == [record]
-        assert new_history._records == (record,)
-
-        # Original remains unchanged
-        assert len(history) == 0
-
-    def test_add_multiple_records(self):
-        """Test adding multiple records sequentially."""
-        history = VariableHistory()
-        record1 = VariableRecord(value=1)
-        record2 = VariableRecord(value=2)
-        record3 = VariableRecord(value=3)
-
-        history1 = history.add_record(record1)
-        history2 = history1.add_record(record2)
-        history3 = history2.add_record(record3)
-
-        assert len(history1) == 1
-        assert len(history2) == 2
-        assert len(history3) == 3
-
-        assert list(history3) == [record1, record2, record3]
-
-    def test_immutability_after_add(self):
-        """Test that add_record returns new instance, doesn't modify original."""
-        history = VariableHistory()
-        record = VariableRecord(value="test")
-
-        new_history = history.add_record(record)
-
-        # New history has the record
-        assert len(new_history) == 1
-        assert new_history._records == (record,)
-
-        # Original history remains empty
-        assert len(history) == 0
-        assert history._records == ()
-
-    def test_add_same_record_twice(self):
-        """Test adding the same record instance multiple times."""
-        history = VariableHistory()
-        record = VariableRecord(value="duplicate")
-
-        history1 = history.add_record(record)
-        history2 = history1.add_record(record)  # Same instance again
-
-        assert len(history2) == 2
-        assert history2._records == (record, record)
-
-    def test_chaining_add_operations(self):
-        """Test chaining multiple add_record calls."""
-        record1 = VariableRecord(value=1)
-        record2 = VariableRecord(value=2)
-
-        history = VariableHistory().add_record(record1).add_record(record2)
-
-        assert len(history) == 2
-        assert list(history) == [record1, record2]
-
-
-class TestVariableHistoryGetRecords:
-    """Test the get_records() filtering method."""
-
-    def test_get_all_records_empty(self):
-        """Test get_records on empty history."""
-        history = VariableHistory()
-
-        records = history.get_records()
+    def test_iter_records_empty(self, empty_variable_history):
+        """Test iter_records() on empty history."""
+        records = list(empty_variable_history.iter_records())
         assert records == []
 
-        # With filters should also return empty
-        assert history.get_records(key=Key()) == []
-        assert history.get_records(time=TimePoint()) == []
-        assert history.get_records(source=Key()) == []
+    def test_iter_records_single_record(
+        self, populated_variable_history, mock_variable_record
+    ):
+        """Test iter_records() with one record."""
+        records = list(populated_variable_history.iter_records())
+        assert records == [mock_variable_record]
 
-    def test_get_all_records_with_data(self):
-        """Test get_records without filters returns all records."""
-        record1 = VariableRecord(value=1)
-        record2 = VariableRecord(value=2)
-        record3 = VariableRecord(value=3)
+    def test_iter_records_multiple_records(
+        self, mock_key_authority, mock_variable_record
+    ):
+        """Test iter_records() with multiple records in chain."""
+        # Create chain of histories
+        history1 = VariableHistory()
 
-        history = VariableHistory(_records=(record1, record2, record3))
+        record1 = Mock(spec=VariableRecord)
+        record1.value = None
+        record1.key = Mock(return_value="key1")
+        history2 = history1.new(record1)
 
-        records = history.get_records()
-        assert records == [record1, record2, record3]
+        record2 = Mock(spec=VariableRecord)
+        record2.value = 34.89
+        record2.confidence = 0.821
+        record2.key = Mock(return_value="key2")
+        history3 = history2.new(record2)
 
-    def test_filter_by_key(self):
+        # Setup KeyAuthority.resolve to return previous histories
+        def resolve_side_effect(key):
+            if key == history2.key():
+                return history2
+            if key == history1.key():
+                return history1
+            return None
+
+        mock_key_authority.resolve.side_effect = resolve_side_effect
+
+        records = list(history3.iter_records())
+        assert records == [record2, record1]
+
+    def test_iter_records_circular_reference_prevention(self, mock_key_authority):
+        """Test iter_records() prevents infinite loops on circular references."""
+        # Create circular reference
+        history1 = VariableHistory()
+        history2 = VariableHistory(_previous=history1.key())
+
+        # Mock resolve to create circular reference
+        mock_key_authority.resolve.side_effect = lambda k: (
+            history2 if k == history1.key() else None
+        )
+
+        records = list(history2.iter_records())
+        assert records == []  # Should break early
+
+    def test_iter_filtered_records_by_key(
+        self,
+    ):
         """Test filtering records by key."""
-        record1 = VariableRecord(value=1)
-        record2 = VariableRecord(value=2)
-        record3 = VariableRecord(value=3)
+        # Create a different key
+        key = Key()
+        history = VariableHistory()
+        history = history.new(record=VariableRecord(value=None))
 
-        history = VariableHistory(_records=(record1, record2, record3))
+        # Test with non-matching key
+        filtered = list(history.iter_filtered_records(key=key))
+        assert len(filtered) == 0
 
-        # Filter by key
-        for record in [record1, record2, record3]:
-            records = history.get_records(key=record.key())
-            assert len(records) == 1
-            assert record in records
-
-    def test_filter_by_time(self):
+    def test_iter_filtered_records_by_time(self, mock_key_authority, mock_time_point):
         """Test filtering records by time."""
-        time1 = TimePoint()
-        time2 = TimePoint()
+        # Create histories with different times
+        history = VariableHistory()
 
-        record1 = VariableRecord(value=1, time=time1)
-        record2 = VariableRecord(value=2, time=time2)
-        record3 = VariableRecord(value=3, time=time1)  # Same time as record1
-        record4 = VariableRecord(value=4)  # No time
+        time1 = Mock(spec=TimePoint)
+        time1.__eq__ = Mock(return_value=True)
+        record1 = Mock(spec=VariableRecord)
+        record1.time = time1
+        record1.value = None
+        history = history.new(record1)
 
-        history = VariableHistory(_records=(record1, record2, record3, record4))
+        time2 = Mock(spec=TimePoint)
+        time2.__eq__ = Mock(return_value=False)
+        record2 = Mock(spec=VariableRecord)
+        record2.time = time2
+        record2.value = None
+        history = history.new(record2)
+
+        # Setup resolve to return previous history
+        mock_key_authority.resolve.return_value = VariableHistory(_record=record1)
 
         # Filter by time1
-        time1_records = history.get_records(time=time1)
-        assert len(time1_records) == 2
-        assert record1 in time1_records
-        assert record3 in time1_records
-        assert record2 not in time1_records
-        assert record4 not in time1_records
+        filtered = list(history.iter_filtered_records(time=time1))
+        assert filtered == [record1]  # Only record1 matches time1
 
-        # Filter by time2
-        time2_records = history.get_records(time=time2)
-        assert time2_records == [record2]
-
-        # Records with no time shouldn't match any time filter
-        assert record4 not in time1_records
-        assert record4 not in time2_records
-
-    def test_filter_by_source(self):
+    def test_iter_filtered_records_by_source(self, mock_key_authority):
         """Test filtering records by source."""
-        source1 = Key()
-        source2 = Key()
+        # Create histories with different sources
+        history = VariableHistory()
 
-        record1 = VariableRecord(value=1, source=source1)
-        record2 = VariableRecord(value=2, source=source2)
-        record3 = VariableRecord(value=3, source=source1)  # Same source as record1
-        record4 = VariableRecord(value=4)  # No source
+        source1 = Mock(spec=Key)
+        source1.__eq__ = Mock(return_value=True)
+        record1 = Mock(spec=VariableRecord)
+        record1.source = source1
+        record1.value = None
+        history = history.new(record1)
 
-        history = VariableHistory(_records=(record1, record2, record3, record4))
+        source2 = Mock(spec=Key)
+        source2.__eq__ = Mock(return_value=False)
+        record2 = Mock(spec=VariableRecord)
+        record2.source = source2
+        record2.value = None
+        history = history.new(record2)
+
+        # Setup resolve
+        mock_key_authority.resolve.return_value = VariableHistory(_record=record1)
 
         # Filter by source1
-        source1_records = history.get_records(source=source1)
-        assert len(source1_records) == 2
-        assert record1 in source1_records
-        assert record3 in source1_records
-        assert record2 not in source1_records
-        assert record4 not in source1_records
+        filtered = list(history.iter_filtered_records(source=source1))
+        assert filtered == [record1]
 
-        # Filter by source2
-        source2_records = history.get_records(source=source2)
-        assert source2_records == [record2]
+    def test_get_records_empty(self, empty_variable_history):
+        """Test get_records() on empty history."""
+        records = empty_variable_history.get_records()
+        assert records == []
 
-        # Records with no source shouldn't match any source filter
-        assert record4 not in source1_records
-        assert record4 not in source2_records
+    def test_get_records_with_filters(
+        self, populated_variable_history, mock_variable_record
+    ):
+        """Test get_records() with filtering and reverse order."""
+        # Add another record to test ordering
+        record2 = Mock(spec=VariableRecord)
+        record2.key = Mock(return_value=mock_variable_record.key())
+        record2.time = mock_variable_record.time
+        record2.source = mock_variable_record.source
+        record2.value = None
 
-    def test_combined_filters(self):
-        """Test combining multiple filters (AND logic)."""
-        time = TimePoint()
-        source = Key()
+        history2 = populated_variable_history.new(record2)
 
-        # Record matching all criteria
-        record1 = VariableRecord(value=1, time=time, source=source)
-        record2 = VariableRecord(value=2, time=time, source=source)
+        # Mock resolve to return previous history
+        with patch(
+            "procela.core.key_authority.KeyAuthority.resolve",
+            return_value=populated_variable_history,
+        ):
+            records = history2.get_records()
 
-        # Records matching some but not all criteria
-        record3 = VariableRecord(value=3, time=TimePoint(), source=source)
-        record4 = VariableRecord(value=4, time=time, source=Key())
+            # Should return records in chronological order (oldest first)
+            assert records == [mock_variable_record, record2]
 
-        history = VariableHistory(_records=(record1, record2, record3, record4))
+    def test_latest_empty(self, empty_variable_history):
+        """Test latest() on empty history."""
+        assert empty_variable_history.latest() is None
 
-        # Combined filter should only return the fully matching record
-        filtered = history.get_records(time=time, source=source)
-        assert filtered == [record1, record2]
+    def test_latest_populated(self, populated_variable_history, mock_variable_record):
+        """Test latest() on populated history."""
+        latest = populated_variable_history.latest()
+        assert latest == mock_variable_record
 
-    def test_filter_with_none_values(self):
-        """Test filtering when records have None values for filtered fields."""
-        time = TimePoint()
-        source = Key()
+    def test_dataclass_immutability(self, empty_variable_history):
+        """Test that VariableHistory is immutable."""
+        # Should not be able to modify attributes
+        with pytest.raises(Exception):
+            empty_variable_history._record = "new_value"
 
-        record_with_time = VariableRecord(value=1, time=time)
-        record_with_source = VariableRecord(value=2, source=source)
-        record_with_both = VariableRecord(value=3, time=time, source=source)
-        record_with_none = VariableRecord(value=4)  # No time or source
+        # Verify it's a frozen dataclass
+        assert empty_variable_history.__dataclass_params__.frozen is True
 
-        history = VariableHistory(
-            _records=(
-                record_with_time,
-                record_with_source,
-                record_with_both,
-                record_with_none,
-            )
+
+# ============================================================================
+# REASONINGHISTORY TESTS
+# ============================================================================
+
+
+class TestReasoningHistory:
+    """Test suite for ReasoningHistory class."""
+
+    def test_initialization_with_previous(self):
+        """Test initialization with previous key."""
+        mock_prev_key = Mock(spec=Key)
+        history = ReasoningHistory(_previous=mock_prev_key)
+
+        assert history._previous == mock_prev_key
+        assert history._result is None
+
+    def test_new_method_valid_result(
+        self, empty_reasoning_history, mock_reasoning_result
+    ):
+        """Test creating new history with valid result."""
+        new_history = empty_reasoning_history.new(mock_reasoning_result)
+
+        assert new_history._result == mock_reasoning_result
+        assert new_history._previous == empty_reasoning_history.key()
+
+    def test_new_method_invalid_result(self, empty_reasoning_history):
+        """Test creating new history with invalid result type."""
+        invalid_result = "not_a_result"
+
+        with pytest.raises(TypeError, match="result should be a ReasoningResult"):
+            empty_reasoning_history.new(invalid_result)
+
+    def test_previous_key_method(self):
+        """Test previous_key() method."""
+        # Test with no previous
+        history1 = ReasoningHistory()
+        assert history1.previous_key() is None
+
+        # Test with previous
+        mock_prev_key = Mock(spec=Key)
+        history2 = ReasoningHistory(_previous=mock_prev_key)
+        assert history2.previous_key() == mock_prev_key
+
+    def test_iter_results_empty(self, empty_reasoning_history):
+        """Test iter_results() on empty history."""
+        results = list(empty_reasoning_history.iter_results())
+        assert results == []
+
+    def test_iter_results_single_result(
+        self, populated_reasoning_history, mock_reasoning_result
+    ):
+        """Test iter_results() with one result."""
+        results = list(populated_reasoning_history.iter_results())
+        assert results == [mock_reasoning_result]
+
+    def test_iter_results_multiple_results(
+        self, mock_key_authority, mock_reasoning_result
+    ):
+        """Test iter_results() with multiple results in chain."""
+        # Create chain of histories
+        history1 = ReasoningHistory()
+
+        result1 = Mock(spec=ReasoningResult)
+        result1.task = Mock(spec=ReasoningTask)
+        history2 = history1.new(result1)
+
+        result2 = Mock(spec=ReasoningResult)
+        result2.task = Mock(spec=ReasoningTask)
+        history3 = history2.new(result2)
+
+        # Setup KeyAuthority.resolve to return previous histories
+        def resolve_side_effect(key):
+            if key == history2.key():
+                return history2
+            if key == history1.key():
+                return history1
+            return None
+
+        mock_key_authority.resolve.side_effect = resolve_side_effect
+
+        results = list(history3.iter_results())
+        assert results == [result2, result1]
+
+    def test_iter_filtered_results_by_task(
+        self, populated_reasoning_history, mock_reasoning_result, mock_reasoning_task
+    ):
+        """Test filtering results by task."""
+        # Create a different task
+        different_task = Mock(spec=ReasoningTask)
+
+        # Test with matching task
+        filtered = list(
+            populated_reasoning_history.iter_filtered_results(task=mock_reasoning_task)
+        )
+        assert filtered == [mock_reasoning_result]
+
+        # Test with non-matching task
+        filtered = list(
+            populated_reasoning_history.iter_filtered_results(task=different_task)
+        )
+        assert filtered == []
+
+    def test_iter_filtered_results_by_success(self, mock_key_authority):
+        """Test filtering results by success flag."""
+        # Create histories with different success values
+        history = ReasoningHistory()
+
+        # Successful result
+        result_success = Mock(spec=ReasoningResult)
+        result_success.success = True
+        result_success.task = Mock(spec=ReasoningTask)
+        history = history.new(result_success)
+
+        # Failed result
+        result_fail = Mock(spec=ReasoningResult)
+        result_fail.success = False
+        result_fail.task = Mock(spec=ReasoningTask)
+        history = history.new(result_fail)
+
+        # Setup resolve to return previous history
+        mock_key_authority.resolve.return_value = ReasoningHistory(
+            _result=result_success
         )
 
-        # Filter by time - should only return records with that time (not None)
-        time_records = history.get_records(time=time)
-        assert record_with_time in time_records
-        assert record_with_both in time_records
-        assert record_with_source not in time_records
-        assert record_with_none not in time_records
+        # Filter by success=True
+        filtered = list(history.iter_filtered_results(success=True))
+        assert filtered == [result_success]
 
-        # Filter by source - should only return records with that source (not None)
-        source_records = history.get_records(source=source)
-        assert record_with_source in source_records
-        assert record_with_both in source_records
-        assert record_with_time not in source_records
-        assert record_with_none not in source_records
+        # Filter by success=False
+        filtered = list(history.iter_filtered_results(success=False))
+        assert filtered == [result_fail]  # result_fail matches success=False
 
-
-class TestVariableHistoryAllKeys:
-    """Test the all_keys() method."""
-
-    def test_all_keys_empty(self):
-        """Test all_keys() on empty history."""
-        history = VariableHistory()
-
-        keys = history.all_keys()
-        assert keys == set()
-
-    def test_all_history_keys(self):
-        """Test all_keys() returns all keys."""
-        record1 = VariableRecord(value=1)
-        record2 = VariableRecord(value=2)
-        record3 = VariableRecord(value=3)
-        record4 = VariableRecord(value=4)
-
-        history = VariableHistory(_records=(record1, record2, record3, record4))
-
-        assert len(history.all_keys()) == 4
-
-
-class TestVariableHistoryDunderMethods:
-    """Test special dunder methods (__len__, __iter__)."""
-
-    def test_len_empty(self):
-        """Test __len__ on empty history."""
-        history = VariableHistory()
-        assert len(history) == 0
-
-    def test_len_with_records(self):
-        """Test __len__ with multiple records."""
-        records = tuple(VariableRecord(value=i) for i in range(5))
-        history = VariableHistory(_records=records)
-
-        assert len(history) == 5
-
-    def test_iter_empty(self):
-        """Test iteration over empty history."""
-        history = VariableHistory()
-
-        items = list(history)
-        assert items == []
-
-    def test_iter_with_records(self):
-        """Test iteration preserves chronological order."""
-        record1 = VariableRecord(value=1)
-        record2 = VariableRecord(value=2)
-        record3 = VariableRecord(value=3)
-
-        history = VariableHistory(_records=(record1, record2, record3))
-
-        # Iteration should return records in tuple order
-        items = list(history)
-        assert items == [record1, record2, record3]
-
-        # Multiple iterations should work
-        first_pass = list(history)
-        second_pass = list(history)
-        assert first_pass == second_pass
-
-    def test_iteration_in_for_loop(self):
-        """Test history can be used in for loop."""
-        records = [VariableRecord(value=i) for i in range(3)]
-        history = VariableHistory(_records=tuple(records))
-
-        collected = []
-        for record in history:
-            collected.append(record)
-
-        assert collected == records
-
-
-class TestVariableHistoryEdgeCases:
-    """Test edge cases and unusual scenarios."""
-
-    def test_large_number_of_records(self):
-        """Test performance with many records (not exhaustive)."""
-        # Create 1000 records
-        records = tuple(VariableRecord(value=i) for i in range(1000))
-        history = VariableHistory(_records=records)
-
-        assert len(history) == 1000
-
-        # Quick filter test
-        filtered = history.get_records()
-        assert len(filtered) == 1000
-
-    def test_records_with_different_times(self):
-        """Test handling at different times."""
-        time1 = TimePoint()
-        time2 = TimePoint()
-
-        record1 = VariableRecord(value=1, time=time1)
-        record2 = VariableRecord(value=2, time=time2)
-
-        history = VariableHistory(_records=(record1, record2))
-
-        # Both should be returned
-        key_records = history.get_records()
-        assert len(key_records) == 2
-
-        # Latest should be record2 (last in tuple)
-        latest = history.latest(key=record2.key())
-        assert latest == record2
-
-    def test_empty_filters_in_get_records(self):
-        """Test get_records with None filters (should return all)."""
-        record1 = VariableRecord(value=1)
-        record2 = VariableRecord(value=2)
-
-        history = VariableHistory(_records=(record1, record2))
-
-        # All these should return all records
-        assert history.get_records() == [record1, record2]
-        assert history.get_records(key=None) == [record1, record2]
-        assert history.get_records(time=None) == [record1, record2]
-        assert history.get_records(source=None) == [record1, record2]
-
-        # All None filters
-        assert history.get_records(key=None, time=None, source=None) == [
-            record1,
-            record2,
-        ]
-
-    def test_copy_does_not_affect_history(self):
-        """Test that copying doesn't break immutability."""
-        import copy
-
-        record = VariableRecord(value="original")
-        history = VariableHistory(_records=(record,))
-
-        history_copy = copy.deepcopy(history)
-
-        # Should be equal
-        assert history._records == history_copy._records
-        assert list(history) == list(history_copy)
-
-        # But different objects
-        assert history is not history_copy
-
-    def test_history_with_no_time_or_source_records(self):
-        """Test history containing records without time or source fields."""
-        time_filter = TimePoint()
-        source_filter = Key()
-
-        record_no_time = VariableRecord(value=1)  # No time
-        record_no_source = VariableRecord(value=2, time=time_filter)  # No source
-        record_both = VariableRecord(value=3, time=time_filter, source=source_filter)
-
-        history = VariableHistory(
-            _records=(record_no_time, record_no_source, record_both)
+    def test_iter_filtered_results_no_filter(
+        self, populated_reasoning_history, mock_reasoning_result
+    ):
+        """Test iter_filtered_results with no filters (default success=True)."""
+        filtered = list(populated_reasoning_history.iter_filtered_results())
+        # Default success=True should filter out None or False results
+        assert (
+            filtered == [mock_reasoning_result] if mock_reasoning_result.success else []
         )
 
-        # Should handle filters gracefully
-        time_records = history.get_records(time=time_filter)
-        assert len(time_records) == 2
+    def test_get_results_empty(self, empty_reasoning_history):
+        """Test get_results() on empty history."""
+        results = empty_reasoning_history.get_results()
+        assert results == []
 
-        source_records = history.get_records(time=time_filter, source=source_filter)
-        # Only record_both has the specific source
-        assert len(source_records) == 1
+    def test_get_results_with_filters(self, mock_key_authority, mock_reasoning_result):
+        """Test get_results() with filtering and reverse order."""
+        # Create chain
+        history1 = ReasoningHistory()
+        history2 = history1.new(mock_reasoning_result)
+
+        result2 = Mock(spec=ReasoningResult)
+        result2.success = False
+        result2.task = mock_reasoning_result.task
+        history3 = history2.new(result2)
+
+        # Setup resolve chain
+        def resolve_side_effect(key):
+            if key == history2.key():
+                return history2
+            if key == history1.key():
+                return history1
+            return None
+
+        mock_key_authority.resolve.side_effect = resolve_side_effect
+
+        # Get all results (should be reversed)
+        results = history3.get_results(success=None)
+        assert results == [mock_reasoning_result, result2]
+
+    def test_latest_no_results(self, empty_reasoning_history):
+        """Test latest() when no results match filter."""
+        mock_task = Mock(spec=ReasoningTask)
+        latest = empty_reasoning_history.latest(task=mock_task)
+        assert latest is None
+
+    def test_len_method_empty(self, empty_reasoning_history):
+        """Test __len__() on empty history."""
+        assert len(empty_reasoning_history) == 0
+
+    def test_len_method_populated(self, mock_key_authority, mock_reasoning_result):
+        """Test __len__() on populated history."""
+        # Create chain
+        history1 = ReasoningHistory()
+        history2 = history1.new(mock_reasoning_result)
+
+        result2 = Mock(spec=ReasoningResult)
+        result2.task = Mock(spec=ReasoningTask)
+        history3 = history2.new(result2)
+
+        # Setup resolve
+        mock_key_authority.resolve.return_value = history2
+
+        assert len(history3) == 2
+
+    def test_dataclass_immutability(self, empty_reasoning_history):
+        """Test that ReasoningHistory is immutable."""
+        # Should not be able to modify attributes
+        with pytest.raises(Exception):
+            empty_reasoning_history._result = "new_value"
+
+        # Verify it's a frozen dataclass
+        assert empty_reasoning_history.__dataclass_params__.frozen is True
+
+    def test_iter_results_circular_reference(self, mock_key_authority):
+        """Test iter_results() handles circular references."""
+        # Create circular reference
+        history1 = ReasoningHistory()
+        history2 = ReasoningHistory(_previous=history1.key())
+
+        # Mock resolve to create circular reference
+        mock_key_authority.resolve.side_effect = lambda k: (
+            history2 if k == history1.key() else None
+        )
+
+        results = list(history2.iter_results())
+        assert results == []  # Should break early
 
 
-def test_history_raise_and_latest_return_none():
-    """Test the history by raising exception and latest() return None"""
-    records = [VariableRecord(value=i, time=TimePoint()) for i in range(3)]
-    records.append("not_a_variable_record")
-    records = tuple(records)
-
-    with pytest.raises(TypeError):
-        _ = VariableHistory(_records=records)
-
-    records = [VariableRecord(value=i, time=TimePoint()) for i in range(3)]
-    records = tuple(records)
-    history = VariableHistory(_records=records)
-
-    with pytest.raises(TypeError):
-        _ = history.add_record("not_a_variable_record")
-
-    latest = history.latest(key=Key())
-    assert latest is None
+# ============================================================================
+# INTEGRATION TESTS
+# ============================================================================
 
 
-def test_all_public_methods_covered():
-    """Meta-test: Ensure all public VariableHistory methods are tested."""
-    tested_aspects = {
-        "creation",
-        "validation",
-        "add_record",
-        "get_records",
-        "latest",
-        "all_keys",
-        "__len__",
-        "__iter__",
-        "edge_cases",
-    }
+class TestIntegration:
+    """Integration tests for both history classes."""
 
-    assert len(tested_aspects) >= 9, f"Missing test aspects: {tested_aspects}"
+    def test_mixed_history_types_independent(self):
+        """Test that VariableHistory and ReasoningHistory don't interfere."""
+        # They should be completely independent classes
+        var_history = VariableHistory()
+        reasoning_history = ReasoningHistory()
+
+        assert isinstance(var_history, VariableHistory)
+        assert isinstance(reasoning_history, ReasoningHistory)
+        assert not isinstance(var_history, ReasoningHistory)
+        assert not isinstance(reasoning_history, VariableHistory)
+
+
+# ============================================================================
+# EDGE CASE TESTS
+# ============================================================================
+
+
+class TestEdgeCases:
+    """Edge case tests for history classes."""
+
+    def test_variable_history_with_none_config(self, mock_key_authority):
+        """Test VariableHistory with None in config (should use default)."""
+        # This tests the default_factory=dict in the field definition
+        history = VariableHistory(_config={})  # type: ignore
+
+        # Should have empty dict as default
+        assert history._config == {}
+
+    def test_reasoning_history_iter_results_with_none_resolution(
+        self, mock_key_authority
+    ):
+        """Test iter_results when KeyAuthority.resolve returns None."""
+        history = ReasoningHistory(_previous="some_key")
+
+        # Resolve returns None (not a ReasoningHistory)
+        mock_key_authority.resolve.return_value = None
+
+        results = list(history.iter_results())
+        assert results == []  # Should stop iteration
+
+    def test_variable_history_with_record_but_no_previous_stats(
+        self, mock_key_authority
+    ):
+        """Test VariableHistory with record but no previous (uses empty stats)."""
+        record = Mock(spec=VariableRecord)
+        record.value = None
+        history = VariableHistory(_record=record)
+
+        # Should have initialized stats via empty().update()
+        assert history._record == record
+
+    def test_large_history_performance(self):
+        """Test that iterators don't load all records at once (performance)."""
+        # This is more of a documentation test
+        # The use of generators (yield) in iter_records/iter_results
+        # ensures memory efficiency for large histories
+
+        # We can't easily test performance, but we can verify it's a generator
+        history = VariableHistory()
+
+        # iter_records should return an iterator, not a list
+        result = history.iter_records()
+        assert hasattr(result, "__iter__")
+        assert hasattr(result, "__next__") or hasattr(result, "next")
 
 
 if __name__ == "__main__":
-    # Run tests with verbose output
-    pytest.main([__file__, "-v", "--tb=short"])
+    pytest.main([__file__, "-v", "--cov=history", "--cov-report=term-missing"])

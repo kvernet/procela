@@ -84,6 +84,11 @@ class TimePoint:
         """
         Prohibit ordering operation.
 
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
+
         Raises
         ------
         SemanticViolation
@@ -94,6 +99,11 @@ class TimePoint:
     def __le__(self, other: Any) -> NoReturn:
         """
         Prohibit ordering operation.
+
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
 
         Raises
         ------
@@ -106,6 +116,11 @@ class TimePoint:
         """
         Prohibit ordering operation.
 
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
+
         Raises
         ------
         SemanticViolation
@@ -116,6 +131,11 @@ class TimePoint:
     def __ge__(self, other: Any) -> NoReturn:
         """
         Prohibit ordering operation.
+
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
 
         Raises
         ------
@@ -128,6 +148,11 @@ class TimePoint:
         """
         Prohibit addition/concatenation.
 
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
+
         Raises
         ------
         SemanticViolation
@@ -139,6 +164,11 @@ class TimePoint:
         """
         Prohibit right addition/concatenation.
 
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
+
         Raises
         ------
         SemanticViolation
@@ -149,6 +179,11 @@ class TimePoint:
     def __sub__(self, other: Any) -> NoReturn:
         """
         Prohibit subtraction/duration calculation.
+
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
 
         Raises
         ------
@@ -163,6 +198,11 @@ class TimePoint:
         """
         Prohibit right subtraction.
 
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
+
         Raises
         ------
         SemanticViolation
@@ -176,6 +216,11 @@ class TimePoint:
         """
         Prohibit multiplication/composition.
 
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
+
         Raises
         ------
         SemanticViolation
@@ -186,6 +231,11 @@ class TimePoint:
     def __rmul__(self, other: Any) -> NoReturn:
         """
         Prohibit right multiplication.
+
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
 
         Raises
         ------
@@ -198,6 +248,11 @@ class TimePoint:
         """
         Prohibit union operation.
 
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
+
         Raises
         ------
         SemanticViolation
@@ -208,6 +263,11 @@ class TimePoint:
     def __and__(self, other: Any) -> NoReturn:
         """
         Prohibit intersection operation.
+
+        Parameters
+        ----------
+        other : Any
+            Any object (ignored).
 
         Raises
         ------
@@ -245,6 +305,7 @@ def create_timepoint() -> TimePoint:
 
     Example
     -------
+    >>> from procela.symbols import TimePoint, create_timepoint
     >>> tp = create_timepoint()
     >>> isinstance(tp, TimePoint)
     True

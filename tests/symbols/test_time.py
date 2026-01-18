@@ -10,7 +10,7 @@ import pickle
 
 import pytest
 
-from procela.core.exceptions import SemanticViolation
+from procela.core.exceptions import ProcelaException, SemanticViolation
 from procela.symbols import Key, TimePoint, create_timepoint
 
 
@@ -388,7 +388,7 @@ class TestSemanticViolationPropagation:
 
     def test_semantic_violation_hierarchy(self):
         """Test SemanticViolation is a TypeError."""
-        assert issubclass(SemanticViolation, TypeError)
+        assert issubclass(SemanticViolation, ProcelaException)
 
     def test_all_prohibited_operations_raise(self):
         """Test all prohibited operations raise SemanticViolation."""

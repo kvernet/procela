@@ -13,210 +13,228 @@ https://procela.org/docs/semantics/core/memory/variable/history.html
 
 from __future__ import annotations
 
-from collections.abc import Iterator
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Any, Iterable
 
 from ....symbols.key import Key
 from ....symbols.time import TimePoint
+from ...key_authority import KeyAuthority
+from ...reasoning.result import ReasoningResult
+from ...reasoning.task import ReasoningTask
 from .record import VariableRecord
+from .statistics import HistoryStatistics
 
 
 @dataclass(frozen=True)
 class VariableHistory:
     """
-    Immutable history of VariableRecords for a variable.
+    Immutable history node for a Variable.
 
-    Example:
-    -------
-        >>> from procela.symbols import Key
-        >>> from procela.core.memory import VariableRecord, VariableHistory
-        >>>
-        >>> # Create empty history
-        >>> history = VariableHistory()
-        >>>
-        >>> # Add records over time
-        >>> key1 = Key()
-        >>> record1 = VariableRecord(value=42, key=key1)
-        >>> history1 = history.add_record(record1)
-        >>>
-        >>> record2 = VariableRecord(value=43, key=key1)
-        >>> history2 = history1.add_record(record2)
-        >>>
-        >>> # Query records
-        >>> len(history2)
-        2
-        >>> history2.get_records(key=key1)
-        [VariableRecord(...), VariableRecord(...)]
-        >>> history2.latest(key1).value
-        43
-        >>> history2.all_keys()
-        {<Key>}
+    Each instance represents exactly one appended record and a complete,
+    incremental epistemic state.
     """
 
-    _records: tuple[VariableRecord, ...] = field(default_factory=tuple, repr=False)
+    _record: VariableRecord | None = field(default=None, repr=False)
+    _previous: Key | None = field(default=None, repr=False)
+    _config: dict[str, Any] = field(default_factory=dict, repr=False)
+
+    _stats: HistoryStatistics = field(init=False, repr=False)
+    _key: Key = field(init=False, repr=False, compare=True, hash=True)
 
     def __post_init__(self) -> None:
-        """
-        Validate record invariants.
+        """Post init validation."""
+        previous_history: Any | None = None
+        if self._previous:
+            previous_history = KeyAuthority.resolve(self._previous)
+            if not isinstance(previous_history, VariableHistory):
+                raise TypeError(
+                    f"_previous should be a {VariableHistory.__name__}, "
+                    f"got {type(previous_history)}"
+                )
 
-        Ensures confidence values are within valid bounds if provided.
+        previous_stats = (
+            HistoryStatistics.empty()
+            if previous_history is None
+            else previous_history._stats
+        )
 
-        Raises
-        ------
-            TypeError: If _records is not a tuple
-        """
-        if not isinstance(self._records, tuple):
-            raise TypeError(f"_records must be a tuple, got {self._records!r}")
+        anomaly_cfg = self._config.get("anomaly", {})
+        alpha = anomaly_cfg.get("alpha", 0.3)
 
-        for record in self._records:
-            if not isinstance(record, VariableRecord):
-                raise TypeError(f"record must be a VariableRecord, got {record!r}")
+        object.__setattr__(
+            self,
+            "_stats",
+            (
+                previous_stats
+                if self._record is None
+                else previous_stats.update(self._record, alpha=alpha)
+            ),
+        )
+        object.__setattr__(self, "_key", KeyAuthority.issue(self))
 
-    def add_record(self, record: VariableRecord) -> VariableHistory:
-        """
-        Return a new VariableHistory with `record` appended.
-
-        Creates a new immutable history containing all previous records
-        plus the new record. The original history remains unchanged.
-
-        Parameters
-        ----------
-            record: VariableRecord to add.
-
-        Returns
-        -------
-            VariableHistory: New instance including the new record.
-
-        Example
-        -------
-            >>> history = VariableHistory()
-            >>> new_history = history.add_record(record)
-            >>> len(new_history) == len(history) + 1
-            True
-        """
+    def new(self, record: VariableRecord) -> VariableHistory:
+        """Return a new VariableHistory with the given record appended."""
         if not isinstance(record, VariableRecord):
-            raise TypeError(f"record must be a VariableRecord, got {record!r}")
-        return VariableHistory(self._records + (record,))
+            raise TypeError(f"record should be a VariableRecord, get {record!r}")
+
+        return VariableHistory(
+            _record=record,
+            _previous=self._key,
+            _config=self._config,
+        )
+
+    def key(self) -> Key:
+        """Return the identity key of this history."""
+        return self._key
+
+    def previous_key(self) -> Key | None:
+        """Return the key of the previous history node, if any."""
+        return self._previous
+
+    def stats(self) -> HistoryStatistics:
+        """Return the epistemic statistics of this history."""
+        return self._stats
+
+    def iter_records(self) -> Iterable[VariableRecord]:
+        """
+        Explicit traversal of records (newest → oldest).
+
+        This traversal is structural and non-epistemic.
+        """
+        current: VariableHistory | None = self
+
+        while current is not None:
+            record = current._record
+            if record is not None:
+                yield record
+
+            prev_key = current._previous
+            if prev_key is None:
+                break
+
+            resolved = KeyAuthority.resolve(prev_key)
+            current = resolved if isinstance(resolved, VariableHistory) else None
+
+    def iter_filtered_records(
+        self,
+        *,
+        key: Key | None = None,
+        time: TimePoint | None = None,
+        source: Key | None = None,
+    ) -> Iterable[VariableRecord]:
+        """Stream filtered records (newest → oldest)."""
+        for record in self.iter_records():
+            if key is not None and record.key() != key:
+                continue
+            if time is not None and record.time != time:
+                continue
+            if source is not None and record.source != source:
+                continue
+            yield record
 
     def get_records(
         self,
-        key: Optional[Key] = None,
-        time: Optional[TimePoint] = None,
-        source: Optional[Key] = None,
+        *,
+        key: Key | None = None,
+        time: TimePoint | None = None,
+        source: Key | None = None,
     ) -> list[VariableRecord]:
+        """Get records based on criteria."""
+        records = list(self.iter_filtered_records(key=key, time=time, source=source))
+        records.reverse()
+        return records
+
+    def latest(self) -> VariableRecord | None:
+        """Get the latest record."""
+        return self._record
+
+
+@dataclass(frozen=True)
+class ReasoningHistory:
+    """
+    Immutable history node for reasoning.
+
+    Each instance represents exactly one appended record and a complete,
+    incremental epistemic state.
+    """
+
+    _result: ReasoningResult | None = field(default=None, repr=False)
+    _previous: Key | None = field(default=None, repr=False)
+
+    _key: Key = field(init=False, repr=False, compare=True, hash=True)
+
+    def __post_init__(self) -> None:
+        """Post init validation."""
+        object.__setattr__(self, "_key", KeyAuthority.issue(self))
+
+    def new(self, result: ReasoningResult) -> ReasoningHistory:
+        """Return a new ReasoningHistory with the given result appended."""
+        if not isinstance(result, ReasoningResult):
+            raise TypeError(f"result should be a ReasoningResult, get {result!r}")
+
+        return ReasoningHistory(
+            _result=result,
+            _previous=self._key,
+        )
+
+    def key(self) -> Key:
+        """Return the identity key of this history."""
+        return self._key
+
+    def previous_key(self) -> Key | None:
+        """Return the key of the previous history node, if any."""
+        return self._previous
+
+    def iter_results(self) -> Iterable[ReasoningResult]:
         """
-        Query records optionally filtered by key, time, or source.
+        Explicit traversal of results (newest → oldest).
 
-        Returns all records matching the specified filters. Multiple
-        filters are combined with AND logic. Empty filter returns
-        all records in chronological order.
-
-        Parameters
-        ----------
-            key: Optional Key to filter by record identity
-            time: Optional TimePoint to filter by temporal position
-            source: Optional Key to filter by record source/provenance
-
-        Returns
-        -------
-            list[VariableRecord]: Filtered records in chronological order.
-
-        Example
-        -------
-            >>> # Get all records from specific source
-            >>> source_key = Key()
-            >>> records = history.get_records(source=source_key)
-            >>>
-            >>> # Get records at specific time
-            >>> time_point = TimePoint()
-            >>> records = history.get_records(time=time_point)
-            >>>
-            >>> # Combine filters
-            >>> records = history.get_records(key=source_key, time=time_point)
+        This traversal is structural and non-epistemic.
         """
-        results = list(self._records)
-        if key is not None:
-            results = [r for r in results if r.key() == key]
-        if time is not None:
-            results = [r for r in results if r.time == time]
-        if source is not None:
-            results = [r for r in results if r.source == source]
+        current: ReasoningHistory | None = self
+
+        while current is not None:
+            result = current._result
+            if result is not None:
+                yield result
+
+            prev_key = current._previous
+            if prev_key is None:
+                break
+
+            resolved = KeyAuthority.resolve(prev_key)
+            current = resolved if isinstance(resolved, ReasoningHistory) else None
+
+    def iter_filtered_results(
+        self,
+        *,
+        task: ReasoningTask | None = None,
+        success: bool | None = True,
+    ) -> Iterable[ReasoningResult]:
+        """Stream filtered results (newest → oldest)."""
+        for result in self.iter_results():
+            if task is not None and result.task != task:
+                continue
+            if success is not None and success != result.success:
+                continue
+            yield result
+
+    def get_results(
+        self,
+        *,
+        task: ReasoningTask | None = None,
+        success: bool | None = True,
+    ) -> list[ReasoningResult]:
+        """Get results based on criteria."""
+        results = list(self.iter_filtered_results(task=task, success=success))
+        results.reverse()
         return results
 
-    def latest(self, key: Key) -> Optional[VariableRecord]:
-        """
-        Return the most recent record for the given Key.
-
-        Searches records in reverse chronological order to find the
-        most recent entry with the specified key. Returns None if no
-        matching records exist.
-
-        Parameters
-        ----------
-            key: Key identifying which record series to examine
-
-        Returns
-        -------
-            Optional[VariableRecord]: Most recent matching record,
-                                     or None if no matches exist.
-
-        Example
-        -------
-            >>> key = Key()
-            >>> latest = history.latest(key)
-            >>> if latest:
-            ...     print(f"Latest value: {latest.value}")
-        """
-        for record in reversed(self._records):
-            if record.key() == key:
-                return record
-        return None
-
-    def all_keys(self) -> set[Key]:
-        """
-        Return all Keys present in this history.
-
-        Returns
-        -------
-            set[Key]: Unique keys of all records in this history.
-
-        Example
-        -------
-            >>> keys = history.all_keys()
-            >>> for key in keys:
-            ...     print(f"Variable {key} has records")
-        """
-        return {r.key() for r in self._records}
+    def latest(self, task: ReasoningTask | None = None) -> ReasoningResult | None:
+        """Get the latest result."""
+        results = self.get_results(task=task, success=None)
+        return results[0] if results is not None and len(results) > 0 else None
 
     def __len__(self) -> int:
-        """
-        Return the number of records in this history.
-
-        Returns
-        -------
-            int: Total count of VariableRecords.
-
-        Example
-        -------
-            >>> len(history)
-            0
-        """
-        return len(self._records)
-
-    def __iter__(self) -> Iterator[VariableRecord]:
-        """
-        Return iterator over records in chronological order.
-
-        Enables direct iteration over the history:
-
-        Example
-        -------
-            >>> for record in history:
-            ...     print(record.value)
-
-        Returns
-        -------
-            iterator: Iterator yielding VariableRecords in insertion order.
-        """
-        return iter(self._records)
+        """Get length of a reasoning history."""
+        return len(list(self.iter_results()))

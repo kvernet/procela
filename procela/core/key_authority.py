@@ -29,6 +29,8 @@ class KeyAuthority:
 
     Example
     -------
+        >>> from procela.core.key_authority import KeyAuthority
+        >>>
         >>> # Issue a Key with owner binding
         >>> owner = object()
         >>> key = KeyAuthority.issue(owner=owner)
@@ -93,9 +95,12 @@ class KeyAuthority:
 
         Example
         -------
+        >>> from procela.core.key_authority import KeyAuthority
+        >>> from procela.symbols import TimePoint
+        >>>
         >>> # Issue Key with mechanism owner
-        >>> mechanism = SomeMechanism()
-        >>> key = KeyAuthority.issue(owner=mechanism)
+        >>> time = TimePoint()
+        >>> key = KeyAuthority.issue(owner=time)
         >>>
         >>> # Issue anonymous Key for transient use
         >>> temp_key = KeyAuthority.issue()
@@ -140,8 +145,11 @@ class KeyAuthority:
 
         Example
         -------
+        >>> from procela.core.key_authority import KeyAuthority
+        >>> from procela.symbols import TimePoint
+        >>>
         >>> # Issue and later resolve
-        >>> owner = SomeEntity()
+        >>> owner = TimePoint()
         >>> key = KeyAuthority.issue(owner=owner)
         >>>
         >>> # Later, perhaps in different context

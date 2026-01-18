@@ -1,4 +1,5 @@
-"""Test suite for KeyAuthority semantic specification.
+"""
+Test suite for KeyAuthority semantic specification.
 
 Validates all functionality and invariants of the KeyAuthority class,
 ensuring thread safety, uniqueness guarantees, and proper owner resolution.
@@ -11,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from procela.core.exceptions import SemanticViolation
+from procela.core.exceptions import ProcelaException, SemanticViolation
 from procela.core.key_authority import KeyAuthority
 from procela.symbols.key import Key
 
@@ -401,7 +402,7 @@ class TestKeyAuthoritySemanticViolation:
 
     def test_semantic_violation_is_type_error(self):
         """Test that SemanticViolation inherits from TypeError."""
-        assert issubclass(SemanticViolation, TypeError)
+        assert issubclass(SemanticViolation, ProcelaException)
 
         # Verify it can be raised and caught
         try:
