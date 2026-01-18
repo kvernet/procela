@@ -5,13 +5,31 @@ This module defines the structured exception classes used throughout the
 Procela framework. All framework-specific exceptions inherit from the
 `ProcelaException` base class, enabling consistent error handling,
 categorization, and recovery strategies across the system.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/exceptions.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/exceptions.html
 """
 
 from __future__ import annotations
 
 
 class ProcelaException(Exception):
-    """Base exception for all Procela-specific errors."""
+    """
+    Base exception for all Procela-specific errors.
+
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/exceptions.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/exceptions.html
+    """
 
 
 class SemanticViolation(ProcelaException):
@@ -21,19 +39,13 @@ class SemanticViolation(ProcelaException):
     This exception indicates that an operation attempted to violate a
     fundamental semantic rule of the Procela framework.
 
-    Examples
-    --------
-    >>> from procela.core.exceptions import SemanticViolation
-    >>>
-    >>> raise SemanticViolation("Cannot perform operation on TimePoint")
-    Traceback (most recent call last):
-        ...
-    procela.core.exceptions.SemanticViolation: Cannot perform operation on TimePoint
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/exceptions.html
 
-    Notes
-    -----
-    This exception is commonly raised by symbolic entities like `TimePoint`
-    when attempting invalid operations such as comparison or arithmetic.
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
@@ -49,14 +61,13 @@ class ResourceExhausted(ProcelaException):
     message : str, optional
         Descriptive message about the resource exhaustion.
 
-    Examples
-    --------
-    >>> from procela.core.exceptions import ResourceExhausted
-    >>>
-    >>> raise ResourceExhausted("Memory allocation exceeded 1GB limit")
-    Traceback (most recent call last):
-        ...
-    procela.core.exceptions.ResourceExhausted: Memory allocation exceeded 1GB limit
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/exceptions.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
@@ -72,14 +83,13 @@ class ConstraintViolation(ProcelaException):
     message : str, optional
         Description of the constraint violation.
 
-    Examples
-    --------
-    >>> from procela.core.exceptions import ConstraintViolation
-    >>>
-    >>> raise ConstraintViolation("Action violates temporal precedence")
-    Traceback (most recent call last):
-        ...
-    procela.core.exceptions.ConstraintViolation: Action violates temporal precedence
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/exceptions.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
@@ -95,19 +105,13 @@ class InconsistentState(ProcelaException):
     message : str, optional
         Description of the inconsistent state.
 
-    Examples
-    --------
-    >>> from procela.core.exceptions import InconsistentState
-    >>>
-    >>> raise InconsistentState("Variable state contradicts its contract")
-    Traceback (most recent call last):
-        ...
-    procela.core.exceptions.InconsistentState: Variable state contradicts its contract
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/exceptions.html
 
-    Notes
-    -----
-    This exception typically indicates a bug in either the framework
-    implementation or in user code that has corrupted internal state.
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
@@ -120,14 +124,13 @@ class ConfigurationError(ProcelaException):
     message : str, optional
         Description of the configuration error.
 
-    Examples
-    --------
-    >>> from procela.core.exceptions import ConfigurationError
-    >>>
-    >>> raise ConfigurationError("Missing required parameter 'priority'")
-    Traceback (most recent call last):
-        ...
-    procela.core.exceptions.ConfigurationError: Missing required parameter 'priority'
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/exceptions.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
@@ -140,17 +143,11 @@ class TimeoutError(ProcelaException):
     message : str, optional
         Description of the timeout.
 
-    Examples
-    --------
-    >>> from procela.core.exceptions import TimeoutError
-    >>>
-    >>> raise TimeoutError("Reasoning cycle exceeded 5 second limit")
-    Traceback (most recent call last):
-        ...
-    procela.core.exceptions.TimeoutError: Reasoning cycle exceeded 5 second limit
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/exceptions.html
 
-    Notes
-    -----
-    This is distinct from the built-in `TimeoutError` to avoid
-    namespace collisions and to provide Procela-specific context.
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/exceptions.html
     """

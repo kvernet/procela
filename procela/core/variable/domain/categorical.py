@@ -6,6 +6,10 @@ This module provides domain classes for categorical values with finite sets.
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/categorical.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/variable/domain/categorical.html
 """
 
 from __future__ import annotations
@@ -39,32 +43,13 @@ class CategoricalDomain(ValueDomain):
       - Order is not preserved
       - Only hashable values can be used as categories
 
-    Examples
-    --------
-    >>> from procela.core.variable import CategoricalDomain
-    >>>
-    >>> # Domain for traffic light colors
-    >>> domain = CategoricalDomain(["red", "yellow", "green"], name="traffic_light")
-    >>> domain.validate("red")
-    True
-    >>> domain.validate("blue")
-    False
-    >>> domain.categories
-    {'red', 'green', 'yellow'}
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/variable/domain/categorical.html
 
-    >>> # Domain with numeric categories
-    >>> status_domain = CategoricalDomain([0, 1, 2, 3], name="status_codes")
-    >>> status_domain.validate(1)
-    True
-    >>> status_domain.validate(99)
-    False
-
-    >>> # Domain with mixed types (not recommended but possible)
-    >>> mixed_domain = CategoricalDomain(["low", "medium", "high", 1, 2, 3])
-    >>> mixed_domain.validate("low")
-    True
-    >>> mixed_domain.validate(2)
-    True
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/variable/domain/categorical.html
     """
 
     def __init__(self, categories: Iterable[Any], name: str = "") -> None:
@@ -83,31 +68,6 @@ class CategoricalDomain(ValueDomain):
         ------
         TypeError
             If any value in categories is not hashable (e.g., list, dict).
-
-        Warnings
-        --------
-        Using unhashable values (like lists or dicts) as categories will
-        raise a TypeError when converting to set.
-
-        Examples
-        --------
-        >>> from procela.core.variable import CategoricalDomain
-        >>>
-        >>> domain = CategoricalDomain(["cat", "dog", "bird"], name="pets")
-        >>> len(domain.categories)
-        3
-        >>> "cat" in domain.categories
-        True
-
-        >>> # Duplicates are automatically removed
-        >>> domain = CategoricalDomain(["a", "b", "a", "c", "b"])
-        >>> len(domain.categories)
-        3
-
-        >>> # Empty domain is allowed
-        >>> empty_domain = CategoricalDomain([])
-        >>> len(empty_domain.categories)
-        0
         """
         super().__init__(name)
         self.categories = set(categories)
@@ -138,32 +98,6 @@ class CategoricalDomain(ValueDomain):
         - Validation uses exact matching: `value in self.categories`
         - The comparison respects Python's equality semantics (e.g., 1 == 1.0 is True)
         - Empty domains will reject all values
-
-        Examples
-        --------
-        >>> from procela.core.variable import CategoricalDomain
-        >>>
-        >>> domain = CategoricalDomain(["apple", "banana", "orange"])
-        >>> domain.validate("apple")
-        True
-        >>> domain.validate("grape")
-        False
-        >>> domain.validate("Apple")  # Case-sensitive
-        False
-
-        >>> # Numeric matching respects Python equality
-        >>> num_domain = CategoricalDomain([1, 2, 3])
-        >>> num_domain.validate(1)
-        True
-        >>> num_domain.validate(1.0)  # 1 == 1.0 in Python
-        True
-        >>> num_domain.validate("1")  # String "1" != integer 1
-        False
-
-        >>> # Empty domain rejects everything
-        >>> empty_domain = CategoricalDomain([])
-        >>> empty_domain.validate("any_value")
-        False
         """
         return value in self.categories
 
@@ -193,28 +127,6 @@ class CategoricalDomain(ValueDomain):
         -----
         The string representation of the categories set may vary between
         Python versions and runs due to set's unordered nature.
-
-        Examples
-        --------
-        >>> from procela.core.variable import CategoricalDomain
-        >>>
-        >>> domain = CategoricalDomain(["red", "green", "blue"])
-        >>> domain.explain("red")
-        "Value red is allowed in categories {'red', 'blue', 'green'}."
-        >>> domain.explain("yellow")
-        "Value yellow is not in allowed categories {'red', 'blue', 'green'}."
-
-        >>> # With numeric categories
-        >>> num_domain = CategoricalDomain([1, 2, 3])
-        >>> num_domain.explain(2)
-        'Value 2 is allowed in categories {1, 2, 3}.'
-        >>> num_domain.explain(4)
-        'Value 4 is not in allowed categories {1, 2, 3}.'
-
-        >>> # Empty domain
-        >>> empty_domain = CategoricalDomain([])
-        >>> empty_domain.explain("test")
-        'Value test is not in allowed categories set().'
         """
         if value in self.categories:
             return f"Value {value} is allowed in categories {self.categories}."

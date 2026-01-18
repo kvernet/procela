@@ -5,6 +5,14 @@ This module implements an anomaly-focused diagnostic reasoner that specializes
 in identifying root causes when anomalies are detected in system variables.
 It analyzes anomaly characteristics, contextual statistics, and historical
 patterns to generate diagnostic hypotheses about the underlying issues.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/diagnosis/anomaly.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/diagnosis/anomaly.html
 """
 
 from __future__ import annotations
@@ -73,12 +81,6 @@ class AnomalyDiagnoser(Diagnoser):
     _calculate_confidence(causes: List[str], anomaly_score: float) -> float
         Calculate confidence in diagnostic conclusions.
 
-    See Also
-    --------
-    Diagnoser : Abstract base class for all diagnostic reasoners.
-    DiagnosisView : View interface providing anomaly and statistical data.
-    DiagnosisResult : Container for diagnostic reasoning results.
-
     Notes
     -----
     This reasoner assumes that anomaly detection has already been performed
@@ -90,31 +92,13 @@ class AnomalyDiagnoser(Diagnoser):
     application domains. Consider subclassing and overriding the pattern
     analysis methods for domain-specific diagnostic logic.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     AnomalyDiagnoser, DiagnosisView, AnomalyResult, DiagnosisResult
-    ... )
-    >>>
-    >>> # Create a diagnoser with custom threshold
-    >>> diagnoser = AnomalyDiagnoser(severity_threshold=1.5)
-    >>> diagnoser.name
-    'AnomalyDiagnoser'
-    >>> # Create a view with an anomaly
-    >>> class View:
-    ...     anomaly=AnomalyResult(
-    ...         is_anomaly=True,
-    ...         score=3.2,
-    ...         threshold=3.0,
-    ...         method="z-score"
-    ...     )
-    ...     stats=None
-    ...     trend=None
-    >>> result = diagnoser.diagnose(View())
-    >>> isinstance(result, DiagnosisResult)
-    True
-    >>> len(result.causes) > 0
-    True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/diagnosis/anomaly.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/diagnosis/anomaly.html
     """
 
     name: ClassVar[str] = "AnomalyDiagnoser"
@@ -142,16 +126,6 @@ class AnomalyDiagnoser(Diagnoser):
         ------
         ValueError
             If severity_threshold is not positive.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import AnomalyDiagnoser
-        >>>
-        >>> diagnoser = AnomalyDiagnoser(severity_threshold=1.5)
-        >>> diagnoser.severity_threshold
-        1.5
-        >>> diagnoser.include_generic_causes
-        True
         """
         if severity_threshold <= 0:
             raise ValueError(
@@ -167,14 +141,6 @@ class AnomalyDiagnoser(Diagnoser):
         This method examines the anomaly present in the view (if any) and
         analyzes it in the context of historical statistics and trends to
         generate diagnostic hypotheses about potential root causes.
-
-        The diagnostic process:
-        1. Checks if an anomaly is present and meets severity threshold
-        2. Analyzes anomaly characteristics (score, method, metadata)
-        3. Examines statistical context (mean, variance, recent values)
-        4. Considers concurrent trends (direction, magnitude)
-        5. Applies pattern matching rules to identify plausible causes
-        6. Calculates confidence based on evidence strength
 
         Parameters
         ----------
@@ -196,23 +162,6 @@ class AnomalyDiagnoser(Diagnoser):
         ------
         TypeError
             If view is not a DiagnosisView instance.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import AnomalyDiagnoser, AnomalyResult
-        >>>
-        >>> diagnoser = AnomalyDiagnoser()
-        >>> # View with significant anomaly
-        >>> class View:
-        ...     anomaly=AnomalyResult(is_anomaly=True, score=4.5, threshold=3.0)
-        ...     stats=None
-        ...     trend=None
-        >>>
-        >>> result = diagnoser.diagnose(View())
-        >>> len(result.causes) > 0  # Should identify causes for anomaly
-        True
-        >>> 0.0 <= result.confidence <= 1.0
-        True
         """
         # Validate input type
         if not isinstance(view, DiagnosisView):
@@ -419,7 +368,14 @@ class AnomalyDiagnoser(Diagnoser):
         return causes
 
     def __repr__(self) -> str:
-        """Return unambiguous string representation."""
+        """
+        Return unambiguous string representation.
+
+        Returns
+        -------
+        str
+            Unambiguous string representation.
+        """
         return (
             f"AnomalyDiagnoser("
             f"severity_threshold={self.severity_threshold}, "
@@ -428,5 +384,12 @@ class AnomalyDiagnoser(Diagnoser):
         )
 
     def __str__(self) -> str:
-        """Return human-readable description."""
+        """
+        Return human-readable description.
+
+        Returns
+        -------
+        str
+            Human-readable description.
+        """
         return f"Anomaly Diagnostic Reasoner " f"(threshold={self.severity_threshold})"

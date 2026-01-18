@@ -6,6 +6,10 @@ This module provides a specialized domain for boolean (True/False) values.
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/boolean.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/variable/domain/boolean.html
 """
 
 from __future__ import annotations
@@ -36,36 +40,13 @@ class BooleanDomain(CategoricalDomain):
     - Boolean values in Python are instances of `bool`, which is a subclass
       of `int` (True == 1, False == 0), but validation uses exact type matching
 
-    Examples
-    --------
-    >>> from procela.core.variable import BooleanDomain
-    >>>
-    >>> # Basic usage
-    >>> bool_domain = BooleanDomain(name="flag")
-    >>> bool_domain.validate(True)
-    True
-    >>> bool_domain.validate(False)
-    True
-    >>> bool_domain.validate(1)
-    True
-    >>> bool_domain.validate(0)
-    True
-    >>> bool_domain.validate("True")  # String, not boolean
-    False
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/variable/domain/boolean.html
 
-    >>> # Empty name is allowed
-    >>> default_bool = BooleanDomain()
-    >>> default_bool.categories
-    {False, True}
-    >>> default_bool.name
-    ''
-
-    >>> # Inherits explain functionality
-    >>> domain = BooleanDomain()
-    >>> domain.explain(True)
-    'Value True is allowed in categories {False, True}.'
-    >>> domain.explain(1)
-    'Value 1 is allowed in categories {False, True}.'
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/variable/domain/boolean.html
     """
 
     def __init__(self, name: str = "") -> None:
@@ -83,29 +64,5 @@ class BooleanDomain(CategoricalDomain):
         The initialization always calls the parent class constructor with
         the fixed list [True, False]. This ensures the categories set
         always contains exactly these two values.
-
-        Examples
-        --------
-        >>> from procela.core.variable import BooleanDomain
-        >>>
-        >>> # Create a named boolean domain
-        >>> flag_domain = BooleanDomain(name="enabled_flag")
-        >>> flag_domain.name
-        'enabled_flag'
-        >>> flag_domain.categories
-        {False, True}
-
-        >>> # Create an unnamed boolean domain
-        >>> default_domain = BooleanDomain()
-        >>> default_domain.name
-        ''
-        >>> len(default_domain.categories)
-        2
-
-        >>> # All boolean domains have the same categories
-        >>> domain1 = BooleanDomain(name="d1")
-        >>> domain2 = BooleanDomain(name="d2")
-        >>> domain1.categories == domain2.categories
-        True
         """
         super().__init__([True, False], name=name)

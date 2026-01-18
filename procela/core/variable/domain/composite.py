@@ -7,6 +7,10 @@ operations (AND composition).
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/composite.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/variable/domain/composite.html
 """
 
 from __future__ import annotations
@@ -41,40 +45,13 @@ class CompositeDomain(ValueDomain):
     - Empty subdomain list results in a domain that accepts all values
     - The composite can contain other CompositeDomain instances (nesting)
 
-    Examples
-    --------
-    >>> from procela.core.variable import (
-    ...     RangeDomain, CategoricalDomain, CompositeDomain
-    ... )
-    >>>
-    >>> # Create a domain for positive even numbers
-    >>> positive_domain = RangeDomain(min_value=0)
-    >>> even_domain = CategoricalDomain([0, 2, 4, 6, 8, 10])
-    >>> composite = CompositeDomain(
-    ...     [positive_domain, even_domain],
-    ...     name="positive_evens"
-    ... )
-    >>> composite.validate(4)
-    True
-    >>> composite.validate(3)  # Not even
-    False
-    >>> composite.validate(-2)  # Not positive
-    False
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/variable/domain/composite.html
 
-    >>> # Empty composite accepts everything
-    >>> empty_composite = CompositeDomain([])
-    >>> empty_composite.validate("anything")
-    True
-    >>> empty_composite.validate(12345)
-    True
-
-    >>> # Nested composites
-    >>> numeric_range = RangeDomain(min_value=0, max_value=100)
-    >>> status_codes = CategoricalDomain(["active", "inactive", "pending"])
-    >>> inner_composite = CompositeDomain([numeric_range, status_codes])
-    >>> outer_composite = CompositeDomain([inner_composite, RangeDomain(min_value=10)])
-    >>> outer_composite.validate(50)  # Will fail - 50 is not a status code
-    False
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/variable/domain/composite.html
     """
 
     def __init__(self, subdomains: list[ValueDomain], name: str = "") -> None:
@@ -94,33 +71,6 @@ class CompositeDomain(ValueDomain):
         The subdomains list is stored by reference, not copied. Modifying
         the original list after creating the CompositeDomain will affect
         the domain's behavior.
-
-        Examples
-        --------
-        >>> from procela.core.variable import (
-        ...     RangeDomain, CategoricalDomain, CompositeDomain
-        ... )
-        >>>
-        >>> # Composite with multiple domains
-        >>> range_dom = RangeDomain(min_value=0, max_value=100)
-        >>> cat_dom = CategoricalDomain(["A", "B", "C"])
-        >>> composite = CompositeDomain(
-        ...     [range_dom, cat_dom], name="range_and_category"
-        ... )
-        >>> len(composite.subdomains)
-        2
-        >>> composite.name
-        'range_and_category'
-
-        >>> # Empty composite
-        >>> empty = CompositeDomain([])
-        >>> len(empty.subdomains)
-        0
-
-        >>> # Single domain composite (useful for uniform interfaces)
-        >>> single = CompositeDomain([range_dom])
-        >>> len(single.subdomains)
-        1
         """
         super().__init__(name)
         self.subdomains = subdomains
@@ -151,31 +101,6 @@ class CompositeDomain(ValueDomain):
         - Empty subdomain list returns True for any value
         - Order of validation follows the subdomains list order
         - HistoryStatistics is passed to each sub-domain unchanged
-
-        Examples
-        --------
-        >>> from procela.core.variable import (
-        ...     RangeDomain, CategoricalDomain, CompositeDomain
-        ... )
-
-        >>> # Composite requiring value between 0-10 AND be either "a" or "b"
-        >>> range_dom = RangeDomain(min_value=0, max_value=10)
-        >>> cat_dom = CategoricalDomain(["a", "b"])
-        >>> composite = CompositeDomain([range_dom, cat_dom])
-
-        >>> composite.validate(5)  # 5 is in range but not in categories
-        False
-        >>> composite.validate("a")  # "a" is in categories but not numeric
-        False
-        >>> composite.validate("c")  # Fails both conditions
-        False
-
-        >>> # Empty composite always validates
-        >>> empty = CompositeDomain([])
-        >>> empty.validate("anything")
-        True
-        >>> empty.validate(None)
-        True
         """
         return all(domain.validate(value, stats) for domain in self.subdomains)
 
@@ -205,41 +130,6 @@ class CompositeDomain(ValueDomain):
         - Explanations are generated even for domains that pass validation
         - The separator " | " is used to visually separate explanations
         - Order of explanations follows the subdomains list order
-
-        Examples
-        --------
-        >>> from procela.core.variable import (
-        ...     RangeDomain, CategoricalDomain, CompositeDomain
-        ... )
-
-        >>> # Composite with one passing and one failing domain
-        >>> range_dom = RangeDomain(min_value=0, max_value=10)
-        >>> cat_dom = CategoricalDomain(["x", "y", "z"])
-        >>> composite = CompositeDomain([range_dom, cat_dom])
-
-        >>> # Value 5: passes range, fails categorical
-        >>> composite.explain(5)
-        "Value 5 is valid in RangeDomain. | Value 5 is not in allowed ..."
-
-        >>> # Value "x": fails range, passes categorical
-        >>> composite.explain("x")
-        "Value x is not numeric. | Value x is allowed in categories {'z', 'y', 'x'}."
-
-        >>> # Value 15: fails both
-        >>> composite.explain(15)
-        "Value 15 is greater than maximum 10. | Value 15 is not in allowed ..."
-
-        >>> # Empty composite
-        >>> empty = CompositeDomain([])
-        >>> empty.explain("anything")
-        ''
-
-        >>> # Single domain composite
-        >>> single = CompositeDomain([range_dom])
-        >>> single.explain(5)
-        'Value 5 is valid in RangeDomain.'
-        >>> single.explain(15)
-        'Value 15 is greater than maximum 10.'
         """
         explanations = [domain.explain(value, stats) for domain in self.subdomains]
         return " | ".join(explanations)

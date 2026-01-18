@@ -9,6 +9,10 @@ timestamped, attributed observation that can be reasoned about.
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/memory/variable/record.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/memory/variable/record.html
 """
 
 from __future__ import annotations
@@ -40,19 +44,13 @@ class VariableRecord:
                     Supports debugging and transparency.
         _key: Private unique identity token for this record (Key).
 
-    Example:
-        >>> from procela.core.memory import VariableRecord
-        >>> from procela.symbols import Key, TimePoint
-        >>>
-        >>> record = VariableRecord(
-        ...     value=42,
-        ...     time=TimePoint(),
-        ...     source=Key(),
-        ...     confidence=0.95,
-        ...     explanation="Produced by linear regression mechanism"
-        ... )
-        >>> record.describe()
-        "VariableRecord(key=<Key>, value=42, time=TimePoint(<Key>), ...)"
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/memory/variable/record.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/memory/variable/record.html
     """
 
     value: Any = field(compare=False)

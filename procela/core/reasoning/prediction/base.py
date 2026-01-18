@@ -5,6 +5,14 @@ This module defines the foundational abstract base class for all predictors
 within the Procela framework. Predictors are specialized components responsible
 for forecasting future states and values of system variables based on
 epistemic data and active reasoning.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/prediction/base.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/prediction/base.html
 """
 
 from abc import ABC, abstractmethod
@@ -50,34 +58,19 @@ class Predictor(ABC):
     NotImplementedError
         If a concrete subclass does not implement the `predict` method.
 
-    See Also
-    --------
-    procela.core.reasoning.view.PredictionView : The input view containing data
-        and context required for making a prediction.
-
     Notes
     -----
     - The `horizon` parameter typically defines how many steps into the future
       to predict. A value of `None` may indicate a default horizon or a
       single-step prediction, depending on the subclass implementation.
 
-    Examples
-    --------
-    Defining a custom predictor:
-    >>> from procela.core.reasoning import Predictor, PredictionView
-    >>>
-    >>> class SimpleForecaster(Predictor):
-    ...     '''A simple example predictor.'''
-    ...     def predict(self, view: PredictionView, horizon: int = 1) -> list[float]:
-    ...         # Example logic: repeat the last known value
-    ...         last_value = view.stats.last_value
-    ...         return [last_value] * horizon
-    >>>
-    >>> # Usage
-    >>> my_predictor = SimpleForecaster()
-    >>> # Assume `my_view` is a properly constructed PredictionView
-    >>> prediction = my_predictor.predict(my_view, horizon=5)
-    >>> print(prediction)
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/prediction/base.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/prediction/base.html
     """
 
     @abstractmethod

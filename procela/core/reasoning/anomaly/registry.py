@@ -9,6 +9,14 @@ supporting the framework's goal of flexible, pluggable reasoning components.
 The registry implements the Factory and Registry design patterns, allowing
 the system to decouple detector implementation from usage and enabling
 runtime configuration of detection strategies.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/anomaly/registry.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/anomaly/registry.html
 """
 
 from __future__ import annotations
@@ -60,26 +68,6 @@ def get_detector(name: str, **kwargs: Any) -> AnomalyDetector:
     TypeError
         If the provided keyword arguments are incompatible with the
         detector's constructor.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import get_detector
-    >>>
-    >>> # Create a Z-Score detector with custom threshold
-    >>> detector = get_detector("z-score", threshold=2.5)
-    >>> detector.name
-    'ZScoreDetector'
-    >>> detector.threshold
-    2.5
-    >>> # Create an EWMA detector with default parameters
-    >>> ewma_detector = get_detector("ewma")
-    >>> ewma_detector.name
-    'EWMADetector'
-
-    See Also
-    --------
-    register_detector : Register a new anomaly detector.
-    detectors_available : Get all available detector names.
     """
     if name not in _ANOMALY_DETECTORS:
         available = ", ".join(sorted(_ANOMALY_DETECTORS.keys()))
@@ -122,27 +110,6 @@ def register_detector(name: str, detector_class: Type[AnomalyDetector]) -> None:
         If `detector_class` is not a subclass of `AnomalyDetector`.
     ValueError
         If `name` is already registered.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     AnomalyDetector, register_detector, get_detector
-    ... )
-    >>>
-    >>> # Define a custom detector
-    >>> class MyCustomDetector(AnomalyDetector):
-    ...     name = "MyCustomDetector"
-    ...     def __init__(self, sensitivity=1.0):
-    ...         self.sensitivity = sensitivity
-    ...     def detect(self, stats):
-    ...         # Implementation omitted
-    ...         pass
-    >>> # Register the custom detector
-    >>> register_detector("custom", MyCustomDetector)
-    >>> # Now it can be instantiated through the registry
-    >>> detector = get_detector("custom", sensitivity=0.8)
-    >>> detector.name
-    'MyCustomDetector'
 
     Notes
     -----
@@ -193,21 +160,6 @@ def unregister_detector(name: str) -> Type[AnomalyDetector]:
     ------
     KeyError
         If the detector name is not found in the registry.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import unregister_detector, get_detector
-    >>>
-    >>> # Remove a detector (e.g., for testing or reconfiguration)
-    >>> detector_class = unregister_detector("z-score")
-    >>> detector_class.__name__
-    'ZScoreDetector'
-    >>> # Attempting to get it now will raise KeyError
-    >>> try:
-    ...     get_detector("z-score")
-    ... except KeyError as e:
-    ...     print(f"Detector not found: {e}")
-    Detector not found: "Anomaly detector 'z-score' not found. Available ...
     """
     if name not in _ANOMALY_DETECTORS:
         available = ", ".join(sorted(_ANOMALY_DETECTORS.keys()))
@@ -231,16 +183,6 @@ def get_detectors() -> dict[str, Type[AnomalyDetector]]:
     -------
     dict[str, Type[AnomalyDetector]]
         A dictionary mapping detector names to their class objects.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import get_detectors
-    >>>
-    >>> detectors = get_detectors()
-    >>> sorted(detectors.keys())
-    ['ewma', 'z-score']
-    >>> detectors['z-score'].__name__
-    'ZScoreDetector'
     """
     return _ANOMALY_DETECTORS.copy()
 
@@ -257,18 +199,6 @@ def available_detectors() -> set[str]:
     -------
     set[str]
         A set containing the names of all registered anomaly detectors.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import available_detectors
-    >>>
-    >>> methods = available_detectors()
-    >>> isinstance(methods, set)
-    True
-    >>> "z-score" in methods
-    True
-    >>> "ewma" in methods
-    True
     """
     return set(_ANOMALY_DETECTORS.keys())
 
@@ -280,15 +210,6 @@ def clear_detector_registry() -> None:
     This function is primarily useful for testing, allowing test suites
     to start with a clean registry state. Use with caution in production
     as it will remove all registered detectors.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import clear_detector_registry, available_detectors
-    >>>
-    >>> # Clear all detectors (e.g., before loading new configuration)
-    >>> clear_detector_registry()
-    >>> available_detectors()
-    set()
     """
     _ANOMALY_DETECTORS.clear()
 
@@ -306,14 +227,5 @@ def has_detector(name: str) -> bool:
     -------
     bool
         True if a detector with the given name is registered, False otherwise.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import has_detector
-    >>>
-    >>> has_detector("z-score")
-    True
-    >>> has_detector("nonexistent")
-    False
     """
     return name in _ANOMALY_DETECTORS

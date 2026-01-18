@@ -10,8 +10,8 @@ Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/action/resolver.html
 
-Examples
---------
+Examples Reference
+------------------
 https://procela.org/docs/examples/core/action/resolver.html
 """
 
@@ -40,8 +40,8 @@ class ConflictResolver:
     -------------------
     https://procela.org/docs/semantics/core/action/resolver.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/action/resolver.html
     """
 

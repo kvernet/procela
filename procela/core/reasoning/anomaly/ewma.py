@@ -5,6 +5,14 @@ This detector uses precomputed EWMA statistics from HistoryStatistics to
 identify anomalies based on the deviation of recent values from the EWMA
 estimate. It's a lightweight detector that leverages the framework's
 built-in statistical computations rather than maintaining its own state.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/anomaly/ewma.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/anomaly/ewma.html
 """
 
 from __future__ import annotations
@@ -50,17 +58,6 @@ class EWMADetector(AnomalyDetector):
     threshold : float
         The anomaly detection threshold.
 
-    Methods
-    -------
-    detect(stats: HistoryStatistics) -> AnomalyResult
-        Detect anomalies using precomputed EWMA statistics.
-
-    See Also
-    --------
-    AnomalyDetector : Abstract base class for anomaly detectors.
-    HistoryStatistics : Provides precomputed EWMA and standard deviation.
-    AnomalyResult : Container for anomaly detection results.
-
     Notes
     -----
     This detector assumes that HistoryStatistics provides:
@@ -71,35 +68,13 @@ class EWMADetector(AnomalyDetector):
     The detector is stateless and relies entirely on the input statistics,
     making it suitable for distributed or parallel processing scenarios.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import EWMADetector
-    >>> from procela.core.memory import HistoryStatistics
-    >>>
-    >>> # Create detector with default threshold
-    >>> detector = EWMADetector()
-    >>> # Create statistics with EWMA already computed
-    >>> stats = HistoryStatistics(
-    ...     count=20,
-    ...     sum=100,
-    ...     sumsq=1000,
-    ...     min=None,
-    ...     max=None,
-    ...     last_value=105.0,
-    ...     confidence_sum=None,
-    ...     ewma=100.0,
-    ...     sources=frozenset()
-    ... )
-    >>> result = detector.detect(stats)
-    >>> result.is_anomaly  # (105-100)/5 = 1.0 < 3.0 threshold
-    False
-    >>> result.score
-    1.0
-    >>> # Create detector with custom threshold
-    >>> sensitive_detector = EWMADetector(threshold=1.5)
-    >>> result2 = sensitive_detector.detect(stats)
-    >>> result2.is_anomaly  # 1.0 < 1.5, still not anomaly
-    False
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/anomaly/ewma.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/anomaly/ewma.html
     """
 
     name: ClassVar[str] = "EWMADetector"
@@ -198,9 +173,23 @@ class EWMADetector(AnomalyDetector):
         )
 
     def __repr__(self) -> str:
-        """Return unambiguous string representation."""
+        """
+        Return unambiguous string representation.
+
+        Returns
+        -------
+        str
+            Unambiguous string representation.
+        """
         return f"EWMADetector(threshold={self.threshold})"
 
     def __str__(self) -> str:
-        """Return human-readable description."""
+        """
+        Return human-readable description.
+
+        Returns
+        -------
+        str
+            Human-readable description.
+        """
         return f"EWMA Anomaly Detector (threshold={self.threshold})"

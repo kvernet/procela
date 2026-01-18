@@ -6,6 +6,14 @@ historical patterns, distribution characteristics, and statistical anomalies
 to identify potential root causes of system issues. It focuses on detecting
 issues through statistical pattern recognition rather than explicit anomaly
 flags.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/diagnosis/statistical.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/diagnosis/statistical.html
 """
 
 from __future__ import annotations
@@ -65,29 +73,6 @@ class StatisticalDiagnoser(Diagnoser):
     skewness_threshold : float
         Threshold for skewness detection.
 
-    Methods
-    -------
-    diagnose(view: DiagnosisView) -> DiagnosisResult
-        Perform statistical pattern-based diagnostic reasoning.
-
-    _analyze_variability(stats: HistoryStatistics) -> list[str]
-        Analyze statistical variability patterns.
-
-    _detect_drift(trend: TrendResult, stats: HistoryStatistics) -> list[str]
-        Detect gradual drift or trend-related issues.
-
-    _check_distribution(stats: HistoryStatistics) -> list[str]
-        Analyze distribution characteristics.
-
-    _statistical_confidence(patterns: dict[str, bool]) -> float
-        Calculate confidence based on statistical evidence.
-
-    See Also
-    --------
-    Diagnoser : Abstract base class for all diagnostic reasoners.
-    DiagnosisView : View interface providing statistical data.
-    DiagnosisResult : Container for diagnostic reasoning results.
-
     Notes
     -----
     This reasoner operates primarily on statistical properties rather than
@@ -99,17 +84,13 @@ class StatisticalDiagnoser(Diagnoser):
     The statistical thresholds and sensitivity parameters should be tuned
     for specific application domains and variable characteristics.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import StatisticalDiagnoser
-    >>>
-    >>> # Create a diagnoser with custom parameters
-    >>> diagnoser = StatisticalDiagnoser(
-    ...     variability_threshold=0.3,
-    ...     drift_sensitivity=0.05
-    ... )
-    >>> diagnoser.name
-    'StatisticalDiagnoser'
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/diagnosis/statistical.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/diagnosis/statistical.html
     """
 
     name: ClassVar[str] = "StatisticalDiagnoser"
@@ -142,21 +123,6 @@ class StatisticalDiagnoser(Diagnoser):
         ------
         ValueError
             If any threshold parameter is not positive.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import StatisticalDiagnoser
-        >>>
-        >>> diagnoser = StatisticalDiagnoser(
-        ...     variability_threshold=0.3,
-        ...     drift_sensitivity=0.08
-        ... )
-        >>> diagnoser.variability_threshold
-        0.3
-        >>> diagnoser.drift_sensitivity
-        0.08
-        >>> diagnoser.skewness_threshold
-        1.0
         """
         if variability_threshold <= 0:
             raise ValueError(
@@ -211,31 +177,6 @@ class StatisticalDiagnoser(Diagnoser):
             If view is not a DiagnosisView instance.
         ValueError
             If view.stats is None (statistical analysis requires stats).
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import StatisticalDiagnoser, DiagnosisResult
-        >>> from procela.core.memory import HistoryStatistics
-        >>>
-        >>> diagnoser = StatisticalDiagnoser()
-        >>> # View with statistical data
-        >>> class View:
-        ...     stats=HistoryStatistics(
-        ...         count=100,
-        ...         sum=5000.0,
-        ...         sumsq=260000.0,
-        ...         min=20.0,
-        ...         max=80.0,
-        ...         last_value=55.0
-        ...     )
-        ...     trend=None
-        ...     anomaly=None
-        ...
-        >>> result = diagnoser.diagnose(View())
-        >>> isinstance(result, DiagnosisResult)
-        True
-        >>> 0.0 <= result.confidence <= 1.0
-        True
         """
         # Validate input type
         if not isinstance(view, DiagnosisView):
@@ -499,7 +440,14 @@ class StatisticalDiagnoser(Diagnoser):
         return min(max(score, 0.0), 1.0)  # Clamp to [0, 1]
 
     def __repr__(self) -> str:
-        """Return unambiguous string representation."""
+        """
+        Return unambiguous string representation.
+
+        Returns
+        -------
+        str
+            Unambiguous string representation.
+        """
         return (
             f"StatisticalDiagnoser("
             f"variability_threshold={self.variability_threshold:.2f}, "
@@ -509,7 +457,14 @@ class StatisticalDiagnoser(Diagnoser):
         )
 
     def __str__(self) -> str:
-        """Return human-readable description."""
+        """
+        Return human-readable description.
+
+        Returns
+        -------
+        str
+            Human-readable description.
+        """
         return (
             f"Statistical Diagnostic Reasoner "
             f"(variability_threshold={self.variability_threshold:.2f}, "

@@ -9,6 +9,10 @@ no Key collisions occur within the current process.
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/key_authority.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/key_authority.html
 """
 
 from __future__ import annotations
@@ -27,23 +31,13 @@ class KeyAuthority:
     ensuring Key uniqueness and providing owner resolution capabilities.
     Thread-safe by design for concurrent access across multiple mechanisms.
 
-    Example
-    -------
-        >>> from procela.core.key_authority import KeyAuthority
-        >>>
-        >>> # Issue a Key with owner binding
-        >>> owner = object()
-        >>> key = KeyAuthority.issue(owner=owner)
-        >>>
-        >>> # Resolve owner later
-        >>> resolved = KeyAuthority.resolve(key)
-        >>> resolved is owner
-        True
-        >>>
-        >>> # Issue without owner (anonymous Key)
-        >>> anonymous_key = KeyAuthority.issue()
-        >>> KeyAuthority.resolve(anonymous_key) is None
-        True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/key_authority.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/key_authority.html
     """
 
     _lock = threading.Lock()
@@ -92,18 +86,6 @@ class KeyAuthority:
         Thread safety is ensured via class-level locking. Multiple
         concurrent calls will be serialized to maintain registry
         consistency.
-
-        Example
-        -------
-        >>> from procela.core.key_authority import KeyAuthority
-        >>> from procela.symbols import TimePoint
-        >>>
-        >>> # Issue Key with mechanism owner
-        >>> time = TimePoint()
-        >>> key = KeyAuthority.issue(owner=time)
-        >>>
-        >>> # Issue anonymous Key for transient use
-        >>> temp_key = KeyAuthority.issue()
         """
         with cls._lock:
             key = Key()
@@ -142,19 +124,5 @@ class KeyAuthority:
 
         The registry is append-only; once a Key is registered, it
         remains in the registry for the lifetime of the process.
-
-        Example
-        -------
-        >>> from procela.core.key_authority import KeyAuthority
-        >>> from procela.symbols import TimePoint
-        >>>
-        >>> # Issue and later resolve
-        >>> owner = TimePoint()
-        >>> key = KeyAuthority.issue(owner=owner)
-        >>>
-        >>> # Later, perhaps in different context
-        >>> resolved = KeyAuthority.resolve(key)
-        >>> resolved is owner
-        True
         """
         return cls._registry.get(key)

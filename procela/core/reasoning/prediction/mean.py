@@ -4,6 +4,14 @@ Mean Value Predictor for the Procela Framework.
 This module implements a predictor that forecasts future values based on the
 historical arithmetic mean of the observed data. It is a simple baseline model
 that assumes the central tendency of past behavior will continue into the future.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/prediction/mean.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/reasoning/prediction/mean.html
 """
 
 from __future__ import annotations
@@ -32,19 +40,13 @@ class MeanPredictor(Predictor):
     None
         This predictor does not have instance attributes.
 
-    Methods
-    -------
-    predict(view: PredictionView, horizon: int | None = None) -> float | None
-        Returns the historical mean as the prediction.
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/prediction/mean.html
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import MeanPredictor
-    >>>
-    >>> predictor = MeanPredictor()
-    >>> # Assuming `view` is a properly constructed PredictionView
-    >>> # with stats.mean() method
-    >>> predictor.predict(view)
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/reasoning/prediction/mean.html
     """
 
     def predict(
@@ -89,23 +91,6 @@ class MeanPredictor(Predictor):
           value regardless of the prediction horizon.
         - This predictor serves as a useful baseline for comparing more
           sophisticated forecasting methods within the Procela framework.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import MeanPredictor
-        >>> from procela.core.memory import HistoryStatistics
-        >>>
-        >>> predictor = MeanPredictor()
-        >>> # Create a view with stats
-        >>> class View:
-        ...     stats = HistoryStatistics(count=5, sum=210.0)
-        ...     trend = None
-        >>>
-        >>> view = View()
-        >>> # Cast to PredictionView for example (in reality, would be instance)
-        >>> result = predictor.predict(view, horizon=5)
-        >>> result
-        42.0
         """
         if not isinstance(view, PredictionView):
             raise TypeError(f"view must be PredictionView, got {type(view).__name__}")
@@ -136,14 +121,6 @@ class MeanPredictor(Predictor):
         -------
         str
             String that can be used to recreate the predictor instance.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import MeanPredictor
-        >>>
-        >>> predictor = MeanPredictor()
-        >>> repr(predictor)
-        'MeanPredictor()'
         """
         return "MeanPredictor()"
 
@@ -155,13 +132,5 @@ class MeanPredictor(Predictor):
         -------
         str
             Descriptive string of the predictor.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import MeanPredictor
-        >>>
-        >>> predictor = MeanPredictor()
-        >>> str(predictor)
-        'MeanPredictor()'
         """
         return "MeanPredictor()"

@@ -3,6 +3,14 @@ Base planner module for Procela's active reasoning engine.
 
 Provides abstract foundations for intelligent planning systems that propose
 interventions based on diagnosis, predictions, and current system state.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/planning/base.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/planning/base.html
 """
 
 from __future__ import annotations
@@ -43,20 +51,13 @@ class Planner(ABC):
     ValueError
         If `priority` is negative or if initialization parameters are invalid.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     Planner, PlanningView, PlanningResult
-    ... )
-    >>> from procela.core.action import ActionProposal
-    >>>
-    >>> class MyPlanner(Planner):
-    ...     def plan(self, view: PlanningView) -> PlanningResult:
-    ...         # Custom planner logic
-    ...         proposals = [
-    ...             ActionProposal(action="Intervene", confidence=0.8, value=10.0)
-    ...         ]
-    ...         return PlanningResult(proposals=proposals)
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/planning/base.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/planning/base.html
     """
 
     def __init__(self, name: str, priority: int = 0, enabled: bool = True) -> None:
@@ -226,7 +227,19 @@ class Planner(ABC):
         return f"Planner '{self._name}' ({status}, priority: {self._priority})"
 
     def _create_failed_result(self, metadata: dict[str, Any]) -> PlanningResult:
-        """Create a planning result that contains failed details."""
+        """
+        Create a planning result that contains failed details.
+
+        Parameters
+        ----------
+        metadata : dict[str, Any]
+            The metadata containing details about why the planning fails.
+
+        Returns
+        -------
+        PlanningResult
+            A failed planning result with empty proposals.
+        """
         _metadata = metadata.copy()
         _metadata.update(
             {

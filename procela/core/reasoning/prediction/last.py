@@ -4,6 +4,14 @@ Last Value Predictor for the Procela Framework.
 This module implements a simple predictor that forecasts future values based
 on the last observed value from epistemic statistics. It's a persistence
 model that assumes the most recent observation will continue into the future.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/prediction/last.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/reasoning/prediction/last.html
 """
 
 from __future__ import annotations
@@ -38,16 +46,13 @@ class LastPredictor(Predictor):
     allow_none : bool
         Flag indicating whether to allow None last_value.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import LastPredictor
-    >>>
-    >>> predictor = LastPredictor(allow_none=False)
-    >>> predictor.allow_none
-    False
-    >>> predictor2 = LastPredictor(allow_none=True)
-    >>> predictor2.allow_none
-    True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/prediction/last.html
+
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/reasoning/prediction/last.html
     """
 
     def __init__(self, allow_none: bool = False) -> None:
@@ -59,14 +64,6 @@ class LastPredictor(Predictor):
         allow_none : bool, optional
             Whether to allow prediction when last_value is None.
             Default is False.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import LastPredictor
-        >>>
-        >>> predictor = LastPredictor(allow_none=True)
-        >>> predictor.allow_none
-        True
         """
         self.allow_none = allow_none
 
@@ -108,20 +105,6 @@ class LastPredictor(Predictor):
         RuntimeError
             If the view's epistemic data doesn't contain the expected
             statistics structure.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import LastPredictor
-        >>> from procela.core.memory import HistoryStatistics
-        >>>
-        >>> predictor = LastPredictor()
-        >>> class View:
-        ...     stats = HistoryStatistics(last_value = 15.5)
-        ...     trend = None
-        >>> view = View()
-        >>> predictions = predictor.predict(view, horizon=3)
-        >>> predictions
-        [15.5, 15.5, 15.5]
         """
         if not isinstance(view, PredictionView):
             raise TypeError(f"view must be PredictionView, got {type(view).__name__}")
@@ -163,14 +146,6 @@ class LastPredictor(Predictor):
         -------
         str
             String that can be used to recreate the predictor instance.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import LastPredictor
-        >>>
-        >>> predictor = LastPredictor(allow_none=True)
-        >>> repr(predictor)
-        'LastPredictor(allow_none=True)'
         """
         return f"LastPredictor(allow_none={self.allow_none})"
 
@@ -182,13 +157,5 @@ class LastPredictor(Predictor):
         -------
         str
             Descriptive string of the predictor configuration.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import LastPredictor
-        >>>
-        >>> predictor = LastPredictor(allow_none=False)
-        >>> str(predictor)
-        'LastPredictor(allow_none=False)'
         """
         return f"LastPredictor(allow_none={self.allow_none})"

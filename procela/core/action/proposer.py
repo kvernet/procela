@@ -10,8 +10,8 @@ Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/action/proposer.html
 
-Examples
---------
+Examples Reference
+------------------
 https://procela.org/docs/examples/core/action/proposer.html
 """
 
@@ -34,8 +34,8 @@ class ActionProposer:
     -------------------
     https://procela.org/docs/semantics/core/action/proposer.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/action/proposer.html
     """
 

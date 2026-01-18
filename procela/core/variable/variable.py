@@ -11,8 +11,8 @@ Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/variable.html
 
-Examples
---------
+Examples Reference
+------------------
 https://procela.org/docs/examples/core/variable/variable.html
 """
 
@@ -67,8 +67,8 @@ class Variable:
     -------------------
     https://procela.org/docs/semantics/core/variable/variable.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/variable/variable.html
     """
 
@@ -129,10 +129,6 @@ class Variable:
         -------
         Key
             A stable identity key assigned to this variable.
-
-        Notes
-        -----
-        Variable identity semantics are defined externally.
         """
         return self._key
 
@@ -173,11 +169,6 @@ class Variable:
         ------
         ValueError
             If the value does not satisfy the variable's domain.
-
-        Notes
-        -----
-        Domain checks are applied mechanically. Semantic interpretation of
-        why a value is valid or not is defined externally.
         """
         history, _ = self.history()
         stats = history.stats()
@@ -205,11 +196,6 @@ class Variable:
         -------
         tuple[VariableHistory, ReasoningHistory]
             Immutable history of observed records and reasoning results.
-
-        Notes
-        -----
-        This method provides access to stored histories only.
-        Semantic interpretation of history contents is external.
         """
         return self._history, self._reasoning_history
 
@@ -221,10 +207,6 @@ class Variable:
         -------
         Iterable[Any]
             Sequence of values from recorded observations.
-
-        Notes
-        -----
-        This iterator exposes values only; interpretation is external.
         """
         return (r.value for r in self.history()[0].get_records())
 
@@ -236,11 +218,6 @@ class Variable:
         -------
         str
             Concise string representation identifying the variable.
-
-        Notes
-        -----
-        This representation is intended for debugging and logging purposes.
-        Semantic interpretation of the representation is defined externally.
         """
         history, _ = self.history()
         return (
@@ -262,11 +239,6 @@ class Variable:
         -------
         str
             Human-readable summary string.
-
-        Notes
-        -----
-        This is a convenience representation. Semantic interpretation of
-        statistics and summary content is defined externally.
         """
         stats = self.history()[0].stats()
         return (
@@ -298,11 +270,6 @@ class Variable:
         -------
         VariableEpistemic
             Epistemic state associated with this variable.
-
-        Notes
-        -----
-        This method performs computational aggregation only. Semantic meaning
-        of the epistemic state is defined externally.
         """
         history, _ = self.history()
         stats = history.stats()
@@ -330,11 +297,6 @@ class Variable:
         -------
         str
             Human-readable explanation of the variable state.
-
-        Notes
-        -----
-        This explanation is generated mechanically from available data.
-        Semantic interpretation of explanations is defined externally.
         """
         epistemic = self.epistemic()
         stats = epistemic.stats
@@ -397,11 +359,6 @@ class Variable:
         -------
         AnomalyResult
             Outcome of anomaly detection.
-
-        Notes
-        -----
-        This method executes computation and records a reasoning result.
-        Semantic interpretation of anomaly detection is defined externally.
         """
         with Timer() as t:
             result = self._detect_anomaly()
@@ -429,11 +386,6 @@ class Variable:
         -------
         TrendResult | None
             Trend result if available, otherwise None.
-
-        Notes
-        -----
-        This method records a reasoning result. Semantic interpretation of
-        trend results is defined externally.
         """
         with Timer() as t:
             result = self._analyze_trend()
@@ -476,11 +428,6 @@ class Variable:
         -------
         VariableRecord | None
             Resolved record if successful; otherwise None.
-
-        Notes
-        -----
-        This method executes conflict resolution and records a reasoning result.
-        Semantic interpretation is defined externally.
         """
         with Timer() as t:
             result, resolved = ConflictResolver().resolve(
@@ -520,10 +467,6 @@ class Variable:
         -------
         list[ActionProposal]
             List of proposed actions.
-
-        Notes
-        -----
-        Semantic interpretation of proposals is defined externally.
         """
         with Timer() as t:
             epistemic = self.epistemic()
@@ -562,11 +505,6 @@ class Variable:
         -------
         ReasoningResult
             Reasoning result containing prediction details.
-
-        Notes
-        -----
-        This method records the reasoning result. Semantic interpretation of
-        predicted values is defined externally.
         """
         if predictor is not None and not isinstance(predictor, Predictor):
             raise TypeError(
@@ -609,10 +547,6 @@ class Variable:
         -------
         ReasoningResult
             Reasoning result with diagnosis output.
-
-        Notes
-        -----
-        Semantic interpretation of diagnosis output is defined externally.
         """
         if operator is not None and not isinstance(operator, DiagnosisOperator):
             raise TypeError(
@@ -659,11 +593,6 @@ class Variable:
         -------
         ReasoningResult
             Reasoning result containing the intervention plan.
-
-        Notes
-        -----
-        This method executes planning computation and records a reasoning result.
-        Semantic interpretation of plans is defined externally.
         """
         with Timer() as t:
             if planningOperator is not None and not isinstance(
@@ -724,7 +653,19 @@ class Variable:
     # -----------------------------
 
     def _detect_anomaly(self, operator: AnomalyOperator | None = None) -> AnomalyResult:
-        """Detect anomaly using operator or pre-configuration."""
+        """
+        Detect anomaly using operator or pre-configuration.
+
+        Parameters
+        ----------
+        operator : AnomalyOperator | None
+            The anomaly operator to be used to detect anomalies.
+
+        Returns
+        -------
+        AnomalyResult
+            The result of the detected anomaly.
+        """
         if operator is not None and not isinstance(operator, AnomalyOperator):
             raise TypeError(
                 f"`operator` should be a AnomalyOperator instance, got {operator}"
@@ -744,7 +685,19 @@ class Variable:
     def _analyze_trend(
         self, operator: TrendOperator | None = None
     ) -> TrendResult | None:
-        """Analyze trend using operator or pre-configuration.."""
+        """
+        Analyze trend using operator or pre-configuration.
+
+        Parameters
+        ----------
+        operator : TrendOperator | None
+            The trend operator to be used to analyze trends if provided.
+
+        Returns
+        -------
+        TrendResult | None
+            The result of analyzed trend or None if no trend.
+        """
         if not isinstance(self.domain, StatisticalDomain):
             return None
 
@@ -768,7 +721,21 @@ class Variable:
         *,
         horizon: int | None = None,
     ) -> PredictionResult:
-        """Predict future variable value using predictor or pre-configuration.."""
+        """
+        Predict future variable value using predictor or pre-configuration.
+
+        Parameters
+        ----------
+        predictor : Predictor | None
+            The predictor to be used to make predictions.
+        horizon : int | None
+            The horizon for the prediction.
+
+        Returns
+        -------
+        PredictionResult
+            The predicted result.
+        """
         if predictor is not None and not isinstance(predictor, Predictor):
             raise TypeError(
                 f"`predictor` should be a Predictor instance, got {predictor}"
@@ -784,7 +751,19 @@ class Variable:
     def _diagnose_causes(
         self, operator: DiagnosisOperator | None = None
     ) -> DiagnosisResult:
-        """Diagnose causes using operator or pre-configuration.."""
+        """
+        Diagnose causes using operator or pre-configuration.
+
+        Parameters
+        ----------
+        operator : DiagnosisOperator | None
+            The operator to be used to diagnose causes if provided.
+
+        Returns
+        -------
+        DiagnosisResult
+            The diagnosis result.
+        """
         if operator is not None and not isinstance(operator, DiagnosisOperator):
             raise TypeError(
                 f"`operator` should be a DiagnosisOperator instance, got {operator}"
@@ -803,7 +782,19 @@ class Variable:
         return operator.diagnose(view=view)
 
     def _record_to_proposal(self, record: VariableRecord) -> ActionProposal:
-        """Convert a VariableRecord into an ActionProposal."""
+        """
+        Convert a VariableRecord into an ActionProposal.
+
+        Parameters
+        ----------
+        record : VariableRecord
+            The record of the variable to be saved.
+
+        Returns
+        -------
+        ActionProposal
+            The action proposal result.
+        """
         return ActionProposal(
             value=record.value,
             confidence=record.confidence or 0.0,
@@ -817,7 +808,23 @@ class Variable:
     def _create_failed_reasoning_result(
         self, task: ReasoningTask, confidence: float | None, explanation: str
     ) -> ReasoningResult:
-        """Create failed reasoning result."""
+        """
+        Create failed reasoning result.
+
+        Parameters
+        ----------
+        task : ReasoningTask
+            The task of the reasoning.
+        confidence : float | None
+            The confidence of the reasoning if provided.
+        explanation : str
+            The explanation containing details of the failure.
+
+        Returns
+        -------
+        ReasoningResult
+            The result of the failed reasoning.
+        """
         result = ReasoningResult(
             task=task,
             success=False,
@@ -829,7 +836,19 @@ class Variable:
         return result
 
     def _record(self, record: VariableRecord) -> bool:
-        """Record a new observation for this variable."""
+        """
+        Record a new observation for this variable.
+
+        Parameters
+        ----------
+        record : VariableRecord
+            The variable record.
+
+        Returns
+        -------
+        bool
+            True if the record is saved successfully, false otherwise.
+        """
         history, _ = self.history()
         stats = history.stats()
         if self.domain.validate(record.value, stats):
@@ -838,5 +857,12 @@ class Variable:
         return False
 
     def _record_reasoning(self, result: ReasoningResult) -> None:
-        """Record a reasoning result."""
+        """
+        Record a reasoning result.
+
+        Parameters
+        ----------
+        result : ReasoningResult
+            The reasoning result to record.
+        """
         self._reasoning_history = self._reasoning_history.new(result=result)

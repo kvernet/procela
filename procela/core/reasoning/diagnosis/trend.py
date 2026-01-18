@@ -5,6 +5,14 @@ This module implements a trend-focused diagnostic reasoner that analyzes
 directional patterns and temporal changes in system variables to identify
 potential root causes. It specializes in detecting issues related to
 gradual degradation, improvement trends, and stability violations.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/diagnosis/trend.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/diagnosis/trend.html
 """
 
 from __future__ import annotations
@@ -80,13 +88,6 @@ class TrendDiagnoser(Diagnoser):
     _trend_confidence(causes: List[str], trend: TrendResult) -> float
         Calculate confidence in trend-based diagnosis.
 
-    See Also
-    --------
-    Diagnoser : Abstract base class for all diagnostic reasoners.
-    DiagnosisView : View interface providing trend data.
-    TrendResult : Container for trend analysis results.
-    DiagnosisResult : Container for diagnostic reasoning results.
-
     Notes
     -----
     This reasoner assumes that trend analysis has been performed and
@@ -100,34 +101,13 @@ class TrendDiagnoser(Diagnoser):
     The trend thresholds should be tuned based on the specific
     variable characteristics and system requirements.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     TrendDiagnoser, DiagnosisResult, TrendResult
-    ... )
-    >>>
-    >>> # Create a diagnoser with custom thresholds
-    >>> diagnoser = TrendDiagnoser(
-    ...     significance_threshold=0.3,
-    ...     strong_threshold=0.7
-    ... )
-    >>> diagnoser.name
-    'TrendDiagnoser'
-    >>> # Create a view with a strong trend
-    >>> class View:
-    ...     trend=TrendResult(
-    ...         value=0.8,
-    ...         direction="down",
-    ...         threshold=0.5
-    ...     )
-    ...     stats=None
-    ...     anomaly=None
-    ...
-    >>> result = diagnoser.diagnose(view)
-    >>> isinstance(result, DiagnosisResult)
-    True
-    >>> len(result.causes) > 0  # Should detect strong downward trend
-    True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/diagnosis/trend.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/diagnosis/trend.html
     """
 
     name: ClassVar[str] = "TrendDiagnoser"
@@ -159,21 +139,6 @@ class TrendDiagnoser(Diagnoser):
         ------
         ValueError
             If thresholds are invalid or inconsistent.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import TrendDiagnoser
-        >>>
-        >>> diagnoser = TrendDiagnoser(
-        ...     significance_threshold=0.15,
-        ...     strong_threshold=0.6
-        ... )
-        >>> diagnoser.significance_threshold
-        0.15
-        >>> diagnoser.strong_threshold
-        0.6
-        >>> diagnoser.require_confidence
-        True
         """
         if significance_threshold <= 0:
             raise ValueError(
@@ -227,25 +192,6 @@ class TrendDiagnoser(Diagnoser):
             If view is not a DiagnosisView instance.
         ValueError
             If trend is required but not available.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import (
-        ...     TrendDiagnoser, TrendResult, DiagnosisResult
-        ... )
-        >>>
-        >>> diagnoser = TrendDiagnoser()
-        >>> # View with significant trend
-        >>> class View:
-        ...     trend=TrendResult(value=0.4, direction="up", threshold=0.5)
-        ...     stats=None
-        ...     anomaly=None
-        ...
-        >>> result = diagnoser.diagnose(View())
-        >>> isinstance(result, DiagnosisResult)
-        True
-        >>> 0.0 <= result.confidence <= 1.0
-        True
         """
         # Validate input type
         if not isinstance(view, DiagnosisView):
@@ -626,7 +572,14 @@ class TrendDiagnoser(Diagnoser):
         return min(max(confidence, 0.0), 1.0)  # Clamp to [0, 1]
 
     def __repr__(self) -> str:
-        """Return unambiguous string representation."""
+        """
+        Return unambiguous string representation.
+
+        Returns
+        -------
+        str
+            Unambiguous string representation.
+        """
         return (
             f"TrendDiagnoser("
             f"significance_threshold={self.significance_threshold:.2f}, "
@@ -636,7 +589,14 @@ class TrendDiagnoser(Diagnoser):
         )
 
     def __str__(self) -> str:
-        """Return human-readable description."""
+        """
+        Return human-readable description.
+
+        Returns
+        -------
+        str
+            Human-readable description.
+        """
         return (
             f"Trend Diagnostic Reasoner "
             f"(significance_threshold={self.significance_threshold:.2f}, "

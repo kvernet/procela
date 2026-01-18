@@ -10,8 +10,8 @@ Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/anomaly/operator.html
 
-Examples
---------
+Examples Reference
+------------------
 https://procela.org/docs/examples/core/reasoning/anomaly/operator.html
 """
 
@@ -37,8 +37,8 @@ class AnomalyOperator(ABC):
     -------------------
     https://procela.org/docs/semantics/core/reasoning/anomaly/operator.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/reasoning/anomaly/operator.html
     """
 
@@ -77,8 +77,8 @@ class AnomalyOperatorThreshold(AnomalyOperator):
     -------------------
     https://procela.org/docs/semantics/core/reasoning/anomaly/operator.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/reasoning/anomaly/operator.html
     """
 

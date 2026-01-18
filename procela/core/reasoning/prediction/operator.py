@@ -10,8 +10,8 @@ Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/prediction/operator.html
 
-Examples
---------
+Examples Reference
+------------------
 https://procela.org/docs/examples/core/reasoning/prediction/operator.html
 """
 
@@ -34,8 +34,8 @@ class PredictionOperator:
     -------------------
     https://procela.org/docs/semantics/core/reasoning/prediction/operator.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/reasoning/prediction/operator.html
     """
 

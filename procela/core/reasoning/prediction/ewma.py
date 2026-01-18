@@ -5,6 +5,14 @@ This module implements an EWMA-based predictor that forecasts future values
 using pre-computed exponentially weighted moving average statistics from
 the epistemic data layer. The predictor leverages incrementally maintained
 statistics to provide efficient, real-time predictions.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/prediction/ewma.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/prediction/ewma.html
 """
 
 from __future__ import annotations
@@ -40,13 +48,13 @@ class EWMAPredictor(Predictor):
     ValueError
         If alpha is not in range (0, 1].
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import EWMAPredictor
-    >>>
-    >>> predictor = EWMAPredictor(alpha=0.3)
-    >>> predictor.alpha
-    0.3
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/prediction/ewma.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/prediction/ewma.html
     """
 
     def __init__(self, alpha: float = 0.3) -> None:
@@ -64,14 +72,6 @@ class EWMAPredictor(Predictor):
         ------
         ValueError
             If alpha is outside the valid range (0, 1].
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import EWMAPredictor
-        >>>
-        >>> predictor = EWMAPredictor(alpha=0.5)
-        >>> predictor.alpha
-        0.5
         """
         if not 0 < alpha <= 1:
             raise ValueError(f"alpha must be in range (0, 1], got {alpha}")
@@ -118,13 +118,6 @@ class EWMAPredictor(Predictor):
         RuntimeError
             If the view's epistemic data doesn't contain the expected
             statistics structure.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import EWMAPredictor
-        >>>
-        >>> # assumes a PredictionView, view
-        >>> predictions = predictor.predict(view, horizon=3)
         """
         if not isinstance(view, PredictionView):
             raise TypeError(f"view must be PredictionView, got {type(view).__name__}")
@@ -164,14 +157,6 @@ class EWMAPredictor(Predictor):
         -------
         str
             String that can be used to recreate the predictor instance.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import EWMAPredictor
-        >>>
-        >>> predictor = EWMAPredictor(alpha=0.4)
-        >>> repr(predictor)
-        "EWMAPredictor(alpha=0.4)"
         """
         return f"EWMAPredictor(alpha={self.alpha})"
 
@@ -183,13 +168,5 @@ class EWMAPredictor(Predictor):
         -------
         str
             Descriptive string of the predictor configuration.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import EWMAPredictor
-        >>>
-        >>> predictor = EWMAPredictor(alpha=0.25)
-        >>> str(predictor)
-        "EWMAPredictor(alpha=0.25)"
         """
         return f"EWMAPredictor(alpha={self.alpha})"

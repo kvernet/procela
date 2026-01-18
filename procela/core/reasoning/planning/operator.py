@@ -9,8 +9,8 @@ Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/planning/operator.html
 
-Examples
---------
+Examples Reference
+------------------
 https://procela.org/docs/examples/core/reasoning/planning/operator.html
 """
 
@@ -35,8 +35,8 @@ class PlanningOperator:
     -------------------
     https://procela.org/docs/semantics/core/reasoning/planning/operator.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/reasoning/planning/operator.html
     """
 

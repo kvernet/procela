@@ -4,6 +4,14 @@ Performance Timer for the Procela Framework.
 This module provides a context manager for precise performance timing
 of code execution. It uses `time.perf_counter()` for high-resolution
 measurements suitable for benchmarking and performance analysis.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/timer.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/timer.html
 """
 
 from __future__ import annotations
@@ -38,29 +46,13 @@ class Timer:
         The elapsed time in seconds between `start` and `end`.
         `None` if timer hasn't been fully executed.
 
-    Methods
-    -------
-    __enter__() -> Timer
-        Start the timer and return the Timer instance.
-    __exit__(*args: Any) -> None
-        Stop the timer and calculate elapsed time.
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/timer.html
 
-    Examples
-    --------
-    >>> import time
-    >>> from procela.core.timer import Timer
-    >>>
-    >>> # Basic usage as context manager
-    >>> with Timer() as timer:
-    ...     # Code to time goes here
-    ...     time.sleep(0.1)
-    >>> print(f"Elapsed time: {timer.elapsed:.6f} seconds")
-    Elapsed time: 0.100123 seconds
-    >>>
-    >>> # Access individual timing components
-    >>> print(f"Started at: {timer.start}")
-    >>> print(f"Ended at: {timer.end}")
-    >>> print(f"Elapsed: {timer.elapsed}")
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/timer.html
     """
 
     def __enter__(self) -> Timer:
@@ -84,15 +76,6 @@ class Timer:
         - The timer is not started until this method is called.
         - Multiple calls to `__enter__` on the same instance will
           overwrite previous start times.
-
-        Examples
-        --------
-        >>> from procela.core.timer import Timer
-        >>>
-        >>> with Timer() as t:
-        ...     # Timer is now running
-        ...     print(f"Timer started at: {t.start}")
-        ...     # Perform some operations
         """
         self.start = time.perf_counter()
         return self
@@ -120,18 +103,6 @@ class Timer:
           timer as the start for consistency.
         - If `__exit__` is called without a preceding `__enter__` call,
           an AttributeError will occur when trying to access `self.start`.
-
-        Examples
-        --------
-        >>> import time
-        >>> from procela.core.timer import Timer
-        >>>
-        >>> timer = Timer()
-        >>> with timer:
-        ...     time.sleep(0.05)
-        >>> # Timer has automatically stopped
-        >>> print(f"Elapsed: {timer.elapsed:.4f} seconds")
-        Elapsed: 0.0501 seconds
         """
         self.end = time.perf_counter()
         self.elapsed = self.end - self.start

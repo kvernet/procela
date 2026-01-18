@@ -1,4 +1,14 @@
-"""Contractual mechanistic core with active causal reasoning."""
+"""
+Contractual mechanistic core with active causal reasoning.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/
+"""
 
 __version__ = "0.1.0"
 

@@ -10,8 +10,8 @@ Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
 
-Examples
---------
+Examples Reference
+------------------
 https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
 """
 
@@ -38,8 +38,8 @@ class TrendOperator(ABC):
     -------------------
     https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
     """
 
@@ -78,8 +78,8 @@ class TrendOperatorThreshold(TrendOperator):
     -------------------
     https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
     """
 
@@ -162,8 +162,8 @@ class DiagnosisOperator(ABC):
     -------------------
     https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
     """
 
@@ -202,8 +202,8 @@ class DiagnosisOperatorThreshold(DiagnosisOperator):
     -------------------
     https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
 
-    Examples
-    --------
+    Examples Reference
+    ------------------
     https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
     """
 

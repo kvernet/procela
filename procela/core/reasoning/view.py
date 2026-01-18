@@ -11,6 +11,14 @@ Each protocol defines a minimal set of properties that a reasoning task requires
 to perform its function. This architectural pattern supports separation of
 concerns and allows different variable implementations to be used interchangeably
 as long as they provide the required view interfaces.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/view.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/view.html
 """
 
 from __future__ import annotations
@@ -65,43 +73,13 @@ class EpistemicView(Protocol):
     of its explicit inheritance declarations. This enables flexible
     composition and dependency injection throughout the Procela framework.
 
-    Examples
-    --------
-    >>> from procela.core.memory import HistoryStatistics
-    >>> from procela.core.reasoning import EpistemicView
-    >>>
-    >>> # Any object with stats, anomaly, and trend properties implements this
-    >>> class MyVariable:
-    ...     def __init__(self):
-    ...         self._stats = HistoryStatistics(
-    ...             count=1,
-    ...             sum=23.1,
-    ...             sumsq=781.3,
-    ...             min=None,
-    ...             max=None,
-    ...             last_value=None,
-    ...             confidence_sum=0.53,
-    ...             ewma=None,
-    ...             sources=[],
-    ...         )
-    ...         self._anomaly = None
-    ...         self._trend = None
-    ...
-    ...     @property
-    ...     def stats(self):
-    ...         return self._stats
-    ...
-    ...     @property
-    ...     def anomaly(self):
-    ...         return self._anomaly
-    ...
-    ...     @property
-    ...     def trend(self):
-    ...         return self._trend
-    ...
-    >>> var = MyVariable()
-    >>> isinstance(var, EpistemicView)  # Runtime type checking
-    True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/view.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/view.html
     """
 
     @property
@@ -152,6 +130,14 @@ class DiagnosisView(Protocol):
     represents a distinct semantic role in the reasoning architecture. This
     separation allows for future differentiation and ensures that diagnostic
     components explicitly declare their dependency requirements.
+
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/view.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/view.html
     """
 
     @property
@@ -195,6 +181,14 @@ class ProposalView(Protocol):
     trend : TrendResult | None
         Trend analysis results that reveal directional patterns which
         may be symptomatic of underlying issues or gradual degradation.
+
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/view.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/view.html
     """
 
     @property
@@ -242,34 +236,13 @@ class PredictionView(Protocol):
     prediction algorithms may explicitly filter or model anomalies, while
     others may ignore them as outliers.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import PredictionView, TrendResult
-    >>> from procela.core.memory import HistoryStatistics
-    >>>
-    >>> # A variable suitable for prediction
-    >>> class PredictableVariable:
-    ...     @property
-    ...     def stats(self):
-    ...         return HistoryStatistics(
-    ...             count=1,
-    ...             sum=23.1,
-    ...             sumsq=781.3,
-    ...             min=None,
-    ...             max=None,
-    ...             last_value=None,
-    ...             confidence_sum=0.53,
-    ...             ewma=None,
-    ...             sources=[],
-    ...         )
-    ...
-    ...     @property
-    ...     def trend(self):
-    ...         return TrendResult(value=0.5, direction="up", threshold=0.1)
-    ...
-    >>> var = PredictableVariable()
-    >>> isinstance(var, PredictionView)
-    True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/view.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/view.html
     """
 
     @property
@@ -321,10 +294,13 @@ class PlanningView(Protocol):
     value types that different variables in the Procela framework may have
     (scalars, vectors, categorical values, complex structures, etc.).
 
-    See Also
-    --------
-    DiagnosisResult : The diagnostic conclusions used by planning.
-    PredictionResult : The forecasted scenarios used by planning.
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/view.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/view.html
     """
 
     @property

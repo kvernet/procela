@@ -4,6 +4,14 @@ Trend-Based Predictor for the Procela Framework.
 This module implements a trend-based predictor that forecasts future values
 using pre-computed trend statistics from the epistemic data layer. It uses
 the trend direction and magnitude to extrapolate future values.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/prediction/trend.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/reasoning/prediction/trend.html
 """
 
 from __future__ import annotations
@@ -42,15 +50,13 @@ class TrendPredictor(Predictor):
     ValueError
         If extrapolation_factor <= 0.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import TrendPredictor
-    >>>
-    >>> predictor = TrendPredictor(extrapolation_factor=1.5)
-    >>> predictor.extrapolation_factor
-    1.5
-    >>> predictor.use_confidence
-    True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/prediction/trend.html
+
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/reasoning/prediction/trend.html
     """
 
     def __init__(
@@ -73,16 +79,6 @@ class TrendPredictor(Predictor):
         ------
         ValueError
             If extrapolation_factor <= 0.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import TrendPredictor
-        >>>
-        >>> predictor = TrendPredictor(extrapolation_factor=0.8, use_confidence=False)
-        >>> predictor.extrapolation_factor
-        0.8
-        >>> predictor.use_confidence
-        False
         """
         if extrapolation_factor <= 0:
             raise ValueError(
@@ -138,20 +134,6 @@ class TrendPredictor(Predictor):
         - For stable trend: constant base_value
 
         The base_value is obtained from `view.stats.last_value`.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import TrendPredictor, TrendResult
-        >>> from procela.core.memory import HistoryStatistics
-        >>>
-        >>> predictor = TrendPredictor()
-        >>> class View:
-        ...     trend = TrendResult(value=0.5, direction="up", threshold=0.3)
-        ...     stats = HistoryStatistics(last_value=10.4)
-        >>> view = View()
-        >>> predictions = predictor.predict(view, horizon=3)
-        >>> len(predictions)
-        3
         """
         if not isinstance(view, PredictionView):
             raise TypeError(f"view must be PredictionView, got {type(view).__name__}")
@@ -220,14 +202,6 @@ class TrendPredictor(Predictor):
         -------
         str
             String that can be used to recreate the predictor.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import TrendPredictor
-        >>>
-        >>> predictor = TrendPredictor(extrapolation_factor=1.2, use_confidence=False)
-        >>> repr(predictor)
-        'TrendPredictor(extrapolation_factor=1.2, use_confidence=False)'
         """
         return (
             f"TrendPredictor(extrapolation_factor={self.extrapolation_factor}, "
@@ -242,14 +216,6 @@ class TrendPredictor(Predictor):
         -------
         str
             Descriptive string of the predictor.
-
-        Examples
-        --------
-        >>> from procela.core.reasoning import TrendPredictor
-        >>>
-        >>> predictor = TrendPredictor(extrapolation_factor=0.8)
-        >>> str(predictor)
-        'TrendPredictor(extrapolation_factor=0.8, use_confidence=True)'
         """
         return (
             f"TrendPredictor(extrapolation_factor={self.extrapolation_factor}, "

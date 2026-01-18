@@ -8,6 +8,10 @@ relationships are managed externally.
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/symbols/time.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/symbols/time.html
 """
 
 from __future__ import annotations
@@ -28,18 +32,13 @@ class TimePoint:
     temporal position. All precedence relationships are managed
     externally.
 
-    Semantic Invariants:
-    1. Identity purity: Wraps a Key with no additional state.
-    2. Immutability: Cannot be modified after creation.
-    3. Opaqueness: No semantic information beyond identity.
-    4. No relationships: Knows nothing about temporal precedence.
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/symbols/time.html
 
-    Example
-    -------
-    >>> from procela.symbols import TimePoint
-    >>> tp = TimePoint()
-    >>> tp.key()
-    <Key>
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/symbols/time.html
     """
 
     _key: Key = field(
@@ -302,14 +301,5 @@ def create_timepoint() -> TimePoint:
     -------
     TimePoint
         New temporal identity token.
-
-    Example
-    -------
-    >>> from procela.symbols import TimePoint, create_timepoint
-    >>> tp = create_timepoint()
-    >>> isinstance(tp, TimePoint)
-    True
-    >>> isinstance(tp.key(), Key)
-    True
     """
     return TimePoint()

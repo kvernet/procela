@@ -6,6 +6,14 @@ the Procela prediction system. It enables dynamic registration, instantiation,
 and management of predictor implementations while maintaining type safety and
 proper error handling. The registry follows the factory pattern to decouple
 predictor creation from usage.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/prediction/registry.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/reasoning/prediction/registry.html
 """
 
 from __future__ import annotations
@@ -48,19 +56,6 @@ def get_predictor(name: str, **kwargs: Any) -> Predictor:
         If the requested predictor name is not found in the registry.
     TypeError
         If the predictor instantiation fails due to invalid arguments.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     EWMAPredictor, get_predictor, LastPredictor
-    ... )
-    >>>
-    >>> predictor = get_predictor("ewma", alpha=0.3)
-    >>> isinstance(predictor, EWMAPredictor)
-    True
-    >>> predictor = get_predictor("last", allow_none=True)
-    >>> isinstance(predictor, LastPredictor)
-    True
     """
     if name not in _PREDICTOR_REGISTRY:
         available = ", ".join(sorted(_PREDICTOR_REGISTRY.keys()))
@@ -99,19 +94,6 @@ def register_predictor(name: str, predictor_class: Type[Predictor]) -> None:
         If predictor_class is not a class or not a subclass of Predictor.
     ValueError
         If the name is already registered.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     Predictor, register_predictor, available_predictors
-    ... )
-    >>>
-    >>> class CustomPredictor(Predictor):
-    ...     def predict(self, view, horizon=None):
-    ...         return [0.0]
-    >>> register_predictor("custom", CustomPredictor)
-    >>> "custom" in available_predictors()
-    True
     """
     if not isinstance(predictor_class, type):
         raise TypeError(
@@ -153,16 +135,6 @@ def unregister_predictor(name: str) -> Type[Predictor]:
     ------
     KeyError
         If the predictor name is not found in the registry.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import unregister_predictor, available_predictors
-    >>>
-    >>> predictor_class = unregister_predictor("trend")
-    >>> predictor_class
-    <class 'procela.core.reasoning.prediction.trend.TrendPredictor'>
-    >>> "trend" in available_predictors()
-    False
     """
     if name not in _PREDICTOR_REGISTRY:
         available = ", ".join(sorted(_PREDICTOR_REGISTRY.keys()))
@@ -186,16 +158,6 @@ def get_predictors() -> dict[str, Type[Predictor]]:
     Notes
     -----
     Returns a copy to prevent external modification of the internal registry.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import get_predictors
-    >>>
-    >>> registry = get_predictors()
-    >>> isinstance(registry, dict)
-    True
-    >>> "mean" in registry
-    True
     """
     return _PREDICTOR_REGISTRY.copy()
 
@@ -208,16 +170,6 @@ def available_predictors() -> set[str]:
     -------
     set[str]
         A set of registered predictor names.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import available_predictors
-    >>>
-    >>> names = available_predictors()
-    >>> isinstance(names, set)
-    True
-    >>> {"ewma", "last", "mean", "trend"} == names
-    True
     """
     return set(_PREDICTOR_REGISTRY.keys())
 
@@ -233,16 +185,6 @@ def clear_predictor_registry() -> None:
     Warnings
     --------
     This operation cannot be undone. Use with caution in production code.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     clear_predictor_registry, available_predictors
-    ... )
-    >>>
-    >>> clear_predictor_registry()
-    >>> len(available_predictors())
-    0
     """
     _PREDICTOR_REGISTRY.clear()
 
@@ -260,14 +202,5 @@ def has_predictor(name: str) -> bool:
     -------
     bool
         True if the predictor is registered, False otherwise.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import has_predictor
-    >>>
-    >>> has_predictor("ewma")
-    True
-    >>> has_predictor("unknown")
-    False
     """
     return name in _PREDICTOR_REGISTRY

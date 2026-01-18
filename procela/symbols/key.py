@@ -4,6 +4,10 @@ Key: Pure identity token for Procela.
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/symbols/key.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/symbols/key.html
 """
 
 from __future__ import annotations
@@ -30,17 +34,13 @@ class Key:
         Private 32-byte opaque token. This attribute is private and
         should not be accessed directly by users.
 
-    Example
-    -------
-        >>> from procela.symbols import Key
-        >>>
-        >>> k1 = Key()
-        >>> k2 = Key()
-        >>> k1 == k2
-        False
-        >>> k3 = Key.from_serialized(k1.to_bytes())
-        >>> k1 == k3
-        True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/symbols/key.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/symbols/key.html
     """
 
     __slots__ = ("_token",)

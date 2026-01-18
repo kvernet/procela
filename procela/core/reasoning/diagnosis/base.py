@@ -5,6 +5,14 @@ This module defines the abstract base class for diagnostic reasoning algorithms,
 which identify root causes of observed anomalies or system behaviors. Diagnostic
 reasoners are core components of Procela's active reasoning engine, enabling
 variables to perform causal analysis and identify underlying issues.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/diagnosis/base.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/diagnosis/base.html
 """
 
 from __future__ import annotations
@@ -37,16 +45,6 @@ class Diagnoser(ABC):
         distinguishes the diagnostic method (e.g., "FaultTreeDiagnoser",
         "BayesianDiagnoser", "RuleBasedDiagnoser").
 
-    Methods
-    -------
-    diagnose(view: DiagnosisView) -> DiagnosisResult
-        Perform diagnostic reasoning on the provided view.
-
-    See Also
-    --------
-    DiagnosisView : View interface providing data for diagnosis.
-    DiagnosisResult : Structured output containing diagnostic conclusions.
-
     Notes
     -----
     As an abstract base class, `Diagnoser` cannot be instantiated
@@ -57,34 +55,13 @@ class Diagnoser(ABC):
     using the anomaly context along with historical trends and statistics
     to hypothesize potential root causes.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import Diagnoser, DiagnosisView, DiagnosisResult
-    >>>
-    >>> # Define a concrete diagnostic reasoner
-    >>> class SimpleDiagnoser(Diagnoser):
-    ...     name = "SimpleDiagnoser"
-    ...
-    ...     def diagnose(self, view: DiagnosisView) -> DiagnosisResult:
-    ...         # Simple implementation checking for common issues
-    ...         causes = []
-    ...         if view.anomaly and view.anomaly.is_anomaly:
-    ...             causes.append("Detected anomaly requires investigation")
-    ...         if view.trend and view.trend.direction == "down":
-    ...             causes.append("Downward trend suggests degradation")
-    ...
-    ...         return DiagnosisResult(
-    ...             causes=causes,
-    ...             confidence=0.7 if causes else 0.0,
-    ...             metadata={"method": self.name}
-    ...         )
-    ...
-    >>> # Create and use the diagnoser
-    >>> diagnoser = SimpleDiagnoser()
-    >>> # view would be a DiagnosisView implementation
-    >>> result = diagnoser.diagnose(view)
-    >>> isinstance(result, DiagnosisResult)
-    True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/diagnosis/base.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/diagnosis/base.html
     """
 
     name: ClassVar[str]
@@ -137,37 +114,5 @@ class Diagnoser(ABC):
         5. Document any assumptions about the input view
 
         The method should not modify the input `DiagnosisView` object.
-
-        Examples
-        --------
-        >>> class MyDiagnoser(Diagnoser):
-        ...     name = "MyDiagnoser"
-        ...
-        ...     def diagnose(self, view: DiagnosisView) -> DiagnosisResult:
-        ...         # Example: Basic diagnostic logic
-        ...         causes = []
-        ...         confidence = 0.0
-        ...
-        ...         if view.anomaly and view.anomaly.is_anomaly:
-        ...             if view.anomaly.score and view.anomaly.score > 5.0:
-        ...                 causes.append("Severe anomaly detected")
-        ...                 confidence = 0.9
-        ...             else:
-        ...                 causes.append("Minor anomaly detected")
-        ...                 confidence = 0.6
-        ...
-        ...         if view.trend and view.trend.direction == "down":
-        ...             causes.append("System shows degradation trend")
-        ...             confidence = max(confidence, 0.7)
-        ...
-        ...         return DiagnosisResult(
-        ...             causes=causes,
-        ...             confidence=confidence if causes else None,
-        ...             metadata={
-        ...                 "method": self.name,
-        ...                 "anomaly_present": view.anomaly is not None,
-        ...                 "trend_present": view.trend is not None
-        ...             }
-        ...         )
         """
         raise NotImplementedError("Subclasses must implement the diagnose method")

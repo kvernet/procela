@@ -4,6 +4,14 @@ Planner registry module for Procela's active reasoning engine.
 This module provides a registry system for managing different planner types
 in the Procela framework. It allows dynamic registration, instantiation,
 and management of planner classes with proper validation and error handling.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/planning/registry.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/planning/registry.html
 """
 
 from __future__ import annotations
@@ -45,16 +53,6 @@ def get_planner(name: str, **kwargs: Any) -> Planner:
         If the planner name is not found in the registry.
     TypeError
         If the planner cannot be instantiated with the provided arguments.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import get_planner
-    >>>
-    >>> planner = get_planner("preventive", priority=5, enabled=True)
-    >>> planner.name
-    'preventive'
-    >>> planner.priority
-    5
     """
     if name not in _PLANNER_REGISTRY:
         available = ", ".join(sorted(_PLANNER_REGISTRY.keys()))
@@ -90,17 +88,6 @@ def register_planner(name: str, planner_class: Type[Planner]) -> None:
         If planner_class is not a class or not a subclass of Planner.
     ValueError
         If the name is already registered in the registry.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import Planner, register_planner
-    >>>
-    >>> class CustomPlanner(Planner):
-    ...     name = "custom"
-    ...     def plan(self, view):
-    ...         # Implementation here
-    ...         pass
-    >>> register_planner("custom", CustomPlanner)
     """
     if not isinstance(planner_class, type):
         raise TypeError(
@@ -145,14 +132,6 @@ def unregister_planner(name: str) -> Type[Planner]:
     ------
     KeyError
         If the planner name is not found in the registry.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import unregister_planner
-    >>>
-    >>> planner_class = unregister_planner("preventive")
-    >>> planner_class.__name__
-    'PreventivePlanner'
     """
     if name not in _PLANNER_REGISTRY:
         available = ", ".join(sorted(_PLANNER_REGISTRY.keys()))
@@ -175,16 +154,6 @@ def get_planners() -> dict[str, Type[Planner]]:
     -------
     dict[str, Type[Planner]]
         A copy of the planner registry dictionary.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import get_planners
-    >>>
-    >>> registry = get_planners()
-    >>> "preventive" in registry
-    True
-    >>> "reactive" in registry
-    True
     """
     return _PLANNER_REGISTRY.copy()
 
@@ -197,14 +166,6 @@ def available_planners() -> set[str]:
     -------
     set[str]
         A set containing all registered planner names.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import available_planners
-    >>>
-    >>> names = available_planners()
-    >>> {"preventive", "reactive"} == names
-    True
     """
     return set(_PLANNER_REGISTRY.keys())
 
@@ -220,14 +181,6 @@ def clear_planner_registry() -> None:
     -------
     This action cannot be undone. Use with caution, especially in
     production environments or shared contexts.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import clear_planner_registry, available_planners
-    >>>
-    >>> clear_planner_registry()
-    >>> available_planners()
-    set()
     """
     _PLANNER_REGISTRY.clear()
 
@@ -245,14 +198,5 @@ def has_planner(name: str) -> bool:
     -------
     bool
         True if the planner is registered, False otherwise.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import has_planner
-    >>>
-    >>> has_planner("preventive")
-    True
-    >>> has_planner("nonexistent")
-    False
     """
     return name in _PLANNER_REGISTRY

@@ -6,6 +6,14 @@ Procela's active reasoning engine.
 Policies implement strategic decision-making logic to choose the most
 appropriate action from a set of competing proposals, enabling
 resource-aware, constraint-respecting system optimization.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/action/policy.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/action/policy.html
 """
 
 from __future__ import annotations
@@ -30,28 +38,13 @@ class SelectionPolicy(ABC):
     algorithms (e.g., highest confidence, multi-criteria optimization,
     constraint satisfaction).
 
-    Methods
-    -------
-    select(proposals: Iterable[ActionProposal]) -> ActionProposal | None
-        Analyzes an iterable of action proposals and selects the most
-        appropriate one according to the policy's logic.
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/action/policy.html
 
-    Examples
-    --------
-    >>> from procela.core.action import (
-    ...     SelectionPolicy,
-    ...     HighestConfidencePolicy,
-    ...     ActionProposal,
-    )
-    >>>
-    >>> # Create sample proposals
-    >>> prop1 = ActionProposal(value=34.7, confidence=0.7)
-    >>> prop2 = ActionProposal(value=28.4, confidence=0.9)
-    >>> # Use a concrete policy
-    >>> policy = HighestConfidencePolicy()
-    >>> selected = policy.select([prop1, prop2])
-    >>> selected.value
-    28.4
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/action/policy.html
     """
 
     @abstractmethod
@@ -85,12 +78,6 @@ class SelectionPolicy(ABC):
         ValueError
             If the policy encounters invalid data within proposals (e.g.,
             confidence outside [0,1] if the policy relies on it).
-
-        Notes
-        -----
-        This method should be pure and deterministic when possible to ensure
-        reproducible system behavior and facilitate debugging. Side effects
-        should be avoided.
         """
         pass
 
@@ -116,34 +103,18 @@ class HighestConfidencePolicy(SelectionPolicy):
     supplemented or replaced with more comprehensive policies in production
     systems with complex trade-offs.
 
-    Examples
-    --------
-    >>> from procela.core.action import HighestConfidencePolicy, ActionProposal
-    >>>
-    >>> policy = HighestConfidencePolicy()
-    >>> proposals = [
-    ...     ActionProposal(value="Low confidence", confidence=0.3),
-    ...     ActionProposal(value="High config", confidence=0.8),
-    ...     ActionProposal(value="Normal confidence", confidence=0.5)
-    ... ]
-    >>> selected = policy.select(proposals)
-    >>> selected.value
-    'High config'
-    >>> selected.confidence
-    0.8
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/action/policy.html
+
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/action/policy.html
     """
 
     def select(self, proposals: Iterable[ActionProposal]) -> ActionProposal | None:
         """
         Select the proposal with the maximum confidence score.
-
-        Implementation details:
-        1. Converts the iterable to a list to allow multiple passes if needed
-        2. Handles empty input by returning `None`
-        3. Uses the built-in `max` function with a key function accessing
-           `proposal.confidence`
-        4. In case of ties, `max` returns the first proposal with the maximum
-           value (Python's default behavior)
 
         Parameters
         ----------

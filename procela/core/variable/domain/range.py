@@ -6,6 +6,10 @@ This module provides domain classes for numeric values with various constraints.
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/range.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/variable/domain/range.html
 """
 
 from __future__ import annotations
@@ -34,30 +38,13 @@ class RangeDomain(ValueDomain):
     name : str
         Optional name for the domain, inherited from ValueDomain.
 
-    Examples
-    --------
-    >>> from procela.core.variable import RangeDomain
-    >>>
-    >>> # Domain for positive numbers
-    >>> positive_domain = RangeDomain(min_value=0, name="positive")
-    >>> positive_domain.validate(5)
-    True
-    >>> positive_domain.validate(-1)
-    False
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/variable/domain/range.html
 
-    >>> # Domain for percentages (0-100)
-    >>> percent_domain = RangeDomain(min_value=0, max_value=100, name="percent")
-    >>> percent_domain.validate(50)
-    True
-    >>> percent_domain.validate(150)
-    False
-
-    >>> # Unbounded domain (any numeric value)
-    >>> any_numeric = RangeDomain(name="any_numeric")
-    >>> any_numeric.validate(3.14)
-    True
-    >>> any_numeric.validate("string")
-    False
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/variable/domain/range.html
     """
 
     def __init__(
@@ -84,24 +71,6 @@ class RangeDomain(ValueDomain):
         ------
         ValueError
             If min_value > max_value when both are specified.
-
-        Examples
-        --------
-        >>> from procela.core.variable import RangeDomain
-        >>>
-        >>> domain = RangeDomain(min_value=0, max_value=10, name="zero_to_ten")
-        >>> domain.min_value
-        0
-        >>> domain.max_value
-        10
-        >>> domain.name
-        'zero_to_ten'
-
-        >>> # Invalid bounds raise ValueError
-        >>> RangeDomain(min_value=10, max_value=0)
-        Traceback (most recent call last):
-            ...
-        ValueError: min_value (10) cannot be greater than max_value (0)
         """
         super().__init__(name)
         if min_value is not None and max_value is not None:
@@ -134,24 +103,6 @@ class RangeDomain(ValueDomain):
         bool
             True if value is numeric and within bounds (or bounds are None),
             False otherwise.
-
-        Examples
-        --------
-        >>> from procela.core.variable import RangeDomain
-        >>>
-        >>> domain = RangeDomain(min_value=0, max_value=100)
-        >>> domain.validate(50)
-        True
-        >>> domain.validate(150)
-        False
-        >>> domain.validate(-10)
-        False
-        >>> domain.validate("50")  # String, not numeric
-        False
-        >>> domain.validate(0)  # Inclusive bounds
-        True
-        >>> domain.validate(100)  # Inclusive bounds
-        True
         """
         if not isinstance(value, (int, float)):
             return False
@@ -186,32 +137,6 @@ class RangeDomain(ValueDomain):
             - Below minimum bound rejection
             - Above maximum bound rejection
             - Success confirmation
-
-        Examples
-        --------
-        >>> from procela.core.variable import RangeDomain
-        >>>
-        >>> domain = RangeDomain(min_value=0, max_value=100)
-        >>> domain.explain(50)
-        'Value 50 is valid in RangeDomain.'
-        >>> domain.explain(-10)
-        'Value -10 is less than minimum 0.'
-        >>> domain.explain(150)
-        'Value 150 is greater than maximum 100.'
-        >>> domain.explain("fifty")
-        'Value fifty is not numeric.'
-
-        >>> # Domain with only lower bound
-        >>> positive_domain = RangeDomain(min_value=0)
-        >>> positive_domain.explain(-5)
-        'Value -5 is less than minimum 0.'
-        >>> positive_domain.explain(42)
-        'Value 42 is valid in RangeDomain.'
-
-        >>> # Domain with only upper bound
-        >>> negative_domain = RangeDomain(max_value=0)
-        >>> negative_domain.explain(5)
-        'Value 5 is greater than maximum 0.'
         """
         if not isinstance(value, (int, float)):
             return f"Value {value} is not numeric."

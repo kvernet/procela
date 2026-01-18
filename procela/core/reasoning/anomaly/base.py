@@ -6,6 +6,14 @@ algorithms within Procela's active reasoning engine. Anomaly detectors
 are specialized reasoning components that analyze historical statistics
 to identify deviations from expected behavior, forming the foundation
 for proactive system monitoring and diagnostic reasoning.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/anomaly/base.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/anomaly/base.html
 """
 
 from __future__ import annotations
@@ -46,60 +54,19 @@ class AnomalyDetector(ABC):
         "MovingAverageDetector", "IsolationForestDetector").
         This is a class attribute that should be set by subclasses.
 
-    Methods
-    -------
-    detect(stats: HistoryStatistics) -> AnomalyResult
-        Analyze historical statistics to detect anomalies.
-
-    See Also
-    --------
-    HistoryStatistics : Statistical summary of variable history used as input.
-    AnomalyResult : Structured output containing detection results.
-
     Notes
     -----
     As an abstract base class, `AnomalyDetector` cannot be instantiated
     directly. Concrete implementations must inherit from this class and
     provide implementations for all abstract methods.
 
-    The design follows the Template Method pattern, where the base class
-    defines the algorithm structure (interface) and subclasses provide
-    specific detection implementations.
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/anomaly/base.html
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import AnomalyDetector, AnomalyResult
-    >>> from procela.core.memory import HistoryStatistics
-    >>>
-    >>> # Define a concrete detector
-    >>> class SimpleThresholdDetector(AnomalyDetector):
-    ...     name = "SimpleThresholdDetector"
-    ...     def detect(self, stats: HistoryStatistics) -> AnomalyResult:
-    ...         # Simple implementation checking if mean exceeds threshold
-    ...         threshold = 100.0
-    ...         mean = stats.mean()
-    ...         is_anomaly = mean > threshold if mean else False
-    ...         score = mean / threshold if mean else 0.0
-    ...         return AnomalyResult(
-    ...             is_anomaly=is_anomaly,
-    ...             score=score,
-    ...             threshold=threshold,
-    ...             method=self.name,
-    ...         )
-
-    >>> # Create and use the detector
-    >>> detector = SimpleThresholdDetector()
-    >>> stats = HistoryStatistics(
-    ...     count=1, sum=123.8, sumsq=98064.82,
-    ...     min=0.3, max=9.1, last_value=None,
-    ...     confidence_sum=1.4, ewma=34.2,
-    ...     sources=frozenset()
-    ... )
-    >>> result = detector.detect(stats)
-    >>> result.is_anomaly
-    True
-    >>> result.method
-    'SimpleThresholdDetector'
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/anomaly/base.html
     """
 
     name: ClassVar[str]
@@ -157,33 +124,5 @@ class AnomalyDetector(ABC):
         5. Document any assumptions about the input statistics
 
         The method should not modify the input `HistoryStatistics` object.
-
-        Examples
-        --------
-        >>> class MyDetector(AnomalyDetector):
-        ...     name = "MyDetector"
-        ...     def detect(self, stats: HistoryStatistics) -> AnomalyResult:
-        ...         # Example: Check if recent value exceeds 3 standard deviations
-        ...         mean, std = stats.mean(), stats.std()
-        ...         if mean is None or std is None:
-        ...             return AnomalyResult(
-        ...                 is_anomaly=False,
-        ...                 score=0.0,
-        ...                 threshold=3.0,
-        ...                 method=self.name,
-        ...                 metadata={"error": "Insufficient statistics"}
-        ...             )
-        ...         if std == 0:
-        ...             z_score = 0
-        ...         else:
-        ...             z_score = abs((stats.last_value - mean) / std)
-        ...         is_anomaly = z_score > 3.0
-        ...         return AnomalyResult(
-        ...             is_anomaly=is_anomaly,
-        ...             score=z_score,
-        ...             threshold=3.0,
-        ...             method=self.name,
-        ...             metadata={"z_score": z_score, "mean": mean, "std": std}
-        ...         )
         """
         raise NotImplementedError("Subclasses must implement the detect method")

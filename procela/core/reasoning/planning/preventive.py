@@ -4,6 +4,14 @@ Preventive planning module for Procela's active reasoning engine.
 This module provides the PreventivePlanner class, which implements a
 planning strategy focused on early intervention based on system predictions
 and diagnoses to prevent potential issues before they occur.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/planning/preventive.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/planning/preventive.html
 """
 
 from __future__ import annotations
@@ -40,14 +48,13 @@ class PreventivePlanner(Planner):
     ValueError
         If `priority` is negative.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import PreventivePlanner
-    >>>
-    >>> planner = PreventivePlanner(priority=5, enabled=True)
-    >>> # Assuming view is an instance of PlanningView
-    >>> result = planner.plan(view)
-    >>> print(f"Generated {len(result.proposals)} preventive proposals")
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/planning/preventive.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/planning/preventive.html
     """
 
     name = "preventive"

@@ -4,6 +4,10 @@ Value domain semantic definitions for Procela.
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/value.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/variable/domain/value.html
 """
 
 from __future__ import annotations
@@ -40,20 +44,13 @@ class ValueDomain(ABC):
     This is an abstract base class. Subclasses must implement the
     `validate` and `explain` methods.
 
-    Examples
-    --------
-    >>> from procela.core.variable import ValueDomain, HistoryStatistics
-    >>>
-    >>> class PositiveIntDomain(ValueDomain):
-    ...     def validate(self, value, stats: HistoryStatistics | None = None):
-    ...         return isinstance(value, int) and value > 0
-    ...     def explain(self, value, stats: HistoryStatistics | None = None):
-    ...         return "Value must be a positive integer"
-    >>> domain = PositiveIntDomain("positive_ints")
-    >>> domain.validate(5)
-    True
-    >>> domain.validate(-1)
-    False
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/variable/domain/value.html
+
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/variable/domain/value.html
     """
 
     name: str
@@ -148,5 +145,15 @@ class ValueDomain(ABC):
 
         This method exposes optional semantic hooks but
         does not define trend logic by default.
+
+        Parameters
+        ----------
+        stats : HistoryStatistics,
+            Additional stats for the trend. May include
+            information needed to compute the trend.
+        absolute : float | None = None
+            The abosulte value of the trend threshold.
+        std_factor : float | None = None
+            The standard deviation factor of the trend threshold.
         """
         return None

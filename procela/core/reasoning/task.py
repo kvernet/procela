@@ -5,6 +5,14 @@ This module defines the ReasoningTask enumeration, which categorizes the
 different types of intelligent reasoning operations that active variables
 in Procela can perform. Each task represents a distinct cognitive capability
 within the framework's mechanistic modeling and active reasoning engine.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/task.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/task.html
 """
 
 from __future__ import annotations
@@ -22,7 +30,7 @@ class ReasoningTask(Enum):
     These tasks form the core cognitive repertoire of the framework's
     decentralized intelligence.
 
-    The tasks are organized into several conceptual groups:
+    The tasks are organized into several groups:
 
     1. **Monitoring & Detection Tasks**: ANOMALY_DETECTION, CONSTRAINT_CHECKING
     2. **Analytical Tasks**: TREND_ANALYSIS, PATTERN_RECOGNITION, SENSITIVITY_ANALYSIS
@@ -40,77 +48,48 @@ class ReasoningTask(Enum):
     ----------
     ANOMALY_DETECTION : ReasoningTask
         Identifies deviations from expected behavior or statistical norms.
-        Example use: Detecting sensor malfunctions or unexpected state changes.
 
     CONFLICT_RESOLUTION : ReasoningTask
         Resolves contradictions between competing producers, proposals,
-        or system goals. Example use: Choosing between conflicting values
-        proposed by different mechanisms.
+        or system goals.
 
     ACTION_PROPOSAL : ReasoningTask
         Generates suggested actions to achieve system objectives or
-        correct identified issues. Example use: Proposing parameter
-        adjustments to maintain system stability.
+        correct identified issues.
 
     VALUE_PREDICTION : ReasoningTask
         Forecasts future values based on current state and historical trends.
-        Example use: Predicting temperature evolution in a thermal system.
 
     CAUSAL_DIAGNOSIS : ReasoningTask
         Identifies root causes of observed effects or system behaviors.
-        Example use: Determining why a pressure reading is outside
-        acceptable bounds.
 
     UNCERTAINTY_QUANTIFICATION : ReasoningTask
         Assesses and quantifies the uncertainty associated with predictions,
-        measurements, or model parameters. Example use: Estimating confidence
-        intervals for forecasted values.
+        measurements, or model parameters.
 
     CONSTRAINT_CHECKING : ReasoningTask
         Verifies that system states and proposed actions satisfy all
-        operational constraints. Example use: Ensuring proposed control
-        actions don't violate safety limits.
+        operational constraints.
 
     TREND_ANALYSIS : ReasoningTask
         Analyzes temporal patterns and directional changes in system variables.
-        Example use: Identifying accelerating degradation in equipment
-        performance.
 
     PATTERN_RECOGNITION : ReasoningTask
         Identifies recurring structures or sequences in system behavior.
-        Example use: Recognizing cyclic load patterns in energy systems.
 
     SENSITIVITY_ANALYSIS : ReasoningTask
         Evaluates how changes in inputs or parameters affect system outputs.
-        Example use: Determining which control parameters have the greatest
-        impact on system stability.
 
     INTERVENTION_PLANNING : ReasoningTask
         Develops coordinated sequences of actions to achieve complex objectives.
-        Example use: Creating a multi-step maintenance procedure to address
-        identified system issues.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import ReasoningTask
-    >>> # Accessing task values
-    >>> task = ReasoningTask.ANOMALY_DETECTION
-    >>> task.name
-    'ANOMALY_DETECTION'
-    >>> task.value  # auto() generates automatic values
-    1
-    >>> # Iterating through all tasks
-    >>> for task in ReasoningTask:
-    ...     print(f"{task.name}: {task.value}")
-    ANOMALY_DETECTION: 1
-    CONSTRAINT_CHECKING: 2
-    TREND_ANALYSIS: 3
-    # ... etc.
-    >>> # Membership testing
-    >>> "ANOMALY_DETECTION" in ReasoningTask.__members__
-    True
-    >>> ReasoningTask.CONSTRAINT_CHECKING in ReasoningTask
-    True
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/task.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/task.html
     """
 
     # Monitoring & Detection Tasks
@@ -146,17 +125,7 @@ class ReasoningTask(Enum):
         str
             A formatted string representation of the task with underscores
             replaced by spaces and proper capitalization.
-
-        Examples
-        --------
-        >>> task = ReasoningTask.ANOMALY_DETECTION
-        >>> str(task)
-        'Anomaly Detection'
-        >>> task = ReasoningTask.CAUSAL_DIAGNOSIS
-        >>> str(task)
-        'Causal Diagnosis'
         """
-        # Convert from UPPER_CASE to Title Case With Spaces
         return self.name.replace("_", " ").title()
 
     def description(self) -> str:
@@ -170,12 +139,6 @@ class ReasoningTask(Enum):
         -------
         str
             A descriptive explanation of the reasoning task.
-
-        Examples
-        --------
-        >>> task = ReasoningTask.ANOMALY_DETECTION
-        >>> task.description()
-        'Identifies deviations from expected behavior or statistical norms.'
         """
         return _DESCRIPTIONS[self]
 

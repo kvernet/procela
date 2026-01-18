@@ -3,6 +3,14 @@ Effect module for the Procela framework.
 
 This module defines the ActionEffect class, a fundamental building block
 for representing the outcomes of actions within Procela's active reasoning engine.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/action/effect.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/action/effect.html
 """
 
 from __future__ import annotations
@@ -22,7 +30,6 @@ class ActionEffect:
         A human-readable explanation of what the effect represents.
         This is the primary vehicle for explainability, translating
         mechanistic state changes into understandable narratives.
-        Example: "Increased system pressure by 5.2 kPa."
 
     expected_outcome : Any | None, optional
         The anticipated result or state change after the action is applied.
@@ -51,23 +58,13 @@ class ActionEffect:
     ValueError
         If `confidence` is provided but is outside the logical range [0.0, 1.0].
 
-    Examples
-    --------
-    >>> from procela.core.action import ActionEffect
-    >>>
-    >>> # Creating a simple descriptive effect
-    >>> effect_1 = ActionEffect(description="Temperature delta applied")
-    >>> effect_1.description
-    'Temperature delta applied'
-    >>> # Creating a predictive effect with confidence
-    >>> predicted_state: dict[str, float] = {"velocity": 12.5, "error_margin": 0.3}
-    >>> effect_2 = ActionEffect(
-    ...     description="Updated kinematic model",
-    ...     expected_outcome=predicted_state,
-    ...     confidence=0.87
-    ... )
-    >>> effect_2.confidence
-    0.87
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/action/effect.html
+
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/action/effect.html
     """
 
     description: str

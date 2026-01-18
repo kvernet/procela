@@ -6,16 +6,13 @@ Semantic classification system for variables in the Procela framework.
 Defines four fundamental roles that determine how variables behave and are
 processed throughout the reasoning pipeline:
 
-ENDOGENOUS: System-determined variables (effects, dependent variables)
-EXOGENOUS: Externally-determined variables (causes, independent variables)
-CONTROL: Manipulable decision variables (parameters, knobs)
-DERIVED: Computed or aggregated variables (outputs, metrics)
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/variable/role.html
 
-Roles influence reasoning strategies, constraint validation, visualization
-selection, and error detection. Each Variable instance is assigned a role
-that guides its treatment in all system components.
-
-See: https://procela.org/docs/semantics/core/variable/roles/
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/variable/role.html
 """
 
 from __future__ import annotations
@@ -50,12 +47,13 @@ class VariableRole(Enum):
         Variables computed from other variables through transformations.
         These represent aggregated, derived, or synthesized information.
 
-    Examples
-    --------
-    >>> from procela.core.variable import VariableRole
-    >>>
-    >>> for role in VariableRole:
-    ...     print(role)
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/variable/role.html
+
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/variable/role.html
     """
 
     ENDOGENOUS = auto()

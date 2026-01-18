@@ -6,6 +6,14 @@ implementations for validating ActionProposal objects. Validators are key
 components of Procela's contractual mechanistic framework, ensuring that only
 proposals meeting specific criteria (e.g., confidence thresholds, constraints)
 proceed in the reasoning and execution pipeline.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/action/validator.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/action/validator.html
 """
 
 from __future__ import annotations
@@ -29,29 +37,13 @@ class ProposalValidator(ABC):
     logic (e.g., checking confidence thresholds, resource availability,
     pre-condition satisfaction).
 
-    Methods
-    -------
-    validate(proposal: ActionProposal) -> bool
-        Evaluates a single action proposal and returns its validity according
-        to the implemented rules.
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/action/validator.html
 
-    See Also
-    --------
-    ConfidenceThresholdValidator : A concrete validator that checks if a
-        proposal's confidence meets a minimum threshold.
-
-    Examples
-    --------
-    >>> from procela.core.action import ProposalValidator, ActionProposal
-    >>>
-    >>> # Create a custom validator
-    >>> class SimpleValidator(ProposalValidator):
-    ...     def validate(self, proposal):
-    ...         return proposal.confidence > 0.5
-    >>> validator = SimpleValidator()
-    >>> prop = ActionProposal(value=10, confidence=0.7)
-    >>> validator.validate(prop)
-    True
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/action/validator.html
     """
 
     @abstractmethod
@@ -122,18 +114,13 @@ class ConfidenceThresholdValidator(ProposalValidator):
     ValueError
         If the provided `threshold` is outside the valid range [0.0, 1.0].
 
-    Examples
-    --------
-    >>> from procela.core.action import ConfidenceThresholdValidator, ActionProposal
-    >>>
-    >>> # Create a validator that requires at least 70% confidence
-    >>> validator = ConfidenceThresholdValidator(threshold=0.7)
-    >>> prop_high = ActionProposal(value="act1", confidence=0.85)
-    >>> prop_low = ActionProposal(value="act2", confidence=0.6)
-    >>> validator.validate(prop_high)
-    True
-    >>> validator.validate(prop_low)
-    False
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/action/validator.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/action/validator.html
     """
 
     def __init__(self, threshold: float) -> None:

@@ -4,6 +4,14 @@ Reactive planning module for Procela's active reasoning engine.
 This module provides the ReactivePlanner class, which implements a
 planning strategy focused on responding to confirmed system issues
 and diagnoses with immediate corrective actions.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/planning/reactive.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/planning/reactive.html
 """
 
 from __future__ import annotations
@@ -41,14 +49,13 @@ class ReactivePlanner(Planner):
     ValueError
         If `priority` is negative.
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import ReactivePlanner, PlanningView
-    >>>
-    >>> planner = ReactivePlanner(priority=3, enabled=True)
-    >>> # Assuming view contains diagnosis with causes
-    >>> result = planner.plan(view)
-    >>> print(f"Generated {len(result.proposals)} reactive proposals")
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/planning/reactive.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/planning/reactive.html
     """
 
     name = "reactive"

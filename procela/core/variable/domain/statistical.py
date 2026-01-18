@@ -7,6 +7,10 @@ validation based on historical data (mean and standard deviation).
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/statistical.html
+
+Examples Reference
+-------------------
+https://procela.org/docs/examples/core/variable/domain/statistical.html
 """
 
 from __future__ import annotations
@@ -44,30 +48,13 @@ class StatisticalDomain(ValueDomain):
         - 2.0: ~95% of data
         - 3.0: ~99.7% of data
 
-    Examples
-    --------
-    >>> from procela.core.variable import StatisticalDomain, HistoryStatistics
-    >>>
-    >>> # Create domain for values within 2 standard deviations
-    >>> domain = StatisticalDomain(k=2.0, name="two_sigma")
-    >>> domain.k
-    2.0
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/variable/domain/statistical.html
 
-    >>> # Validation with stats
-    >>> stats = HistoryStatistics(2, 20, 640, None, None, None, 1.0, None, frozenset())
-    >>> domain.validate(9, stats)
-    True
-    >>> domain.validate(45, stats)
-    False
-
-    >>> # Validation without stats passes
-    >>> domain.validate(999)
-    True
-
-    >>> # Validation with incomplete stats passes
-    >>> stats = HistoryStatistics(1, 20, 640, None, None, None, 1.0, None, frozenset())
-    >>> domain.validate(50, stats)  # Missing std
-    True
+    Examples Reference
+    -------------------
+    https://procela.org/docs/examples/core/variable/domain/statistical.html
     """
 
     def __init__(
@@ -93,33 +80,6 @@ class StatisticalDomain(ValueDomain):
             If k is negative.
         TypeError
             If k is not numeric.
-
-        Examples
-        --------
-        >>> from procela.core.variable import StatisticalDomain
-        >>>
-        >>> # Default domain (3 sigma)
-        >>> domain1 = StatisticalDomain()
-        >>> domain1.k
-        3.0
-
-        >>> # Domain with 2 sigma bounds
-        >>> domain2 = StatisticalDomain(k=2.0, name="quality_check")
-        >>> domain2.k
-        2.0
-        >>> domain2.name
-        'quality_check'
-
-        >>> # Zero sigma domain (only allows exact mean)
-        >>> domain3 = StatisticalDomain(k=0.0)
-        >>> domain3.k
-        0.0
-
-        >>> # Negative k raises ValueError
-        >>> StatisticalDomain(k=-1.0)
-        Traceback (most recent call last):
-            ...
-        ValueError: k must be non-negative, got -1.0
         """
         super().__init__(name=name)
         if not isinstance(k, int | float):
@@ -168,51 +128,6 @@ class StatisticalDomain(ValueDomain):
         - The validation is lenient by default when stats is insufficient
         - This prevents false failures when statistical data is unavailable
         - Non-numeric values will raise TypeError when compared
-
-        Examples
-        --------
-        >>> from procela.core.variable import StatisticalDomain, HistoryStatistics
-        >>>
-        >>> domain = StatisticalDomain(k=2.0)
-        >>> stats = HistoryStatistics(
-        ...     2, 20, 640, None, None, None, 1.0, None, frozenset()
-        ... )
-
-        >>> domain.validate(45, stats)
-        False
-        >>> domain.validate(55, stats)
-        False
-        >>> domain.validate(40, stats)
-        False
-        >>> domain.validate(24, stats)
-        True
-
-        >>> # Values outside bounds
-        >>> domain.validate(49, stats)
-        False
-        >>> domain.validate(61, stats)
-        False
-
-        >>> # Insufficient stats passes validation
-        >>> domain.validate(999)  # No stats
-        True
-        >>> stats = HistoryStatistics(
-        ...     1, 20, 640, None, None, None, 1.0, None, frozenset()
-        ... )
-        >>> domain.validate(999, stats)  # Missing std
-        True
-        >>> stats = HistoryStatistics(
-        ...     2, 20, 640, None, None, None, 1.0, None, frozenset()
-        ... )
-        >>> domain.validate(999, stats)
-        False
-
-        >>> # Edge case: k = 0 (only exact mean allowed)
-        >>> exact_domain = StatisticalDomain(k=0.0)
-        >>> exact_domain.validate(10, stats)
-        True
-        >>> exact_domain.validate(11, stats)
-        False
         """
         if not isinstance(value, (int, float)):
             return False
@@ -252,42 +167,6 @@ class StatisticalDomain(ValueDomain):
               is missing mean or std
             - "Value X must be within [lower, upper]." showing the
               calculated bounds
-
-        Examples
-        --------
-        >>> from procela.core.variable import StatisticalDomain, HistoryStatistics
-        >>>
-        >>> domain = StatisticalDomain(k=2.0)
-
-        >>> stats = HistoryStatistics(
-        ...     4, 400, 40400, None, None, None, 1.0, None, frozenset()
-        ... )
-        >>> domain.explain(95, stats)
-        'Value 95 is within [80.0, 120.0].'
-        >>> domain.explain(400, stats)
-        'Value 400 is not within [80.0, 120.0].'
-
-        >>> # Insufficient stats
-        >>> domain.explain(50)  # No stats
-        'Insufficient history for statistical validation.'
-        >>> stats = HistoryStatistics(
-        ...     1, 20, 640, None, None, None, 1.0, None, frozenset()
-        ... )
-        >>> domain.explain(50, stats)  # Missing std
-        'Insufficient history for statistical validation.'
-
-        >>> domain3 = StatisticalDomain(k=3.0)
-        >>> stats = HistoryStatistics(
-        ...     4, 400, 40400, None, None, None, 1.0, None, frozenset()
-        ... )
-        >>> domain3.explain(195, stats)
-        'Value 195 is not within [70.0, 130.0].'
-
-        >>> stats = HistoryStatistics(
-        ...     2, 20, 400, None, None, None, 1.0, None, frozenset()
-        ... )
-        >>> domain.explain(10, stats)
-        'Value 10 is within [-10.0, 30.0].'
         """
         if not isinstance(value, (int, float)):
             return "Value must be numeric."
@@ -325,21 +204,6 @@ class StatisticalDomain(ValueDomain):
         -------
         float | None
             The computed trend threshold or None
-
-        Examples
-        --------
-        >>> from procela.core.variable import StatisticalDomain, HistoryStatistics
-        >>>
-        >>> domain = StatisticalDomain(k=2.0)
-        >>> stats = HistoryStatistics(
-        ...     4, 400, 40400, None, None, None, 1.0, None, frozenset()
-        ... )
-        >>> domain.trend_threshold(stats, absolute=0.75)
-        0.75
-
-        >>> domain = StatisticalDomain(k=3.0)
-        >>> domain.trend_threshold(stats, std_factor=0.03)
-        0.3
         """
         if absolute is None and std_factor is None:
             raise ValueError("Provide either absolute or std_factor.")

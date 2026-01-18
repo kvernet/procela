@@ -6,6 +6,14 @@ by active variables within Procela's mechanistic modeling and active reasoning
 engine. Each result class provides standardized, type-safe representations of
 reasoning outcomes with built-in confidence quantification, explainability,
 and audit trail capabilities.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/result.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/result.html
 """
 
 from __future__ import annotations
@@ -102,25 +110,13 @@ class ReasoningResult:
     ValueError
         If `confidence` is provided but is outside the logical range [0.0, 1.0].
 
-    Examples
-    --------
-    >>> from datetime import datetime, timezone
-    >>> from procela.core.reasoning import ReasoningResult, ReasoningTask
-    >>>
-    >>> # A successful anomaly detection result
-    >>> result = ReasoningResult(
-    ...     task=ReasoningTask.ANOMALY_DETECTION,
-    ...     success=True,
-    ...     result=True,  # Anomaly detected
-    ...     confidence=0.92,
-    ...     explanation="Z-score exceeded 3.0 threshold",
-    ...     metadata={"method": "zscore", "zscore": 3.2},
-    ...     execution_time=0.045
-    ... )
-    >>> result.success
-    True
-    >>> result.confidence
-    0.92
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/result.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/result.html
     """
 
     task: ReasoningTask
@@ -247,22 +243,13 @@ class AnomalyResult:
     ValueError
         If `threshold` is provided and is non-positive (<= 0).
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import AnomalyResult
-    >>>
-    >>> # Detection with a z-score method
-    >>> result = AnomalyResult(
-    ...     is_anomaly=True,
-    ...     score=3.2,
-    ...     threshold=3.0,
-    ...     method="zscore",
-    ...     metadata={"zscore": 3.2, "mean": 10.5, "std": 2.1}
-    ... )
-    >>> result.is_anomaly
-    True
-    >>> result.confidence()
-    1.0
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/result.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/result.html
     """
 
     is_anomaly: bool
@@ -294,15 +281,6 @@ class AnomalyResult:
         float | None
             A confidence value between 0.0 and 1.0, or None if confidence
             cannot be meaningfully computed.
-
-        Examples
-        --------
-        >>> result = AnomalyResult(is_anomaly=True, score=4.5, threshold=3.0)
-        >>>
-        >>> result.confidence()
-        1.0  # Capped at 1.0
-        >>> result = AnomalyResult(is_anomaly=False, score=1.5, threshold=3.0)
-        >>> result.confidence()  # None because no anomaly detected
         """
         if not self.is_anomaly or self.score is None or self.threshold is None:
             return None
@@ -353,18 +331,13 @@ class TrendResult:
         If `threshold` is non-positive (<= 0).
         If `direction` is not one of "up", "down", or "stable".
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import TrendResult
-    >>>
-    >>> # A strong upward trend
-    >>> result = TrendResult(value=2.5, direction="up", threshold=0.5)
-    >>> result.value
-    2.5
-    >>> result.confidence()
-    1.0  # |2.5| / 2.5 = 1.0 (capped)
-    >>> result.zscore(std=1.25)
-    2.0  # 2.5 / 1.25 = 2.0
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/result.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/result.html
     """
 
     value: float
@@ -396,16 +369,6 @@ class TrendResult:
         -------
         float
             A confidence value between 0.0 and 1.0.
-
-        Examples
-        --------
-        >>> result = TrendResult(value=0.3, direction="up", threshold=0.5)
-        >>>
-        >>> result.confidence()
-        0.6  # 0.3 / 0.5 = 0.6
-        >>> result = TrendResult(value=0.0, direction="stable", threshold=0.5)
-        >>> result.confidence()
-        0.0
         """
         if self.direction == "stable":
             return 0.0
@@ -429,19 +392,12 @@ class TrendResult:
         Returns
         -------
         float | None
-            The z-score (value / std), or None if std is None or zero.
+            The z-score or None if std is None or zero.
 
         Raises
         ------
         ValueError
             If `std` is provided but is non-positive (<= 0).
-
-        Examples
-        --------
-        >>> result = TrendResult(value=2.5, direction="up", threshold=0.5)
-        >>> result.zscore(std=1.25)
-        2.0
-        >>> result.zscore(std=None)  # No standard deviation available
         """
         if std is None:
             return None
@@ -496,27 +452,13 @@ class DiagnosisResult:
     ValueError
         If `confidence` is outside [0.0, 1.0].
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import DiagnosisResult
-    >>>
-    >>> # A diagnosis with multiple potential causes
-    >>> result = DiagnosisResult(
-    ...     causes=[
-    ...         "Sensor calibration drift",
-    ...         "Increased ambient temperature",
-    ...         "Cooling system malfunction"
-    ...     ],
-    ...     confidence=0.78,
-    ...     metadata={
-    ...         "method": "fault_tree",
-    ...         "evidence_strength": [0.9, 0.6, 0.8]
-    ...     }
-    ... )
-    >>> len(result.causes)
-    3
-    >>> result.confidence
-    0.78
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/result.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/result.html
     """
 
     causes: list[str]
@@ -618,29 +560,13 @@ class PlanningResult:
         If `confidence` is outside [0.0, 1.0], or `recommended` contains
         proposals not in `proposals`.
 
-    Examples
-    --------
-    >>> from datetime import datetime, timezone
-    >>> from procela.core.reasoning import PlanningResult
-    >>> from procela.core.action import ActionProposal
-    >>>
-    >>> # Create sample proposals
-    >>> prop1 = ActionProposal(value="increase_temp", confidence=0.8)
-    >>> prop2 = ActionProposal(value="reduce_load", confidence=0.7)
-    >>> # Planning result with recommendations
-    >>> result = PlanningResult(
-    ...     proposals=[prop1, prop2],
-    ...     recommended=[prop1],  # Only recommend the first
-    ...     confidence=0.85,
-    ...     strategy="preventive",
-    ...     metadata={"horizon": 5, "cost_estimated": 42.5}
-    ... )
-    >>> len(result.proposals)
-    2
-    >>> len(result.recommended)  # type: ignore
-    1
-    >>> result.strategy
-    'preventive'
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/result.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/result.html
     """
 
     proposals: list[Any]
@@ -743,27 +669,13 @@ class PredictionResult:
         If `horizon` is provided but is non-positive (<= 0).
         If `confidence` is outside [0.0, 1.0].
 
-    Examples
-    --------
-    >>> from procela.core.reasoning import PredictionResult
-    >>>
-    >>> # A temperature prediction with confidence interval
-    >>> result = PredictionResult(
-    ...     value=22.5,
-    ...     horizon=3,  # 3 steps ahead
-    ...     confidence=0.88,
-    ...     metadata={
-    ...         "model": "ARIMA",
-    ...         "prediction_interval": (21.0, 24.0),
-    ...         "rmse": 0.5
-    ...     }
-    ... )
-    >>> result.value
-    22.5
-    >>> result.horizon
-    3
-    >>> result.confidence
-    0.88
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/reasoning/result.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/reasoning/result.html
     """
 
     value: Any

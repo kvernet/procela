@@ -4,6 +4,14 @@ Diagnoser Registry Module for the Procela Framework.
 This module provides a centralized registry for managing diagnostic reasoner classes.
 It enables dynamic registration, instantiation, and management of diagnoser
 implementations while maintaining type safety and proper error handling.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/reasoning/diagnosis/registry.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/reasoning/diagnosis/registry.html
 """
 
 from __future__ import annotations
@@ -44,14 +52,6 @@ def get_diagnoser(name: str, **kwargs: Any) -> Diagnoser:
         If the requested diagnoser name is not found in the registry.
     TypeError
         If the diagnoser instantiation fails due to invalid arguments.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import TrendDiagnoser, get_diagnoser
-    >>>
-    >>> diagnoser = get_diagnoser("trend", significance_threshold=0.3)
-    >>> isinstance(diagnoser, TrendDiagnoser)
-    True
     """
     if name not in _DIAGNOSER_REGISTRY:
         available = ", ".join(sorted(_DIAGNOSER_REGISTRY.keys()))
@@ -90,18 +90,6 @@ def register_diagnoser(name: str, diagnoser_class: Type[Diagnoser]) -> None:
         If diagnoser_class is not a class or not a subclass of Diagnoser.
     ValueError
         If the name is already registered.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     Diagnoser, register_diagnoser, available_diagnosers
-    ... )
-    >>>
-    >>> class CustomDiagnoser(Diagnoser):
-    ...     pass
-    >>> register_diagnoser("custom", CustomDiagnoser)
-    >>> "custom" in available_diagnosers()
-    True
     """
     if not isinstance(diagnoser_class, type):
         raise TypeError(
@@ -143,16 +131,6 @@ def unregister_diagnoser(name: str) -> Type[Diagnoser]:
     ------
     KeyError
         If the diagnoser name is not found in the registry.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import unregister_diagnoser, available_diagnosers
-    >>>
-    >>> diagnoser_class = unregister_diagnoser("trend")
-    >>> diagnoser_class
-    <class 'procela.core.reasoning.diagnosis.trend.TrendDiagnoser'>
-    >>> "trend" in available_diagnosers()
-    False
     """
     if name not in _DIAGNOSER_REGISTRY:
         available = ", ".join(sorted(_DIAGNOSER_REGISTRY.keys()))
@@ -176,16 +154,6 @@ def get_diagnosers() -> dict[str, Type[Diagnoser]]:
     Notes
     -----
     Returns a copy to prevent external modification of the internal registry.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import get_diagnosers
-    >>>
-    >>> registry = get_diagnosers()
-    >>> isinstance(registry, dict)
-    True
-    >>> "anomaly" in registry
-    True
     """
     return _DIAGNOSER_REGISTRY.copy()
 
@@ -198,16 +166,6 @@ def available_diagnosers() -> set[str]:
     -------
     set[str]
         A set of registered diagnoser names.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import available_diagnosers
-    >>>
-    >>> names = available_diagnosers()
-    >>> isinstance(names, set)
-    True
-    >>> "statistical" in names
-    True
     """
     return set(_DIAGNOSER_REGISTRY.keys())
 
@@ -223,16 +181,6 @@ def clear_diagnoser_registry() -> None:
     Warnings
     --------
     This operation cannot be undone. Use with caution in production code.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import (
-    ...     clear_diagnoser_registry, available_diagnosers
-    ... )
-    >>>
-    >>> clear_diagnoser_registry()
-    >>> len(available_diagnosers())
-    0
     """
     _DIAGNOSER_REGISTRY.clear()
 
@@ -250,14 +198,5 @@ def has_diagnoser(name: str) -> bool:
     -------
     bool
         True if the diagnoser is registered, False otherwise.
-
-    Examples
-    --------
-    >>> from procela.core.reasoning import has_diagnoser
-    >>>
-    >>> has_diagnoser("trend")
-    True
-    >>> has_diagnoser("unknown")
-    False
     """
     return name in _DIAGNOSER_REGISTRY

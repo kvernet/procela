@@ -5,6 +5,14 @@ This module defines the VariableEpistemic data class, which encapsulates
 the epistemic (knowledge-related) state of a variable. This includes
 statistical analysis of its history, anomaly detection results, and
 trend analysis results.
+
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/memory/variable/epistemic.html
+
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/memory/variable/epistemic.html
 """
 
 from __future__ import annotations
@@ -51,43 +59,6 @@ class VariableEpistemic:
     trend : TrendResult | None
         Trend analysis results.
 
-    Examples
-    --------
-    >>> from procela.core.memory import HistoryStatistics, VariableEpistemic
-    >>> from procela.core.reasoning import AnomalyResult, TrendResult
-    >>>
-    >>> # Create statistics object
-    >>> stats = HistoryStatistics(count=100, sum=1050.0, sumsq=11466.0)
-    >>>
-    >>> # Create anomaly result
-    >>> anomaly = AnomalyResult(
-    ...     is_anomaly=True,
-    ...     score=3.2,
-    ...     threshold=2.5
-    ... )
-    >>>
-    >>> # Create trend result
-    >>> trend = TrendResult(
-    ...     value=8.43,
-    ...     direction="up",
-    ...     threshold=1.75,
-    ... )
-    >>>
-    >>> # Create epistemic state
-    >>> epistemic = VariableEpistemic(
-    ...     stats=stats,
-    ...     anomaly=anomaly,
-    ...     trend=trend
-    ... )
-    >>>
-    >>> # Access epistemic properties
-    >>> print(f"Mean: {epistemic.stats.mean()}")
-    Mean: 10.5
-    >>> print(f"Anomaly: {epistemic.anomaly.is_anomaly}")
-    Anomaly: True
-    >>> print(f"Trend direction: {epistemic.trend.direction}")
-    Trend direction: up
-
     Notes
     -----
     - This class is a frozen dataclass, meaning instances are immutable
@@ -99,11 +70,13 @@ class VariableEpistemic:
     - This class is designed to work within Procela's active reasoning
       framework where variables maintain self-knowledge about their state.
 
-    See Also
-    --------
-    HistoryStatistics : Statistical analysis of variable history
-    AnomalyResult : Results from anomaly detection
-    TrendResult : Results from trend analysis
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/memory/variable/epistemic.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/memory/variable/epistemic.html
     """
 
     stats: HistoryStatistics

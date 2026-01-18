@@ -6,13 +6,13 @@ a variable's history in Procela's memory subsystem. These statistics
 include count, sum, sum of squares, min, max, last value, confidence
 sum, exponentially weighted moving average (EWMA), and set of sources.
 
-The main class provided is:
+Semantics Reference
+-------------------
+https://procela.org/docs/semantics/core/memory/variable/statistics.html
 
-- HistoryStatistics: Represents an immutable snapshot of accumulated
-  statistics over a sequence of variable records.
-
-The statistics tracked by this class are useful for summarizing numeric
-valued observations from a variable's history.
+Examples Reference
+------------------
+https://procela.org/docs/examples/core/memory/variable/statistics.html
 """
 
 from __future__ import annotations
@@ -56,18 +56,13 @@ class HistoryStatistics:
     sources : frozenset[Key]
         Frozen set of associated source keys encountered.
 
-    Methods
-    -------
-    empty()
-        Return a fresh `HistoryStatistics` with no data.
-    update(record, alpha=0.3)
-        Return an updated statistics object incorporating `record`.
-    mean()
-        Return the arithmetic mean of the values.
-    std()
-        Return the population standard deviation.
-    confidence()
-        Return the mean confidence of the records.
+    Semantics Reference
+    -------------------
+    https://procela.org/docs/semantics/core/memory/variable/statistics.html
+
+    Examples Reference
+    ------------------
+    https://procela.org/docs/examples/core/memory/variable/statistics.html
     """
 
     count: int = 0
@@ -202,7 +197,14 @@ class HistoryStatistics:
         return self.confidence_sum / self.count
 
     def __repr__(self) -> str:
-        """Human-readable representation of a HistoryStatistics."""
+        """
+        Human-readable representation of a HistoryStatistics.
+
+        Returns
+        -------
+        str
+            Human-readable representation.
+        """
         return (
             f"HistoryStatistics("
             f"count={self.count}, "
