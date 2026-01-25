@@ -43,14 +43,6 @@ class VariableRecord:
         explanation: Optional string explaining the rationale or provenance.
                     Supports debugging and transparency.
         _key: Private unique identity token for this record (Key).
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/memory/variable/record.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/memory/variable/record.html
     """
 
     value: Any = field(compare=False)

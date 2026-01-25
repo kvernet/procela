@@ -39,14 +39,6 @@ class BooleanDomain(CategoricalDomain):
       for validation
     - Boolean values in Python are instances of `bool`, which is a subclass
       of `int` (True == 1, False == 0), but validation uses exact type matching
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/variable/domain/boolean.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/variable/domain/boolean.html
     """
 
     def __init__(self, name: str = "") -> None:

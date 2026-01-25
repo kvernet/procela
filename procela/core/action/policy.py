@@ -37,14 +37,6 @@ class SelectionPolicy(ABC):
     Subclasses must implement the `select` method with specific selection
     algorithms (e.g., highest confidence, multi-criteria optimization,
     constraint satisfaction).
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/policy.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/action/policy.html
     """
 
     @abstractmethod

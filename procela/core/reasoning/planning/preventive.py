@@ -18,8 +18,8 @@ from __future__ import annotations
 
 from ...action.effect import ActionEffect
 from ...action.proposal import ActionProposal, ProposalStatus
-from ..result import PlanningResult
-from ..view import PlanningView
+from ...assessment.planning import PlanningResult
+from ...epistemic.planning import PlanningView
 from .base import Planner
 
 
@@ -47,14 +47,6 @@ class PreventivePlanner(Planner):
     ------
     ValueError
         If `priority` is negative.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/planning/preventive.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/planning/preventive.html
     """
 
     name = "preventive"

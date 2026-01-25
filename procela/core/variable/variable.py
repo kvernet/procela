@@ -18,16 +18,24 @@ https://procela.org/docs/examples/core/variable/variable.html
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Iterable, Sequence
 
 from ...symbols.key import Key
 from ...symbols.time import TimePoint
-from ..action.policy import SelectionPolicy
+from ..action.policy import HighestConfidencePolicy, SelectionPolicy
 from ..action.proposal import ActionProposal
 from ..action.proposer import ActionProposer
 from ..action.resolver import ConflictResolver
 from ..action.validator import ProposalValidator
-from ..memory.variable.epistemic import VariableEpistemic
+from ..assessment.anomaly import AnomalyResult
+from ..assessment.diagnosis import DiagnosisResult
+from ..assessment.planning import PlanningResult
+from ..assessment.prediction import PredictionResult
+from ..assessment.reasoning import ReasoningResult
+from ..assessment.statistics import StatisticsResult
+from ..assessment.task import ReasoningTask
+from ..assessment.trend import TrendResult
 from ..memory.variable.history import ReasoningHistory, VariableHistory
 from ..memory.variable.record import VariableRecord
 from ..reasoning.anomaly.operator import AnomalyOperator, AnomalyOperatorThreshold
@@ -40,18 +48,36 @@ from ..reasoning.diagnosis.operator import (
 from ..reasoning.planning.operator import PlanningOperator
 from ..reasoning.prediction.base import Predictor
 from ..reasoning.prediction.last import LastPredictor
-from ..reasoning.result import (
-    AnomalyResult,
-    DiagnosisResult,
-    PredictionResult,
-    ReasoningResult,
-    TrendResult,
-)
-from ..reasoning.task import ReasoningTask
 from ..timer import Timer
 from .domain.statistical import StatisticalDomain
 from .domain.value import ValueDomain
 from .role import VariableRole
+
+
+@dataclass(frozen=True)
+class VariableEpistemic:
+    """
+    Container for the epistemic state of a variable.
+
+    This immutable data class holds the knowledge-related aspects of a
+    variable's state, including historical statistics, anomaly detection
+    results, and trend analysis results.
+
+    Parameters
+    ----------
+    stats : HistoryStatistics
+        Statistical analysis of the variable's historical data.
+    anomaly : AnomalyResult | None
+        Anomaly detection results.
+    trend : TrendResult | None
+        Trend analysis results.
+    """
+
+    key: Key
+    reasoning: ReasoningResult | None
+    stats: StatisticsResult
+    anomaly: AnomalyResult | None
+    trend: TrendResult | None
 
 
 class Variable:
@@ -81,6 +107,8 @@ class Variable:
         role: VariableRole = VariableRole.ENDOGENOUS,
         config: dict[str, Any] | None = None,
         seed: int | None = None,
+        policy: SelectionPolicy | None = None,
+        validators: Iterable[ProposalValidator] | None = None,
     ):
         """
         Instantiate a variable with identity and configuration.
@@ -114,12 +142,15 @@ class Variable:
         self.role = role
         self.config = config or {}
         self.seed = seed
+        self._policy = policy or HighestConfidencePolicy()
+        self._validators = validators
 
         from ..key_authority import KeyAuthority
 
         self._key = KeyAuthority.issue(self)
         self._history = VariableHistory(_config=self.config)
         self._reasoning_history = ReasoningHistory()
+        self._candidates: list[VariableRecord] = []
 
     def key(self) -> Key:
         """
@@ -171,7 +202,7 @@ class Variable:
             If the value does not satisfy the variable's domain.
         """
         history, _ = self.history()
-        stats = history.stats()
+        stats = history.stats().stats()
         if not self.domain.validate(value, stats):
             why = self.domain.explain(value, stats)
             raise ValueError(f"Value {value!r} violates domain: {why}")
@@ -209,6 +240,18 @@ class Variable:
             Sequence of values from recorded observations.
         """
         return (r.value for r in self.history()[0].get_records())
+
+    @property
+    def value(self) -> Any:
+        """
+        Get the last value of a variable.
+
+        Returns
+        -------
+        Any
+            The last value of the variable
+        """
+        return self._history.stats().last_value
 
     def __repr__(self) -> str:
         """
@@ -272,26 +315,139 @@ class Variable:
             Epistemic state associated with this variable.
         """
         history, _ = self.history()
-        stats = history.stats()
+        stats = history.stats().stats()
         anomaly = self._detect_anomaly()
         trend = self._analyze_trend()
 
         return VariableEpistemic(
+            key=self.key(),
+            reasoning=self._reasoning_history.latest(),
             stats=stats,
             anomaly=anomaly,
             trend=trend,
         )
 
+    def add_candidate(self, candidate: VariableRecord) -> None:
+        """
+        Add candidate produced by some mechanims.
+
+        Parameters
+        ----------
+        candidate : VariableRecord
+            The candidate record produced by some mechanism.
+        """
+        self._candidates.append(candidate)
+
+    def candidates(self) -> list[VariableRecord]:
+        """
+        Get all current candidates of the variable.
+
+        Returns
+        -------
+        list[VariableRecord]
+            The current candidates of the variable.
+        """
+        return self._candidates
+
+    def commit(self, record: VariableRecord | None) -> None:
+        """
+        Commit a change to the variable.
+
+        Parameters
+        ----------
+        record : VariableRecord
+            The variable record to be commited.
+
+        Notes
+        -----
+        The candidates list is cleared after a commit.
+        """
+        if record is None:
+            return
+
+        if not isinstance(record, VariableRecord):
+            return
+
+        history, _ = self.history()
+        stats = history.stats().stats()
+        if not self.domain.validate(record.value, stats):
+            why = self.domain.explain(record.value, stats)
+            raise ValueError(f"Value {record.value!r} violates domain: {why}")
+
+        self._history = self._history.new(record)
+        self.clear_candidates()
+
+    def policy(self) -> SelectionPolicy:
+        """
+        Get the selection policy of the variable.
+
+        Returns
+        -------
+        SelectionPolicy | None
+            The selection policy of the variable.
+        """
+        return self._policy
+
+    def validators(self) -> Iterable[ProposalValidator] | None:
+        """
+        Get the validators of the variable.
+
+        Returns
+        -------
+        Iterable[ProposalValidator] | None
+            The validators of the variable.
+        """
+        return self._validators
+
+    def clear_candidates(self) -> None:
+        """Clear the list of candidates."""
+        self._candidates.clear()
+
+    def reset(self) -> None:
+        """
+        Reset the complete epistemic state of the variable.
+
+        This method clears all observation history, reasoning history, and pending
+        candidate records while preserving the variable identity, key,
+        configuration, domain, and policies.
+
+        Calling this method defines a boundary between simulation worlds. The
+        variable remains the same conceptual entity, but all accumulated knowledge
+        and inferred state are discarded.
+
+        This operation is required for scenario exploration, counterfactual
+        evaluation, and optimization workflows.
+
+        Notes
+        -----
+        - Variable identity and configuration are preserved.
+        - Observation and reasoning histories are fully reset.
+        - All candidate proposals are cleared.
+
+        Warnings
+        --------
+        This method must only be called between simulation runs.
+        Calling reset during execution results in undefined behavior.
+        """
+        self._history.reset()
+        self._reasoning_history.reset()
+        self.clear_candidates()
+
     # -----------------------------
     # Epistemic reasoning
     # -----------------------------
 
-    def explain(self) -> str:
+    def explain(self, recent_reasoning: int = 3) -> str:
         """
         Return an explanation of the variable's current state.
 
         This method produces a structured explanation based on recorded
         observations, reasoning results, and associated metadata.
+
+        Parameters
+        ----------
+        recent_reasoning : int
+            The number of recent reasoning to be included, default is 3.
 
         Returns
         -------
@@ -303,14 +459,14 @@ class Variable:
         anomaly = epistemic.anomaly
         trend = epistemic.trend
 
-        mean, std = stats.mean(), stats.std()
-        confidence = stats.confidence()
+        mean, std = stats.mean, stats.std
+        confidence = stats.confidence
 
         lines = [
             f"Variable '{self.name}' ({self.role.name})",
             f"Description: {self.description or 'N/A'}",
             f"Units: {self.units or 'N/A'}",
-            f"Latest value: {stats.last_value} " f"(confidence: {confidence})",
+            f"Latest value: {stats.value} " f"(confidence: {confidence})",
             f"Observed {stats.count} records "
             f"(min={stats.min}, max={stats.max}, "
             f"mean={mean}, std={std})",
@@ -337,13 +493,8 @@ class Variable:
         # Optional reasoning summary (last 3 actions)
         if hasattr(self, "_reasoning_history") and self._reasoning_history:
             lines.append("Recent reasoning steps:")
-            for res in self._reasoning_history.get_results()[-3:]:
-                task_name = res.task.name.replace("_", " ").capitalize()
-                if isinstance(res.result, list):
-                    summary = f"{len(res.result)} items"
-                else:
-                    summary = str(res.result)
-                lines.append(f"  - {task_name}: {summary}")
+            for res in self._reasoning_history.get_results()[-recent_reasoning:]:
+                lines.append(self._explain_reasoning(res))
 
         return "\n".join(lines)
 
@@ -469,8 +620,7 @@ class Variable:
             List of proposed actions.
         """
         with Timer() as t:
-            epistemic = self.epistemic()
-            view = epistemic.get_proposal_view()
+            view = self.epistemic()
             proposals = ActionProposer().propose(view=view)
 
         # Record reasoning
@@ -633,7 +783,7 @@ class Variable:
             class View:
                 diagnosis = diagnosis_result
                 predictions = [prediction]
-                current_value = stats.last_value
+                current_value = stats.value
 
             result = planningOperator.plan(View())
 
@@ -651,6 +801,103 @@ class Variable:
     # -----------------------------
     # Private helpers
     # -----------------------------
+
+    def _explain_reasoning(self, res: ReasoningResult) -> str:
+        """
+        Explain a reasoning result.
+
+        Parameters
+        ----------
+        res : ReasoningResult
+            The reasoning result to be explained.
+
+        Returns
+        -------
+        str
+            Human explanation of the reasoning result.
+        """
+        if res is None or not isinstance(res, ReasoningResult):
+            return ""
+
+        lines = []
+        task_name = res.task.name.replace("_", " ").capitalize()
+        lines.append(f"  - {task_name}")
+
+        if res.task == ReasoningTask.ANOMALY_DETECTION and isinstance(
+            res.result, AnomalyResult
+        ):
+            keys = (
+                list(res.result.metadata.keys())
+                if res.result.metadata is not None
+                else []
+            )
+            lines.append(f"\tscore    : {res.result.score}")
+            lines.append(f"\tthreshold: {res.result.threshold}")
+            lines.append(f"\tmethod   : {res.result.method}")
+            lines.append(f"\tmetadata : additional dict of {len(keys)} keys")
+        elif res.task == ReasoningTask.TREND_ANALYSIS and isinstance(
+            res.result, TrendResult
+        ):
+            lines.append(f"\tvalue    : {res.result.value}")
+            lines.append(f"\tdirection: {res.result.direction}")
+            lines.append(f"\tthreshold: {res.result.threshold}")
+        elif res.task == ReasoningTask.VALUE_PREDICTION and isinstance(
+            res.result, PredictionResult
+        ):
+            keys = (
+                list(res.result.metadata.keys())
+                if res.result.metadata is not None
+                else []
+            )
+            lines.append(f"\tvalue     : {res.result.value}")
+            lines.append(f"\thorizon   : {res.result.horizon}")
+            lines.append(f"\tconfidence: {res.result.confidence}")
+            lines.append(f"\tmetadata  : additional dict of {len(keys)} keys")
+        elif res.task == ReasoningTask.CONFLICT_RESOLUTION and isinstance(
+            res.result, VariableRecord
+        ):
+            from_keys = (
+                res.result.metadata.get("resolved_from", [])
+                if res.result.metadata is not None
+                else []
+            )
+            policy = (
+                res.result.metadata.get("policy", None)
+                if res.result.metadata is not None
+                else None
+            )
+            lines.append(f"\tvalue     : {res.result.value}")
+            lines.append(f"\tconfidence: {res.result.confidence}")
+            lines.append(f"\tsources   : {len(from_keys)}")
+            lines.append(f"\tpolicy    : {policy}")
+        elif res.task == ReasoningTask.ACTION_PROPOSAL and isinstance(res.result, list):
+            for proposal in res.result:
+                action_name = proposal.action.replace("_", " ").capitalize()
+                lines.append(f"\tAction    : {action_name}")
+        elif res.task == ReasoningTask.CAUSAL_DIAGNOSIS and isinstance(
+            res.result, DiagnosisResult
+        ):
+            lines.append("\tCauses:")
+            for cause in res.result.causes:
+                lines.append(f"\t\t- {cause}")
+            for key, value in res.result.metadata.items():
+                key_text = key.replace("_", " ").capitalize()
+                lines.append(f"\t{key_text:22}: {value}")
+        if res.task == ReasoningTask.INTERVENTION_PLANNING and isinstance(
+            res.result, PlanningResult
+        ):
+            for proposal in res.result.proposals:
+                strategy = (
+                    res.result.strategy.capitalize()
+                    if res.result.strategy is not None
+                    else None
+                )
+                lines.append(f"\tRationale: {proposal.rationale}")
+                lines.append(f"\tEffect   : {proposal.effect.description}")
+                lines.append(f"\tOutcome  : {proposal.effect.expected_outcome}")
+                lines.append(f"\tStrategy : {strategy}")
+
+        return "\n".join(lines)
 
     def _detect_anomaly(self, operator: AnomalyOperator | None = None) -> AnomalyResult:
         """
@@ -678,7 +925,7 @@ class Variable:
             operator = AnomalyOperatorThreshold(method, threshold=threshold)
 
         history, _ = self.history()
-        stats = history.stats()
+        stats = history.stats().stats()
 
         return operator.detect(stats)
 
@@ -702,7 +949,7 @@ class Variable:
             return None
 
         history, _ = self.history()
-        stats = history.stats()
+        stats = history.stats().stats()
 
         if operator is None:
             trend = self.config.get("trend", {})
@@ -743,8 +990,7 @@ class Variable:
 
         predictor = predictor or LastPredictor()
 
-        epistemic = self.epistemic()
-        view = epistemic.get_prediction_view()
+        view = self.epistemic()
 
         return predictor.predict(view=view, horizon=horizon)
 
@@ -775,9 +1021,7 @@ class Variable:
             kwargs = diagnosis_cfg.get("kwargs", {})
             operator = DiagnosisOperatorThreshold(name=name, **kwargs)
 
-        # Diagnosis view from variable epistemic
-        epistemic = self.epistemic()
-        view = epistemic.get_diagnosis_view()
+        view = self.epistemic()
 
         return operator.diagnose(view=view)
 
@@ -850,7 +1094,7 @@ class Variable:
             True if the record is saved successfully, false otherwise.
         """
         history, _ = self.history()
-        stats = history.stats()
+        stats = history.stats().stats()
         if self.domain.validate(record.value, stats):
             self._history = self._history.new(record)
             return True

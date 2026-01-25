@@ -17,7 +17,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
-from ...memory.variable.statistics import HistoryStatistics
+from ...assessment.statistics import StatisticsResult
 from .value import ValueDomain
 
 
@@ -37,14 +37,6 @@ class RangeDomain(ValueDomain):
         Maximum allowed value (inclusive). None means no upper bound.
     name : str
         Optional name for the domain, inherited from ValueDomain.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/variable/domain/range.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/variable/domain/range.html
     """
 
     def __init__(
@@ -82,7 +74,7 @@ class RangeDomain(ValueDomain):
         self.min_value = min_value
         self.max_value = max_value
 
-    def validate(self, value: Any, stats: HistoryStatistics | None = None) -> bool:
+    def validate(self, value: Any, stats: StatisticsResult | None = None) -> bool:
         """
         Validate that a value is numeric and within bounds.
 
@@ -94,7 +86,7 @@ class RangeDomain(ValueDomain):
         value : Any
             Value to validate. Can be any type, but only int and float
             can be valid.
-        stats : HistoryStatistics | None, optional
+        stats : StatisticsResult | None, optional
             Additional stats for validation (not used in this implementation
             but included for interface compatibility). Default is None.
 
@@ -114,7 +106,7 @@ class RangeDomain(ValueDomain):
             return False
         return True
 
-    def explain(self, value: Any, stats: HistoryStatistics | None = None) -> str:
+    def explain(self, value: Any, stats: StatisticsResult | None = None) -> str:
         """
         Explain why a value is valid or invalid for this domain.
 
@@ -125,7 +117,7 @@ class RangeDomain(ValueDomain):
         ----------
         value : Any
             Value to explain validation for.
-        stats : HistoryStatistics | None, optional
+        stats : StatisticsResult | None, optional
             Additional stats for explanation (not used in this implementation
             but included for interface compatibility). Default is None.
 

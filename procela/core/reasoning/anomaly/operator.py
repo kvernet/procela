@@ -20,8 +20,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
-from ...memory.variable.statistics import HistoryStatistics
-from ..result import AnomalyResult
+from ...assessment.anomaly import AnomalyResult
+from ...assessment.statistics import StatisticsResult
 from .registry import get_detector
 
 
@@ -32,24 +32,16 @@ class AnomalyOperator(ABC):
     Subclasses implement a specific strategy for detecting anomalies given
     a set of history statistics. This class defines the interface that all
     anomaly operators must follow.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/anomaly/operator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/anomaly/operator.html
     """
 
     @abstractmethod
-    def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+    def detect(self, stats: StatisticsResult) -> AnomalyResult:
         """
         Perform anomaly detection on history statistics.
 
         Parameters
         ----------
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Aggregated statistics for a variable history to be evaluated.
 
         Returns
@@ -72,14 +64,6 @@ class AnomalyOperatorThreshold(AnomalyOperator):
     This operator delegates detection to a named detector obtained from
     the anomaly detector registry. The detector is configured using the
     provided parameters.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/anomaly/operator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/anomaly/operator.html
     """
 
     def __init__(self, name: str, **kwargs: Any) -> None:
@@ -100,13 +84,13 @@ class AnomalyOperatorThreshold(AnomalyOperator):
         """
         self.detector = get_detector(name, **kwargs)
 
-    def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+    def detect(self, stats: StatisticsResult) -> AnomalyResult:
         """
         Detect anomalies using the configured detector.
 
         Parameters
         ----------
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Aggregated history statistics to evaluate.
 
         Returns

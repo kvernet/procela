@@ -21,6 +21,7 @@ import math
 from dataclasses import dataclass
 
 from ....symbols.key import Key
+from ...assessment.statistics import StatisticsResult
 from .record import VariableRecord
 
 
@@ -55,14 +56,6 @@ class HistoryStatistics:
         `None` if no values.
     sources : frozenset[Key]
         Frozen set of associated source keys encountered.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/memory/variable/statistics.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/memory/variable/statistics.html
     """
 
     count: int = 0
@@ -216,4 +209,25 @@ class HistoryStatistics:
             f"ewma={self.ewma}, "
             f"sources={len(self.sources)}"
             f")"
+        )
+
+    def stats(self) -> StatisticsResult:
+        """
+        Return the statistics result from the history.
+
+        Returns
+        -------
+        StatisticsResult
+            The statistics result.
+        """
+        return StatisticsResult(
+            count=self.count,
+            sum=self.sum,
+            min=self.min,
+            max=self.max,
+            mean=self.mean(),
+            std=self.std(),
+            value=self.last_value,
+            ewma=self.ewma,
+            confidence=self.confidence(),
         )

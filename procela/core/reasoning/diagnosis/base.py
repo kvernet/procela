@@ -20,8 +20,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import ClassVar
 
-from ..result import DiagnosisResult
-from ..view import DiagnosisView
+from ...assessment.diagnosis import DiagnosisResult
+from ...epistemic.variable import VariableView
 
 
 class Diagnoser(ABC):
@@ -54,31 +54,23 @@ class Diagnoser(ABC):
     Diagnostic reasoning in Procela typically follows anomaly detection,
     using the anomaly context along with historical trends and statistics
     to hypothesize potential root causes.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/diagnosis/base.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/diagnosis/base.html
     """
 
     name: ClassVar[str]
     """A unique identifier for this diagnostic reasoning algorithm."""
 
     @abstractmethod
-    def diagnose(self, view: DiagnosisView) -> DiagnosisResult:
+    def diagnose(self, view: VariableView) -> DiagnosisResult:
         """
         Perform diagnostic reasoning on the provided system view.
 
         This is the core method that all concrete diagnostic reasoners must
-        implement. It analyzes the provided `DiagnosisView` to identify
+        implement. It analyzes the provided `VariableView` to identify
         potential root causes of observed anomalies, trends, or system issues.
 
         Parameters
         ----------
-        view : DiagnosisView
+        view : VariableView
             A view of the system providing access to statistics, anomalies,
             and trends. This typically includes:
             - Historical statistics for context
@@ -96,7 +88,7 @@ class Diagnoser(ABC):
         Raises
         ------
         ValueError
-            If the `DiagnosisView` object is incomplete, invalid,
+            If the `VariableView` object is incomplete, invalid,
             or contains data that the reasoner cannot process.
         NotImplementedError
             If called directly on the abstract base class (must be
@@ -113,6 +105,6 @@ class Diagnoser(ABC):
         4. Be deterministic when possible (same input → same output)
         5. Document any assumptions about the input view
 
-        The method should not modify the input `DiagnosisView` object.
+        The method should not modify the input `VariableView` object.
         """
         raise NotImplementedError("Subclasses must implement the diagnose method")

@@ -19,13 +19,11 @@ from __future__ import annotations
 
 from typing import ClassVar, Optional
 
-from ...memory.variable.statistics import HistoryStatistics
-from ..result import (
-    AnomalyResult,
-    DiagnosisResult,
-    TrendResult,
-)
-from ..view import DiagnosisView
+from ...assessment.anomaly import AnomalyResult
+from ...assessment.diagnosis import DiagnosisResult
+from ...assessment.statistics import StatisticsResult
+from ...assessment.trend import TrendResult
+from ...epistemic.variable import VariableView
 from .base import Diagnoser
 
 
@@ -70,35 +68,16 @@ class AnomalyDiagnoser(Diagnoser):
     include_generic_causes : bool
         Flag controlling inclusion of generic diagnostic causes.
 
-    Methods
-    -------
-    diagnose(view: DiagnosisView) -> DiagnosisResult
-        Perform anomaly-focused diagnostic reasoning.
-
-    _analyze_pattern(anomaly, stats, trend) -> List[str]
-        Analyze specific anomaly patterns to identify causes.
-
-    _calculate_confidence(causes: List[str], anomaly_score: float) -> float
-        Calculate confidence in diagnostic conclusions.
-
     Notes
     -----
     This reasoner assumes that anomaly detection has already been performed
-    and that the `DiagnosisView` contains meaningful anomaly results. If no
+    and that the `VariableView` contains meaningful anomaly results. If no
     anomaly is present or the anomaly score is very low, the diagnosis will
     be minimal or generic.
 
     The diagnostic rules are heuristic and should be tuned for specific
     application domains. Consider subclassing and overriding the pattern
     analysis methods for domain-specific diagnostic logic.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/diagnosis/anomaly.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/diagnosis/anomaly.html
     """
 
     name: ClassVar[str] = "AnomalyDiagnoser"
@@ -134,7 +113,7 @@ class AnomalyDiagnoser(Diagnoser):
         self.severity_threshold = severity_threshold
         self.include_generic_causes = include_generic_causes
 
-    def diagnose(self, view: DiagnosisView) -> DiagnosisResult:
+    def diagnose(self, view: VariableView) -> DiagnosisResult:
         """
         Perform diagnostic reasoning focused on anomaly analysis.
 
@@ -144,7 +123,7 @@ class AnomalyDiagnoser(Diagnoser):
 
         Parameters
         ----------
-        view : DiagnosisView
+        view : VariableView
             A view of the system containing:
             - anomaly: Anomaly detection results (if any)
             - stats: Historical statistics for context
@@ -161,11 +140,11 @@ class AnomalyDiagnoser(Diagnoser):
         Raises
         ------
         TypeError
-            If view is not a DiagnosisView instance.
+            If view is not a VariableView instance.
         """
         # Validate input type
-        if not isinstance(view, DiagnosisView):
-            raise TypeError(f"view must be DiagnosisView, got {type(view).__name__}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"view must be VariableView, got {type(view).__name__}")
 
         # Initialize results
         causes: list[str] = []
@@ -222,7 +201,7 @@ class AnomalyDiagnoser(Diagnoser):
     def _analyze_pattern(
         self,
         anomaly: AnomalyResult,
-        stats: HistoryStatistics,
+        stats: StatisticsResult,
         trend: TrendResult | None,
     ) -> list[str]:
         """
@@ -236,7 +215,7 @@ class AnomalyDiagnoser(Diagnoser):
         ----------
         anomaly : AnomalyResult
             The anomaly result object containing detection details.
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Historical statistics providing context for the anomaly.
         trend : TrendResult
             Trend analysis results (if available).
@@ -283,7 +262,7 @@ class AnomalyDiagnoser(Diagnoser):
         # Check statistical context
         if stats and hasattr(stats, "mean") and hasattr(stats, "std"):
             # High variance might indicate measurement noise
-            mean, std = stats.mean(), stats.std()
+            mean, std = stats.mean, stats.std
             if mean is not None and std is not None:
                 if std / max(mean, 1e-9) > 0.1:  # 10%
                     causes.append("High variability suggests measurement issues")
@@ -343,13 +322,13 @@ class AnomalyDiagnoser(Diagnoser):
 
         return min(max(confidence, 0.0), 1.0)  # Clamp to [0, 1]
 
-    def _generic_causes(self, view: DiagnosisView) -> list[str]:
+    def _generic_causes(self, view: VariableView) -> list[str]:
         """
         Provide generic diagnostic causes when specific patterns aren't found.
 
         Parameters
         ----------
-        view : DiagnosisView
+        view : VariableView
             The system view being diagnosed.
 
         Returns

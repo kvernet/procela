@@ -19,9 +19,9 @@ from __future__ import annotations
 
 from typing import Iterable, Sequence
 
+from ..assessment.reasoning import ReasoningResult
+from ..assessment.task import ReasoningTask
 from ..memory.variable.history import VariableRecord
-from ..reasoning.result import ReasoningResult
-from ..reasoning.task import ReasoningTask
 from .policy import SelectionPolicy
 from .proposal import ActionProposal, ProposalStatus
 from .validator import ProposalValidator
@@ -35,14 +35,6 @@ class ConflictResolver:
     determine a single authoritative VariableRecord from multiple
     candidates. Semantic interpretation of the result is defined
     externally.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/resolver.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/action/resolver.html
     """
 
     def resolve(
@@ -135,14 +127,18 @@ class ConflictResolver:
         proposals = [self._record_to_proposal(r) for r in candidates]
 
         # Step 2 — Apply validators
+        validated: list[ActionProposal] = []
         if validators is not None:
-            validated: list[ActionProposal] = []
             for proposal in proposals:
                 if all(v.validate(proposal) for v in validators):
                     proposal = proposal.with_status(ProposalStatus.VALIDATED)
                     validated.append(proposal)
+        else:
+            for proposal in proposals:
+                proposal = proposal.with_status(ProposalStatus.VALIDATED)
+                validated.append(proposal)
 
-            proposals = validated
+        proposals = validated
 
         if not proposals:
             return (

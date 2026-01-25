@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ...memory.variable.statistics import HistoryStatistics
+from ...assessment.statistics import StatisticsResult
 from .value import ValueDomain
 
 
@@ -27,7 +27,7 @@ class StatisticalDomain(ValueDomain):
 
     This domain validates numeric values based on statistical bounds computed
     from historical data. Values must fall within `k` standard deviations
-    from the mean of historical data provided via HistoryStatistics.
+    from the mean of historical data provided via StatisticsResult.
 
     Attributes
     ----------
@@ -39,22 +39,14 @@ class StatisticalDomain(ValueDomain):
 
     Notes
     -----
-    - Validation requires HistoryStatistics (mean and std) to be provided
-    - Without HistoryStatistics, validation always passes
+    - Validation requires StatisticsResult (mean and std) to be provided
+    - Without StatisticsResult, validation always passes
     - The bounds are inclusive: [mean - k*std, mean + k*std]
     - This is useful for outlier detection and data quality monitoring
     - For normal distributions, common k values are:
         - 1.0: ~68% of data
         - 2.0: ~95% of data
         - 3.0: ~99.7% of data
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/variable/domain/statistical.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/variable/domain/statistical.html
     """
 
     def __init__(
@@ -89,7 +81,7 @@ class StatisticalDomain(ValueDomain):
 
         self.k = k
 
-    def validate(self, value: Any, stats: HistoryStatistics | None = None) -> bool:
+    def validate(self, value: Any, stats: StatisticsResult | None = None) -> bool:
         """
         Validate that a value is within k standard deviations of mean.
 
@@ -104,8 +96,8 @@ class StatisticalDomain(ValueDomain):
         value : Any
             Value to validate. Should be numeric (int or float).
             Non-numeric values will fail comparison operations.
-        stats : HistoryStatistics | None, optional
-            HistoryStatistics containing statistical parameters:
+        stats : StatisticsResult | None, optional
+            StatisticsResult containing statistical parameters:
             - "mean": float - mean of historical data
             - "std": float - standard deviation of historical data
             Default is None.
@@ -114,7 +106,7 @@ class StatisticalDomain(ValueDomain):
         -------
         bool
             True if:
-            - HistoryStatistics is None or missing mean/std
+            - StatisticsResult is None or missing mean/std
             - Value is within [mean - k*std, mean + k*std]
             False otherwise.
 
@@ -135,14 +127,14 @@ class StatisticalDomain(ValueDomain):
         if not stats:
             return True
 
-        mean, std = stats.mean(), stats.std()
+        mean, std = stats.mean, stats.std
 
         if mean is None or std is None:
             return True
 
         return bool(mean - self.k * std <= value <= mean + self.k * std)
 
-    def explain(self, value: Any, stats: HistoryStatistics | None = None) -> str:
+    def explain(self, value: Any, stats: StatisticsResult | None = None) -> str:
         """
         Explain statistical validation bounds and result.
 
@@ -153,8 +145,8 @@ class StatisticalDomain(ValueDomain):
         ----------
         value : Any
             Value to explain validation for.
-        stats : HistoryStatistics | None, optional
-            HistoryStatistics containing statistical parameters:
+        stats : StatisticsResult | None, optional
+            StatisticsResult containing statistical parameters:
             - "mean": float - mean of historical data
             - "std": float - standard deviation of historical data
             Default is None.
@@ -171,8 +163,8 @@ class StatisticalDomain(ValueDomain):
         if not isinstance(value, (int, float)):
             return "Value must be numeric."
 
-        mean = stats.mean() if stats else None
-        std = stats.std() if stats else None
+        mean = stats.mean if stats else None
+        std = stats.std if stats else None
 
         if mean is None or std is None:
             return "Insufficient history for statistical validation."
@@ -185,7 +177,7 @@ class StatisticalDomain(ValueDomain):
 
     def trend_threshold(
         self,
-        stats: HistoryStatistics,
+        stats: StatisticsResult,
         *,
         absolute: float | None = None,
         std_factor: float | None = 1.0,
@@ -211,7 +203,7 @@ class StatisticalDomain(ValueDomain):
         if absolute is not None:
             return absolute
 
-        std = stats.std()
+        std = stats.std
         if std is not None and std_factor is not None:
             return std_factor * std
 

@@ -25,9 +25,9 @@ from typing import Any, Iterable
 
 from ....symbols.key import Key
 from ....symbols.time import TimePoint
+from ...assessment.reasoning import ReasoningResult
+from ...assessment.task import ReasoningTask
 from ...key_authority import KeyAuthority
-from ...reasoning.result import ReasoningResult
-from ...reasoning.task import ReasoningTask
 from .record import VariableRecord
 from .statistics import HistoryStatistics
 
@@ -71,14 +71,6 @@ class VariableHistory:
     -----
     This structure is immutable. Any operation that conceptually appends
     a record returns a new `VariableHistory` instance.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/memory/variable/history.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/memory/variable/history.html
     """
 
     _record: VariableRecord | None = field(default=None, repr=False)
@@ -264,6 +256,30 @@ class VariableHistory:
         """
         return self._record
 
+    def reset(self) -> None:
+        """
+        Reset the variable history to an empty state.
+
+        This method clears the current record and removes the reference to any
+        previous history state. After reset, the history contains no observation
+        and no chain to earlier records.
+
+        The reset operation is intended for simulation lifecycle control, such as
+        restarting a world or evaluating counterfactual scenarios.
+
+        Notes
+        -----
+        - History objects are immutable during normal execution.
+        - Resetting a history discards the current epistemic timeline.
+
+        Warnings
+        --------
+        This method must not be called during a simulation step.
+        Resetting history breaks continuity and invalidates ongoing execution.
+        """
+        object.__setattr__(self, "_record", None)
+        object.__setattr__(self, "_previous", None)
+
 
 @dataclass(frozen=True)
 class ReasoningHistory:
@@ -282,14 +298,6 @@ class ReasoningHistory:
         The reasoning result stored at this history node.
     _previous : Key | None
         The previous history key, or None if this is the root.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/memory/variable/history.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/memory/variable/history.html
     """
 
     _result: ReasoningResult | None = field(default=None, repr=False)
@@ -449,3 +457,26 @@ class ReasoningHistory:
             The length of the reasoning history.
         """
         return len(list(self.iter_results()))
+
+    def reset(self) -> None:
+        """
+        Reset the reasoning history to an empty state.
+
+        This method clears the reasoning result and removes any reference
+        to previous reasoning history. After reset, no inferred or derived
+        reasoning state remains.
+
+        The reset operation is part of simulation lifecycle management and is
+        intended to be used between independent simulation runs.
+
+        Notes
+        -----
+        - Reasoning history is immutable during execution.
+        - Resetting discards all accumulated reasoning results.
+
+        Warnings
+        --------
+        This method must not be called during active reasoning or execution.
+        """
+        object.__setattr__(self, "_result", None)
+        object.__setattr__(self, "_previous", None)

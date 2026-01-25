@@ -19,8 +19,8 @@ import logging
 from abc import ABC, abstractmethod
 from typing import Any
 
-from ..result import PlanningResult
-from ..view import PlanningView
+from ...assessment.planning import PlanningResult
+from ...epistemic.planning import PlanningView
 
 logger = logging.getLogger(__name__)
 
@@ -50,14 +50,6 @@ class Planner(ABC):
     ------
     ValueError
         If `priority` is negative or if initialization parameters are invalid.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/planning/base.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/planning/base.html
     """
 
     def __init__(self, name: str, priority: int = 0, enabled: bool = True) -> None:

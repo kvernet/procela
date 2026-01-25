@@ -20,11 +20,12 @@ from .domain import (
     CategoricalDomain,
     CompositeDomain,
     RangeDomain,
+    RealDomain,
     StatisticalDomain,
     ValueDomain,
 )
 from .role import VariableRole
-from .variable import Variable
+from .variable import Variable, VariableEpistemic
 
 __all__ = [
     # Domain
@@ -32,6 +33,7 @@ __all__ = [
     "CategoricalDomain",
     "CompositeDomain",
     "RangeDomain",
+    "RealDomain",
     "StatisticalDomain",
     "ValueDomain",
     # Statistics
@@ -40,4 +42,5 @@ __all__ = [
     "VariableRole",
     # Variable
     "Variable",
+    "VariableEpistemic",
 ]

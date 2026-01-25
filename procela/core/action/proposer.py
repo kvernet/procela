@@ -2,7 +2,7 @@
 Action proposers for the action subsystem.
 
 This module defines the ActionProposer class, which generates
-ActionProposal objects based on ProposalView observations, including
+ActionProposal objects based on VariableView observations, including
 anomalies, trends, and statistics. Computation is mechanical; semantic
 interpretation of proposals is defined externally.
 
@@ -17,7 +17,7 @@ https://procela.org/docs/examples/core/action/proposer.html
 
 from __future__ import annotations
 
-from ..reasoning.view import ProposalView
+from ..epistemic.variable import VariableView
 from .effect import ActionEffect
 from .proposal import ActionProposal
 
@@ -26,26 +26,18 @@ class ActionProposer:
     """
     Generate actionable proposals from variable observations.
 
-    This class produces ActionProposal objects using a ProposalView,
+    This class produces ActionProposal objects using a VariableView,
     considering anomalies, trends, and confidence levels. The semantic
     meaning of proposals is external to this module.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/proposer.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/action/proposer.html
     """
 
-    def propose(self, view: ProposalView) -> list[ActionProposal]:
+    def propose(self, view: VariableView) -> list[ActionProposal]:
         """
-        Generate a list of action proposals based on a ProposalView.
+        Generate a list of action proposals based on a VariableView.
 
         Parameters
         ----------
-        view : ProposalView
+        view : VariableView
             Structured view containing variable statistics, anomalies, and trends.
 
         Returns
@@ -57,7 +49,7 @@ class ActionProposer:
         Raises
         ------
         TypeError
-            If `view` is not a ProposalView instance.
+            If `view` is not a VariableView instance.
 
         Notes
         -----
@@ -67,16 +59,16 @@ class ActionProposer:
         if view is None:
             return []
 
-        if not isinstance(view, ProposalView):
-            raise TypeError(f"`view` should be a ProposalView instance, got {view}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"`view` should be a VariableView instance, got {view}")
 
         proposals: list[ActionProposal] = []
 
         stats = view.stats
         anomaly = view.anomaly
         trend = view.trend
-        value_confidence = stats.confidence()
-        last_value = stats.last_value
+        value_confidence = stats.confidence
+        last_value = stats.value
 
         # 1. Anomaly-driven proposals
         if anomaly is not None and anomaly.is_anomaly:

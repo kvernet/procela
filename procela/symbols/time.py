@@ -31,14 +31,6 @@ class TimePoint:
     A TimePoint is a pure wrapper around a Key that represents a
     temporal position. All precedence relationships are managed
     externally.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/symbols/time.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/symbols/time.html
     """
 
     _key: Key = field(

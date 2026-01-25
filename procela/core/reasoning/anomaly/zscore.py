@@ -20,8 +20,8 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from ...memory.variable.statistics import HistoryStatistics
-from ..result import AnomalyResult
+from ...assessment.anomaly import AnomalyResult
+from ...assessment.statistics import StatisticsResult
 from .base import AnomalyDetector
 
 
@@ -64,14 +64,6 @@ class ZScoreDetector(AnomalyDetector):
 
     For non-normal distributions or time-varying statistics, consider
     complementary methods like EWMADetector or other adaptive approaches.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/anomaly/zscore.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/anomaly/zscore.html
     """
 
     name: ClassVar[str] = "ZScoreDetector"
@@ -95,7 +87,7 @@ class ZScoreDetector(AnomalyDetector):
             raise ValueError(f"Threshold must be > 0, got {threshold}")
         self.threshold = threshold
 
-    def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+    def detect(self, stats: StatisticsResult) -> AnomalyResult:
         """
         Detect anomalies using Z-Score statistical method.
 
@@ -108,16 +100,16 @@ class ZScoreDetector(AnomalyDetector):
         1. Insufficient data (count < 2): Returns non-anomalous result
         2. Missing statistics (std or mean is None): Returns non-anomalous
         3. Zero standard deviation: Returns non-anomalous (degenerate case)
-        4. Missing last value: Returns non-anomalous
+        4. Missing value: Returns non-anomalous
 
         Parameters
         ----------
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Statistical summary containing:
             - count: Number of observations (must be ≥ 2 for detection)
             - mean: Historical mean (callable or property)
             - std: Historical standard deviation (callable or property)
-            - last_value: Most recent observation
+            - value: Most recent observation
 
         Returns
         -------
@@ -132,12 +124,12 @@ class ZScoreDetector(AnomalyDetector):
         Raises
         ------
         TypeError
-            If stats is not a HistoryStatistics instance.
+            If stats is not a StatisticsResult instance.
         """
         # Validate input type
-        if not isinstance(stats, HistoryStatistics):
+        if not isinstance(stats, StatisticsResult):
             raise TypeError(
-                f"stats must be HistoryStatistics, got {type(stats).__name__}"
+                f"stats must be StatisticsResult, got {type(stats).__name__}"
             )
 
         # Check for sufficient data
@@ -154,7 +146,7 @@ class ZScoreDetector(AnomalyDetector):
                 },
             )
 
-        mean, std = stats.mean(), stats.std()
+        mean, std = stats.mean, stats.std
         if mean is None:
             return AnomalyResult(
                 is_anomaly=False,
@@ -174,7 +166,7 @@ class ZScoreDetector(AnomalyDetector):
             )
 
         # Check for last value
-        if stats.last_value is None:
+        if stats.value is None:
             return AnomalyResult(
                 is_anomaly=False,
                 score=None,
@@ -193,24 +185,24 @@ class ZScoreDetector(AnomalyDetector):
                 metadata={
                     "reason": "degenerate distribution",
                     "mean": mean,
-                    "last_value": stats.last_value,
+                    "value": stats.value,
                 },
             )
 
         # Calculate Z-Score
-        score = abs(stats.last_value - mean) / std
+        score = abs(stats.value - mean) / std
         is_anomaly = score >= self.threshold
 
         # Prepare comprehensive metadata
         metadata = {
             "mean": mean,
             "std": std,
-            "last_value": stats.last_value,
+            "value": stats.value,
             "count": stats.count,
             "z_score": score,
             "threshold": self.threshold,
-            "deviation": stats.last_value - mean,
-            "absolute_deviation": abs(stats.last_value - mean),
+            "deviation": stats.value - mean,
+            "absolute_deviation": abs(stats.value - mean),
         }
 
         return AnomalyResult(

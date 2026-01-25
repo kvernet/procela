@@ -15,7 +15,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
-from ...memory.variable.statistics import HistoryStatistics
+from ...assessment.statistics import StatisticsResult
 
 
 class ValueDomain(ABC):
@@ -30,27 +30,10 @@ class ValueDomain(ABC):
     name : str
         Optional name for the domain. Used for identification and debugging.
 
-    Methods
-    -------
-    __init__(name: str = "")
-        Initialize the value domain with an optional name.
-    validate(value: Any, stats: HistoryStatistics | None = None) -> bool
-        Validate that a value belongs to the domain.
-    explain(value: Any, stats: HistoryStatistics | None = None) -> str
-        Explain why a value is valid or invalid.
-
     Notes
     -----
     This is an abstract base class. Subclasses must implement the
     `validate` and `explain` methods.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/variable/domain/value.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/variable/domain/value.html
     """
 
     name: str
@@ -68,7 +51,7 @@ class ValueDomain(ABC):
         self.name = name
 
     @abstractmethod
-    def validate(self, value: Any, stats: HistoryStatistics | None = None) -> bool:
+    def validate(self, value: Any, stats: StatisticsResult | None = None) -> bool:
         """
         Validate that a value belongs to the domain.
 
@@ -76,7 +59,7 @@ class ValueDomain(ABC):
         ----------
         value : Any
             Value to validate against the domain constraints.
-        stats : HistoryStatistics | None, optional
+        stats : StatisticsResult | None, optional
             Additional stats for validation. Default is None.
 
         Returns
@@ -99,7 +82,7 @@ class ValueDomain(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def explain(self, value: Any, stats: HistoryStatistics | None = None) -> str:
+    def explain(self, value: Any, stats: StatisticsResult | None = None) -> str:
         """
         Explain why a value is valid or invalid.
 
@@ -110,7 +93,7 @@ class ValueDomain(ABC):
         ----------
         value : Any
             Value to explain validation for.
-        stats : HistoryStatistics | None, optional
+        stats : StatisticsResult | None, optional
             Additional stats for the explanation. May include
             information needed to generate a meaningful explanation.
             Default is None.
@@ -135,7 +118,7 @@ class ValueDomain(ABC):
 
     def trend_threshold(
         self,
-        stats: HistoryStatistics,
+        stats: StatisticsResult,
         *,
         absolute: float | None = None,
         std_factor: float | None = None,
@@ -148,7 +131,7 @@ class ValueDomain(ABC):
 
         Parameters
         ----------
-        stats : HistoryStatistics,
+        stats : StatisticsResult,
             Additional stats for the trend. May include
             information needed to compute the trend.
         absolute : float | None = None

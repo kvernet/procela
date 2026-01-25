@@ -21,8 +21,8 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import ClassVar
 
-from ...memory.variable.statistics import HistoryStatistics
-from ..result import AnomalyResult
+from ...assessment.anomaly import AnomalyResult
+from ...assessment.statistics import StatisticsResult
 
 
 class AnomalyDetector(ABC):
@@ -35,7 +35,7 @@ class AnomalyDetector(ABC):
     while ensuring type safety and contractual guarantees about anomaly
     detection results.
 
-    Anomaly detectors in Procela analyze `HistoryStatistics` to identify
+    Anomaly detectors in Procela analyze `StatisticsResult` to identify
     statistically significant deviations from expected patterns. They
     translate quantitative statistical evidence into `AnomalyResult`
     objects that include binary classification, confidence scores, and
@@ -59,33 +59,25 @@ class AnomalyDetector(ABC):
     As an abstract base class, `AnomalyDetector` cannot be instantiated
     directly. Concrete implementations must inherit from this class and
     provide implementations for all abstract methods.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/anomaly/base.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/anomaly/base.html
     """
 
     name: ClassVar[str]
     """A unique identifier for this anomaly detection algorithm."""
 
     @abstractmethod
-    def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+    def detect(self, stats: StatisticsResult) -> AnomalyResult:
         """
         Detect anomalies based on historical statistics.
 
         This is the core method that all concrete anomaly detectors must
-        implement. It analyzes the provided `HistoryStatistics` object
+        implement. It analyzes the provided `StatisticsResult` object
         to determine if the current or recent behavior of a variable
         constitutes an anomaly according to the detector's specific
         algorithm and criteria.
 
         Parameters
         ----------
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Statistical summary of a variable's historical data.
             This typically includes measures like mean, variance,
             recent values, distribution characteristics, and temporal
@@ -105,7 +97,7 @@ class AnomalyDetector(ABC):
         Raises
         ------
         ValueError
-            If the `HistoryStatistics` object is incomplete, invalid,
+            If the `StatisticsResult` object is incomplete, invalid,
             or contains data that the detector cannot process.
         NotImplementedError
             If called directly on the abstract base class (must be
@@ -123,6 +115,6 @@ class AnomalyDetector(ABC):
         4. Be deterministic when possible (same input → same output)
         5. Document any assumptions about the input statistics
 
-        The method should not modify the input `HistoryStatistics` object.
+        The method should not modify the input `StatisticsResult` object.
         """
         raise NotImplementedError("Subclasses must implement the detect method")

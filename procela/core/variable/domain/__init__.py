@@ -20,6 +20,7 @@ from .boolean import BooleanDomain
 from .categorical import CategoricalDomain
 from .composite import CompositeDomain
 from .range import RangeDomain
+from .real import RealDomain
 from .statistical import StatisticalDomain
 from .value import ValueDomain
 
@@ -28,6 +29,7 @@ __all__ = [
     "CategoricalDomain",
     "CompositeDomain",
     "RangeDomain",
+    "RealDomain",
     "StatisticalDomain",
     "ValueDomain",
 ]

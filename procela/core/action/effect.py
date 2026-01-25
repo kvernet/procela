@@ -57,14 +57,6 @@ class ActionEffect:
     ------
     ValueError
         If `confidence` is provided but is outside the logical range [0.0, 1.0].
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/effect.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/action/effect.html
     """
 
     description: str

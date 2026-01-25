@@ -17,7 +17,6 @@ https://procela.org/docs/examples/core/memory/
 from .variable import (
     HistoryStatistics,
     ReasoningHistory,
-    VariableEpistemic,
     VariableHistory,
     VariableRecord,
 )
@@ -27,5 +26,4 @@ __all__ = [
     "HistoryStatistics",
     "VariableHistory",
     "ReasoningHistory",
-    "VariableEpistemic",
 ]

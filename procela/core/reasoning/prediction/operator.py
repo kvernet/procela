@@ -17,8 +17,8 @@ https://procela.org/docs/examples/core/reasoning/prediction/operator.html
 
 from __future__ import annotations
 
-from ..result import PredictionResult
-from ..view import PredictionView
+from ...assessment.prediction import PredictionResult
+from ...epistemic.variable import VariableView
 from .base import Predictor
 
 
@@ -27,22 +27,14 @@ class PredictionOperator:
     Operator for performing predictions.
 
     This class executes computational prediction using a Predictor instance
-    over a PredictionView. It does not define the semantic interpretation
+    over a VariableView. It does not define the semantic interpretation
     of predictions; this is handled externally.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/prediction/operator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/prediction/operator.html
     """
 
     def predict(
         self,
         predictor: Predictor,
-        view: PredictionView,
+        view: VariableView,
         horizon: int | None = None,
     ) -> PredictionResult:
         """
@@ -52,7 +44,7 @@ class PredictionOperator:
         ----------
         predictor : Predictor
             Predictor instance used to perform the computation.
-        view : PredictionView
+        view : VariableView
             Structured view of the data to predict.
         horizon : int or None, optional
             Number of steps into the future to predict. Default is None.
@@ -67,7 +59,7 @@ class PredictionOperator:
         ------
         TypeError
             If `predictor` is not a Predictor instance or `view` is not a
-            PredictionView.
+            VariableView.
 
         Notes
         -----
@@ -79,8 +71,8 @@ class PredictionOperator:
                 f"predictor should be a Predictor instance, got {predictor}"
             )
 
-        if not isinstance(view, PredictionView):
-            raise TypeError(f"view should be a PredictionView, got {view}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"view should be a VariableView, got {view}")
 
         result = predictor.predict(view, horizon)
 

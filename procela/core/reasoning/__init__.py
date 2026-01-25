@@ -79,22 +79,6 @@ from .prediction import (
     register_predictor,
     unregister_predictor,
 )
-from .result import (
-    AnomalyResult,
-    DiagnosisResult,
-    PlanningResult,
-    PredictionResult,
-    ReasoningResult,
-    TrendResult,
-)
-from .task import ReasoningTask
-from .view import (
-    DiagnosisView,
-    EpistemicView,
-    PlanningView,
-    PredictionView,
-    ProposalView,
-)
 
 __all__ = [
     # Anomaly Detection Components
@@ -156,19 +140,4 @@ __all__ = [
     "clear_predictor_registry",
     "has_predictor",
     "_PREDICTOR_REGISTRY",
-    # Result Structures
-    "ReasoningResult",
-    "AnomalyResult",
-    "TrendResult",
-    "DiagnosisResult",
-    "PlanningResult",
-    "PredictionResult",
-    # Task Orchestration
-    "ReasoningTask",
-    # View Interfaces
-    "EpistemicView",
-    "DiagnosisView",
-    "PredictionView",
-    "PlanningView",
-    "ProposalView",
 ]

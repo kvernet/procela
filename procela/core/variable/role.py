@@ -46,14 +46,6 @@ class VariableRole(Enum):
     DERIVED
         Variables computed from other variables through transformations.
         These represent aggregated, derived, or synthesized information.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/variable/role.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/variable/role.html
     """
 
     ENDOGENOUS = auto()

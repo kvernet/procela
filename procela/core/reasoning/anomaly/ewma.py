@@ -1,7 +1,7 @@
 """
 EWMA (Exponentially Weighted Moving Average) Anomaly Detector for Procela.
 
-This detector uses precomputed EWMA statistics from HistoryStatistics to
+This detector uses precomputed EWMA statistics from StatisticsResult to
 identify anomalies based on the deviation of recent values from the EWMA
 estimate. It's a lightweight detector that leverages the framework's
 built-in statistical computations rather than maintaining its own state.
@@ -19,8 +19,8 @@ from __future__ import annotations
 
 from typing import ClassVar
 
-from ...memory.variable.statistics import HistoryStatistics
-from ..result import AnomalyResult
+from ...assessment.anomaly import AnomalyResult
+from ...assessment.statistics import StatisticsResult
 from .base import AnomalyDetector
 
 
@@ -30,17 +30,17 @@ class EWMADetector(AnomalyDetector):
 
     This detector identifies anomalies by comparing the most recent value
     against the EWMA (Exponentially Weighted Moving Average) computed by
-    the HistoryStatistics object. Anomalies are detected when the
+    the StatisticsResult object. Anomalies are detected when the
     standardized deviation (z-score) exceeds a configurable threshold.
 
     The detection logic is:
-        score = abs(last_value - stats.ewma) / std
+        score = abs(value - stats.ewma) / std
         is_anomaly = score > threshold
 
     Where:
-        - last_value: The most recent value from statistics
-        - stats.ewma: Precomputed EWMA from HistoryStatistics
-        - std: Standard deviation from HistoryStatistics
+        - value: The most recent value from statistics
+        - stats.ewma: Precomputed EWMA from StatisticsResult
+        - std: Standard deviation from StatisticsResult
         - threshold: Configurable anomaly threshold
 
     Parameters
@@ -60,21 +60,13 @@ class EWMADetector(AnomalyDetector):
 
     Notes
     -----
-    This detector assumes that HistoryStatistics provides:
-    - last_value: The most recent observed value
+    This detector assumes that StatisticsResult provides:
+    - value: The most recent observed value
     - ewma: The exponentially weighted moving average
     - std: The standard deviation for normalization
 
     The detector is stateless and relies entirely on the input statistics,
     making it suitable for distributed or parallel processing scenarios.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/anomaly/ewma.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/anomaly/ewma.html
     """
 
     name: ClassVar[str] = "EWMADetector"
@@ -98,7 +90,7 @@ class EWMADetector(AnomalyDetector):
             raise ValueError(f"threshold must be > 0, got {threshold}")
         self.threshold = threshold
 
-    def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+    def detect(self, stats: StatisticsResult) -> AnomalyResult:
         """
         Detect anomalies using precomputed EWMA statistics.
 
@@ -109,8 +101,8 @@ class EWMADetector(AnomalyDetector):
 
         Parameters
         ----------
-        stats : HistoryStatistics
-            Statistical summary containing last_value, ewma, and std.
+        stats : StatisticsResult
+            Statistical summary containing value, ewma, and std.
             All three attributes must be available for detection.
 
         Returns
@@ -126,21 +118,21 @@ class EWMADetector(AnomalyDetector):
         Raises
         ------
         ValueError
-            If required statistics (last_value, ewma, or std) are missing
+            If required statistics (value, ewma, or std) are missing
             or if std is zero (cannot normalize).
         TypeError
-            If stats is not a HistoryStatistics instance.
+            If stats is not a StatisticsResult instance.
         """
         # Validate input type
-        if not isinstance(stats, HistoryStatistics):
+        if not isinstance(stats, StatisticsResult):
             raise TypeError(
-                f"stats must be HistoryStatistics, got {type(stats).__name__}"
+                f"stats must be StatisticsResult, got {type(stats).__name__}"
             )
 
         # Check for required statistics
-        std = stats.std()
-        if stats.last_value is None:
-            raise ValueError("stats.last_value is None")
+        std = stats.std
+        if stats.value is None:
+            raise ValueError("stats.value is None")
         if stats.ewma is None:
             raise ValueError("stats.ewma is None")
         if std is None:
@@ -151,17 +143,17 @@ class EWMADetector(AnomalyDetector):
             raise ValueError("stats.std is zero, cannot normalize")
 
         # Calculate anomaly score
-        score = abs(stats.last_value - stats.ewma) / std
+        score = abs(stats.value - stats.ewma) / std
 
         # Determine if anomaly exists
         is_anomaly = score > self.threshold
 
         # Prepare metadata
         metadata = {
-            "last_value": stats.last_value,
+            "value": stats.value,
             "ewma": stats.ewma,
             "std": std,
-            "difference": stats.last_value - stats.ewma,
+            "difference": stats.value - stats.ewma,
         }
 
         return AnomalyResult(

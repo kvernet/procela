@@ -36,14 +36,6 @@ class ProposalValidator(ABC):
     Subclasses must implement the `validate` method with specific validation
     logic (e.g., checking confidence thresholds, resource availability,
     pre-condition satisfaction).
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/validator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/action/validator.html
     """
 
     @abstractmethod
@@ -113,14 +105,6 @@ class ConfidenceThresholdValidator(ProposalValidator):
     ------
     ValueError
         If the provided `threshold` is outside the valid range [0.0, 1.0].
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/validator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/action/validator.html
     """
 
     def __init__(self, threshold: float) -> None:

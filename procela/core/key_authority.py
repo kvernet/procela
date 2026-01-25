@@ -30,14 +30,6 @@ class KeyAuthority:
     Maintains a global registry of all issued Keys within a runtime context,
     ensuring Key uniqueness and providing owner resolution capabilities.
     Thread-safe by design for concurrent access across multiple mechanisms.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/key_authority.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/key_authority.html
     """
 
     _lock = threading.Lock()

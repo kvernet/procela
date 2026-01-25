@@ -26,21 +26,11 @@ class Key:
     not *what it is* or *how it relates*. It carries no information
     beyond its identity function.
 
-    Semantics Docs: https://procela.org/docs/semantics/key.html
-
     Attributes
     ----------
     _token : bytes
         Private 32-byte opaque token. This attribute is private and
         should not be accessed directly by users.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/symbols/key.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/symbols/key.html
     """
 
     __slots__ = ("_token",)

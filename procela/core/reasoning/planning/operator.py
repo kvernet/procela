@@ -18,8 +18,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from ..result import PlanningResult
-from ..view import PlanningView
+from ...assessment.planning import PlanningResult
+from ...epistemic.planning import PlanningView
 from .registry import get_planner
 
 
@@ -30,14 +30,6 @@ class PlanningOperator:
     Subclasses implement specific planning strategies and computations.
     This class defines the interface for all planning operators used
     in the reasoning pipeline.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/planning/operator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/planning/operator.html
     """
 
     def __init__(self, name: str, **kwargs: Any) -> None:

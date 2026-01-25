@@ -22,13 +22,10 @@ class ProcelaException(Exception):
     """
     Base exception for all Procela-specific errors.
 
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/exceptions.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/exceptions.html
+    Parameters
+    ----------
+    message : str, optional
+        Descriptive message about the exception.
     """
 
 
@@ -38,14 +35,6 @@ class SemanticViolation(ProcelaException):
 
     This exception indicates that an operation attempted to violate a
     fundamental semantic rule of the Procela framework.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/exceptions.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
@@ -55,19 +44,6 @@ class ResourceExhausted(ProcelaException):
 
     This includes computational resources, memory, or framework-defined
     limits such as maximum recursion depth in reasoning cycles.
-
-    Parameters
-    ----------
-    message : str, optional
-        Descriptive message about the resource exhaustion.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/exceptions.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
@@ -77,19 +53,6 @@ class ConstraintViolation(ProcelaException):
 
     This includes both hard constraints (must be satisfied) and
     soft constraints (preference violations).
-
-    Parameters
-    ----------
-    message : str, optional
-        Description of the constraint violation.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/exceptions.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
@@ -99,55 +62,16 @@ class InconsistentState(ProcelaException):
 
     This indicates a bug or unexpected condition that violates
     framework invariants.
-
-    Parameters
-    ----------
-    message : str, optional
-        Description of the inconsistent state.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/exceptions.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/exceptions.html
     """
 
 
 class ConfigurationError(ProcelaException):
-    """
-    Raised when framework configuration is invalid or incomplete.
-
-    Parameters
-    ----------
-    message : str, optional
-        Description of the configuration error.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/exceptions.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/exceptions.html
-    """
+    """Raised when framework configuration is invalid or incomplete."""
 
 
 class TimeoutError(ProcelaException):
-    """
-    Raised when an operation exceeds its allowed time budget.
+    """Raised when an operation exceeds its allowed time budget."""
 
-    Parameters
-    ----------
-    message : str, optional
-        Description of the timeout.
 
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/exceptions.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/exceptions.html
-    """
+class ExecutionError(ProcelaException):
+    """Raised when an error occurs during execution."""

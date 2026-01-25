@@ -17,8 +17,8 @@ https://procela.org/docs/examples/core/reasoning/prediction/ewma.html
 
 from __future__ import annotations
 
-from ..result import PredictionResult
-from ..view import PredictionView
+from ...assessment.prediction import PredictionResult
+from ...epistemic.variable import VariableView
 from .base import Predictor
 
 
@@ -47,14 +47,6 @@ class EWMAPredictor(Predictor):
     ------
     ValueError
         If alpha is not in range (0, 1].
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/prediction/ewma.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/prediction/ewma.html
     """
 
     def __init__(self, alpha: float = 0.3) -> None:
@@ -80,7 +72,7 @@ class EWMAPredictor(Predictor):
 
     def predict(
         self,
-        view: PredictionView,
+        view: VariableView,
         horizon: int | None = None,
     ) -> PredictionResult:
         """
@@ -93,7 +85,7 @@ class EWMAPredictor(Predictor):
 
         Parameters
         ----------
-        view : PredictionView
+        view : VariableView
             View containing epistemic data including pre-computed statistics.
             Must provide access to `epistemic.stats.ewma` and
             `epistemic.stats.last_value`.
@@ -111,7 +103,7 @@ class EWMAPredictor(Predictor):
         Raises
         ------
         TypeError
-            If view is not a PredictionView instance.
+            If view is not a VariableView instance.
         ValueError
             If horizon is specified but < 1, or if required statistics
             are not available (ewma is None).
@@ -119,8 +111,8 @@ class EWMAPredictor(Predictor):
             If the view's epistemic data doesn't contain the expected
             statistics structure.
         """
-        if not isinstance(view, PredictionView):
-            raise TypeError(f"view must be PredictionView, got {type(view).__name__}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"view must be VariableView, got {type(view).__name__}")
 
         if horizon is None:
             horizon = 1
@@ -145,7 +137,7 @@ class EWMAPredictor(Predictor):
         return PredictionResult(
             value=[ewma_value] * horizon,
             horizon=horizon,
-            confidence=view.stats.confidence(),
+            confidence=view.stats.confidence,
             metadata={"ewma": ewma_value, "horizon": horizon},
         )
 

@@ -57,14 +57,6 @@ class ProposalStatus(Enum):
     CANCELED : str
         The proposal was valid and possibly selected, but was canceled
         before or during execution due to changing system conditions.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/proposal.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/action/proposal.html
     """
 
     PROPOSED = "proposed"
@@ -153,14 +145,6 @@ class ActionProposal:
     creation, ensuring consistent state for reasoning. New states are created
     via the `with_status` method or by constructing new instances. Immutability
     is key for safe caching, hashing, and use in concurrent contexts.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/proposal.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/action/proposal.html
     """
 
     value: Any

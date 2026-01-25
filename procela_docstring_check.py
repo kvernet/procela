@@ -177,7 +177,7 @@ def check_docstring(
             f"{filename}:{lineno} Forbidden section '{forbidden}' in docstring"
         )
 
-    if scope in {"module", "class"}:
+    if scope in {"module"}:
         if REQUIRED_SECTION not in headers:
             violations.append(
                 f"{filename}:{lineno} Missing required 'Semantics Reference' section"

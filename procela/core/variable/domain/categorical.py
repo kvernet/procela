@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from typing import Any, Iterable
 
-from ...memory.variable.statistics import HistoryStatistics
+from ...assessment.statistics import StatisticsResult
 from .value import ValueDomain
 
 
@@ -42,14 +42,6 @@ class CategoricalDomain(ValueDomain):
       - Duplicate values in the input are automatically deduplicated
       - Order is not preserved
       - Only hashable values can be used as categories
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/variable/domain/categorical.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/variable/domain/categorical.html
     """
 
     def __init__(self, categories: Iterable[Any], name: str = "") -> None:
@@ -72,7 +64,7 @@ class CategoricalDomain(ValueDomain):
         super().__init__(name)
         self.categories = set(categories)
 
-    def validate(self, value: Any, stats: HistoryStatistics | None = None) -> bool:
+    def validate(self, value: Any, stats: StatisticsResult | None = None) -> bool:
         """
         Validate that a value is in the allowed categories.
 
@@ -84,7 +76,7 @@ class CategoricalDomain(ValueDomain):
         value : Any
             Value to validate. Can be any type, but must match exactly
             (including type) one of the categories to be valid.
-        stats : HistoryStatistics | None, optional
+        stats : StatisticsResult | None, optional
             Additional stats for validation (not used in this implementation
             but included for interface compatibility). Default is None.
 
@@ -101,7 +93,7 @@ class CategoricalDomain(ValueDomain):
         """
         return value in self.categories
 
-    def explain(self, value: Any, stats: HistoryStatistics | None = None) -> str:
+    def explain(self, value: Any, stats: StatisticsResult | None = None) -> str:
         """
         Explain why a value is valid or invalid for this domain.
 
@@ -112,7 +104,7 @@ class CategoricalDomain(ValueDomain):
         ----------
         value : Any
             Value to explain validation for.
-        stats : HistoryStatistics | None, optional
+        stats : StatisticsResult | None, optional
             Additional stats for explanation (not used in this implementation
             but included for interface compatibility). Default is None.
 

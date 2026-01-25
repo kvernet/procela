@@ -16,8 +16,8 @@ https://procela.org/docs/examples/core/reasoning/prediction/mean.html
 
 from __future__ import annotations
 
-from ..result import PredictionResult
-from ..view import PredictionView
+from ...assessment.prediction import PredictionResult
+from ...epistemic.variable import VariableView
 from .base import Predictor
 
 
@@ -39,19 +39,11 @@ class MeanPredictor(Predictor):
     ----------
     None
         This predictor does not have instance attributes.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/prediction/mean.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/reasoning/prediction/mean.html
     """
 
     def predict(
         self,
-        view: PredictionView,
+        view: VariableView,
         horizon: int | None = None,
     ) -> PredictionResult:
         """
@@ -63,7 +55,7 @@ class MeanPredictor(Predictor):
 
         Parameters
         ----------
-        view : PredictionView
+        view : VariableView
             A view containing epistemic data with pre-computed statistics.
             Must provide access to `stats.mean()` method.
         horizon : int | None, optional
@@ -80,7 +72,7 @@ class MeanPredictor(Predictor):
         Raises
         ------
         TypeError
-            If `view` is not an instance of `PredictionView`.
+            If `view` is not an instance of `VariableView`.
         AttributeError
             If the `view` does not provide the required `stats.mean()`
             interface.
@@ -92,8 +84,8 @@ class MeanPredictor(Predictor):
         - This predictor serves as a useful baseline for comparing more
           sophisticated forecasting methods within the Procela framework.
         """
-        if not isinstance(view, PredictionView):
-            raise TypeError(f"view must be PredictionView, got {type(view).__name__}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"view must be VariableView, got {type(view).__name__}")
 
         if view.stats is None:
             return PredictionResult(
@@ -103,9 +95,9 @@ class MeanPredictor(Predictor):
             )
 
         return PredictionResult(
-            value=view.stats.mean(),
+            value=view.stats.mean,
             horizon=horizon,
-            confidence=view.stats.confidence(),
+            confidence=view.stats.confidence,
             metadata={
                 "count": view.stats.count,
                 "sum": view.stats.sum,

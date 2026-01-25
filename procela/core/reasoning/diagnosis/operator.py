@@ -20,9 +20,10 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Any
 
-from ...memory.variable.statistics import HistoryStatistics
-from ..result import DiagnosisResult, TrendResult
-from ..view import DiagnosisView
+from ...assessment.diagnosis import DiagnosisResult
+from ...assessment.statistics import StatisticsResult
+from ...assessment.trend import TrendResult
+from ...epistemic.variable import VariableView
 from .registry import get_diagnoser
 
 
@@ -33,24 +34,16 @@ class TrendOperator(ABC):
     Trend operators evaluate changes in history statistics and produce
     trend results for downstream reasoning. This class defines the
     computational interface for trend analysis.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
     """
 
     @abstractmethod
-    def analyze(self, stats: HistoryStatistics) -> TrendResult | None:
+    def analyze(self, stats: StatisticsResult) -> TrendResult | None:
         """
         Analyze trend from history statistics.
 
         Parameters
         ----------
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Aggregated statistics from variable history.
 
         Returns
@@ -73,14 +66,6 @@ class TrendOperatorThreshold(TrendOperator):
     This operator uses a threshold to determine whether a trend is stable,
     upward, or downward based on EWMA and mean values from history
     statistics.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
     """
 
     def __init__(self, threshold: float | None = 3.0):
@@ -101,13 +86,13 @@ class TrendOperatorThreshold(TrendOperator):
         super().__init__()
         self.threshold = threshold
 
-    def analyze(self, stats: HistoryStatistics) -> TrendResult | None:
+    def analyze(self, stats: StatisticsResult) -> TrendResult | None:
         """
         Analyze trend using threshold comparison.
 
         Parameters
         ----------
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Aggregated statistics from variable history.
 
         Returns
@@ -127,15 +112,13 @@ class TrendOperatorThreshold(TrendOperator):
         if stats is None:
             return None
 
-        if not isinstance(stats, HistoryStatistics):
-            raise TypeError(
-                f"stats should be a HistoryStatistics instance, got {stats}"
-            )
+        if not isinstance(stats, StatisticsResult):
+            raise TypeError(f"stats should be a StatisticsResult instance, got {stats}")
 
         if stats.count is None or stats.count < 2 or stats.ewma is None:
             return None
 
-        mean = stats.mean()
+        mean = stats.mean
         if mean is None:
             return None
 
@@ -157,24 +140,16 @@ class DiagnosisOperator(ABC):
     Diagnosis operators evaluate DiagnosticViews and produce
     DiagnosisResults. This class defines the computational interface
     for diagnosis operations.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
     """
 
     @abstractmethod
-    def diagnose(self, view: DiagnosisView) -> DiagnosisResult:
+    def diagnose(self, view: VariableView) -> DiagnosisResult:
         """
         Perform diagnosis using a diagnosis operator.
 
         Parameters
         ----------
-        view : DiagnosisView
+        view : VariableView
             Structured view of data for diagnosis evaluation.
 
         Returns
@@ -197,14 +172,6 @@ class DiagnosisOperatorThreshold(DiagnosisOperator):
     This operator delegates diagnosis to a named diagnoser obtained from
     the diagnosis registry. It does not define meaning of diagnostic
     labels.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/diagnosis/operator.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/diagnosis/operator.html
     """
 
     def __init__(self, name: str, **kwargs: Any):
@@ -226,13 +193,13 @@ class DiagnosisOperatorThreshold(DiagnosisOperator):
         super().__init__()
         self.diagnoser = get_diagnoser(name, **kwargs)
 
-    def diagnose(self, view: DiagnosisView) -> DiagnosisResult:
+    def diagnose(self, view: VariableView) -> DiagnosisResult:
         """
         Run diagnosis via the configured diagnoser.
 
         Parameters
         ----------
-        view : DiagnosisView
+        view : VariableView
             Structured view of data for diagnosis evaluation.
 
         Returns

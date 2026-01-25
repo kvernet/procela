@@ -45,14 +45,6 @@ class Timer:
     elapsed : float | None
         The elapsed time in seconds between `start` and `end`.
         `None` if timer hasn't been fully executed.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/timer.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/timer.html
     """
 
     def __enter__(self) -> Timer:

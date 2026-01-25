@@ -19,9 +19,11 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from ...memory.variable.statistics import HistoryStatistics
-from ..result import AnomalyResult, DiagnosisResult, TrendResult
-from ..view import DiagnosisView
+from ...assessment.anomaly import AnomalyResult
+from ...assessment.diagnosis import DiagnosisResult
+from ...assessment.statistics import StatisticsResult
+from ...assessment.trend import TrendResult
+from ...epistemic.variable import VariableView
 from .base import Diagnoser
 
 
@@ -71,27 +73,10 @@ class TrendDiagnoser(Diagnoser):
     require_confidence : bool
         Flag controlling confidence requirement.
 
-    Methods
-    -------
-    diagnose(view: DiagnosisView) -> DiagnosisResult
-        Perform trend-focused diagnostic reasoning.
-
-    _trend_direction(trend: TrendResult) -> List[str]
-        Analyze trend direction for diagnostic signals.
-
-    _trend_magnitude(trend: TrendResult) -> List[str]
-        Analyze trend magnitude and strength.
-
-    _trend_stability(trend: TrendResult) -> List[str]
-        Check trend stability and consistency.
-
-    _trend_confidence(causes: List[str], trend: TrendResult) -> float
-        Calculate confidence in trend-based diagnosis.
-
     Notes
     -----
     This reasoner assumes that trend analysis has been performed and
-    that the `DiagnosisView` contains meaningful trend results. It's
+    that the `VariableView` contains meaningful trend results. It's
     particularly effective for:
     1. Early detection of gradual system changes
     2. Monitoring performance degradation or improvement
@@ -100,14 +85,6 @@ class TrendDiagnoser(Diagnoser):
 
     The trend thresholds should be tuned based on the specific
     variable characteristics and system requirements.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/diagnosis/trend.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/diagnosis/trend.html
     """
 
     name: ClassVar[str] = "TrendDiagnoser"
@@ -154,7 +131,7 @@ class TrendDiagnoser(Diagnoser):
         self.strong_threshold = strong_threshold
         self.require_confidence = require_confidence
 
-    def diagnose(self, view: DiagnosisView) -> DiagnosisResult:
+    def diagnose(self, view: VariableView) -> DiagnosisResult:
         """
         Perform diagnostic reasoning focused on trend analysis.
 
@@ -172,7 +149,7 @@ class TrendDiagnoser(Diagnoser):
 
         Parameters
         ----------
-        view : DiagnosisView
+        view : VariableView
             A view of the system containing:
             - trend: Trend analysis results (primary focus)
             - stats: Historical statistics for context (optional)
@@ -189,13 +166,13 @@ class TrendDiagnoser(Diagnoser):
         Raises
         ------
         TypeError
-            If view is not a DiagnosisView instance.
+            If view is not a VariableView instance.
         ValueError
             If trend is required but not available.
         """
         # Validate input type
-        if not isinstance(view, DiagnosisView):
-            raise TypeError(f"view must be DiagnosisView, got {type(view).__name__}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"view must be VariableView, got {type(view).__name__}")
 
         # Check for trend data
         if view.trend is None:
@@ -429,7 +406,7 @@ class TrendDiagnoser(Diagnoser):
         return causes
 
     def _statistical_context(
-        self, trend: TrendResult, stats: HistoryStatistics
+        self, trend: TrendResult, stats: StatisticsResult
     ) -> list[str]:
         """
         Analyze trend in statistical context.
@@ -441,7 +418,7 @@ class TrendDiagnoser(Diagnoser):
         ----------
         trend : TrendResult
             Trend analysis results.
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Historical statistics for context.
 
         Returns
@@ -455,7 +432,7 @@ class TrendDiagnoser(Diagnoser):
             return causes
 
         # Check if trend is large relative to historical variability
-        std = stats.std()
+        std = stats.std
         if std is not None and std > 0:
             trend_z = abs(trend.value) / std
             if trend_z > 2.0:

@@ -17,8 +17,8 @@ https://procela.org/docs/examples/core/reasoning/prediction/base.html
 
 from abc import ABC, abstractmethod
 
-from ..result import PredictionResult
-from ..view import PredictionView
+from ...assessment.prediction import PredictionResult
+from ...epistemic.variable import VariableView
 
 
 class Predictor(ABC):
@@ -47,14 +47,14 @@ class Predictor(ABC):
 
     Methods
     -------
-    predict(view: PredictionView, horizon: int | None = None) -> Any
+    predict(view: VariableView, horizon: int | None = None) -> Any
         Core abstract method to generate predictions. Must be implemented
         by all subclasses.
 
     Raises
     ------
     TypeError
-        If `view` is not an instance of `PredictionView`.
+        If `view` is not an instance of `VariableView`.
     NotImplementedError
         If a concrete subclass does not implement the `predict` method.
 
@@ -63,20 +63,12 @@ class Predictor(ABC):
     - The `horizon` parameter typically defines how many steps into the future
       to predict. A value of `None` may indicate a default horizon or a
       single-step prediction, depending on the subclass implementation.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/prediction/base.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/prediction/base.html
     """
 
     @abstractmethod
     def predict(
         self,
-        view: PredictionView,
+        view: VariableView,
         horizon: int | None = None,
     ) -> PredictionResult:
         """
@@ -88,7 +80,7 @@ class Predictor(ABC):
 
         Parameters
         ----------
-        view : PredictionView
+        view : VariableView
             A structured view containing the historical data, current state,
             variable metadata, and any other epistemic information required
             to form a prediction. The predictor may analyze trends, patterns,
@@ -107,7 +99,7 @@ class Predictor(ABC):
         Raises
         ------
         TypeError
-            If the provided `view` is not a valid `PredictionView` instance.
+            If the provided `view` is not a valid `VariableView` instance.
         ValueError
             If the `view` does not contain sufficient or valid data for
             prediction, or if the `horizon` is invalid (e.g., negative).

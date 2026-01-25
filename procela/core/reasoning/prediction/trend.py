@@ -16,8 +16,8 @@ https://procela.org/docs/examples/core/reasoning/prediction/trend.html
 
 from __future__ import annotations
 
-from ..result import PredictionResult
-from ..view import PredictionView
+from ...assessment.prediction import PredictionResult
+from ...epistemic.variable import VariableView
 from .base import Predictor
 
 
@@ -49,14 +49,6 @@ class TrendPredictor(Predictor):
     ------
     ValueError
         If extrapolation_factor <= 0.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/prediction/trend.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/reasoning/prediction/trend.html
     """
 
     def __init__(
@@ -90,7 +82,7 @@ class TrendPredictor(Predictor):
 
     def predict(
         self,
-        view: PredictionView,
+        view: VariableView,
         horizon: int | None = None,
     ) -> PredictionResult:
         """
@@ -101,7 +93,7 @@ class TrendPredictor(Predictor):
 
         Parameters
         ----------
-        view : PredictionView
+        view : VariableView
             View containing trend analysis results. Must provide
             access to `trend` attribute with TrendResult.
         horizon : int | None, optional
@@ -117,7 +109,7 @@ class TrendPredictor(Predictor):
         Raises
         ------
         TypeError
-            If view is not a PredictionView instance.
+            If view is not a VariableView instance.
         ValueError
             If horizon is specified but < 1, or if trend data is
             not available or invalid.
@@ -135,8 +127,8 @@ class TrendPredictor(Predictor):
 
         The base_value is obtained from `view.stats.last_value`.
         """
-        if not isinstance(view, PredictionView):
-            raise TypeError(f"view must be PredictionView, got {type(view).__name__}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"view must be VariableView, got {type(view).__name__}")
 
         if horizon is None:
             horizon = 1
@@ -147,7 +139,7 @@ class TrendPredictor(Predictor):
         if trend is None:
             raise ValueError("Trend data is not available (None)")
 
-        base_value = view.stats.last_value
+        base_value = view.stats.value
         if base_value is None:
             raise ValueError("Cannot predict: last_value is None")
 

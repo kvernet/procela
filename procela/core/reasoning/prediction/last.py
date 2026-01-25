@@ -16,8 +16,8 @@ https://procela.org/docs/examples/core/reasoning/prediction/last.html
 
 from __future__ import annotations
 
-from ..result import PredictionResult
-from ..view import PredictionView
+from ...assessment.prediction import PredictionResult
+from ...epistemic.variable import VariableView
 from .base import Predictor
 
 
@@ -45,14 +45,6 @@ class LastPredictor(Predictor):
     ----------
     allow_none : bool
         Flag indicating whether to allow None last_value.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/prediction/last.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/reasoning/prediction/last.html
     """
 
     def __init__(self, allow_none: bool = False) -> None:
@@ -69,7 +61,7 @@ class LastPredictor(Predictor):
 
     def predict(
         self,
-        view: PredictionView,
+        view: VariableView,
         horizon: int | None = None,
     ) -> PredictionResult:
         """
@@ -81,7 +73,7 @@ class LastPredictor(Predictor):
 
         Parameters
         ----------
-        view : PredictionView
+        view : VariableView
             View containing epistemic data including pre-computed statistics.
             Must provide access to `epistemic.stats.last_value`.
         horizon : int | None, optional
@@ -98,7 +90,7 @@ class LastPredictor(Predictor):
         Raises
         ------
         TypeError
-            If view is not a PredictionView instance.
+            If view is not a VariableView instance.
         ValueError
             If horizon is specified but < 1, or if last_value is None
             and allow_none is False.
@@ -106,8 +98,8 @@ class LastPredictor(Predictor):
             If the view's epistemic data doesn't contain the expected
             statistics structure.
         """
-        if not isinstance(view, PredictionView):
-            raise TypeError(f"view must be PredictionView, got {type(view).__name__}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"view must be VariableView, got {type(view).__name__}")
 
         if not view.stats:
             raise TypeError("view.stats must be provided")
@@ -117,7 +109,7 @@ class LastPredictor(Predictor):
         elif horizon < 1:
             raise ValueError(f"horizon must be >= 1, got {horizon}")
 
-        last_value = view.stats.last_value
+        last_value = view.stats.value
 
         if last_value is None:
             if self.allow_none:

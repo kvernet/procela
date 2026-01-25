@@ -20,12 +20,10 @@ from __future__ import annotations
 
 from typing import Any, ClassVar
 
-from ...memory.variable.statistics import HistoryStatistics
-from ..result import (
-    DiagnosisResult,
-    TrendResult,
-)
-from ..view import DiagnosisView
+from ...assessment.diagnosis import DiagnosisResult
+from ...assessment.statistics import StatisticsResult
+from ...assessment.trend import TrendResult
+from ...epistemic.variable import VariableView
 from .base import Diagnoser
 
 
@@ -83,14 +81,6 @@ class StatisticalDiagnoser(Diagnoser):
 
     The statistical thresholds and sensitivity parameters should be tuned
     for specific application domains and variable characteristics.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/reasoning/diagnosis/statistical.html
-
-    Examples Reference
-    ------------------
-    https://procela.org/docs/examples/core/reasoning/diagnosis/statistical.html
     """
 
     name: ClassVar[str] = "StatisticalDiagnoser"
@@ -139,7 +129,7 @@ class StatisticalDiagnoser(Diagnoser):
         self.drift_sensitivity = drift_sensitivity
         self.skewness_threshold = skewness_threshold
 
-    def diagnose(self, view: DiagnosisView) -> DiagnosisResult:
+    def diagnose(self, view: VariableView) -> DiagnosisResult:
         """
         Perform diagnostic reasoning based on statistical pattern analysis.
 
@@ -157,7 +147,7 @@ class StatisticalDiagnoser(Diagnoser):
 
         Parameters
         ----------
-        view : DiagnosisView
+        view : VariableView
             A view of the system containing statistical data:
             - stats: Historical statistics (must be present)
             - trend: Trend analysis results (optional)
@@ -174,13 +164,13 @@ class StatisticalDiagnoser(Diagnoser):
         Raises
         ------
         TypeError
-            If view is not a DiagnosisView instance.
+            If view is not a VariableView instance.
         ValueError
             If view.stats is None (statistical analysis requires stats).
         """
         # Validate input type
-        if not isinstance(view, DiagnosisView):
-            raise TypeError(f"view must be DiagnosisView, got {type(view).__name__}")
+        if not isinstance(view, VariableView):
+            raise TypeError(f"view must be VariableView, got {type(view).__name__}")
 
         # Check for required statistical data
         if view.stats is None:
@@ -201,7 +191,7 @@ class StatisticalDiagnoser(Diagnoser):
         }
 
         # Perform statistical analyses
-        # Note: HistoryStatistics doesn't have skewness/kurtosis/modes yet
+        # Note: StatisticsResult doesn't have skewness/kurtosis/modes yet
         # So I work with what's available
 
         variability_causes = self._analyze_variability(view.stats)
@@ -257,7 +247,7 @@ class StatisticalDiagnoser(Diagnoser):
             metadata=metadata,
         )
 
-    def _analyze_variability(self, stats: HistoryStatistics) -> list[str]:
+    def _analyze_variability(self, stats: StatisticsResult) -> list[str]:
         """
         Analyze statistical variability patterns.
 
@@ -269,8 +259,8 @@ class StatisticalDiagnoser(Diagnoser):
 
         Parameters
         ----------
-        stats : HistoryStatistics
-            Historical statistics object from HistoryStatistics.
+        stats : StatisticsResult
+            Historical statistics object from StatisticsResult.
 
         Returns
         -------
@@ -285,7 +275,7 @@ class StatisticalDiagnoser(Diagnoser):
             return causes
 
         # Check coefficient of variation (std/mean)
-        mean, std = stats.mean(), stats.std()
+        mean, std = stats.mean, stats.std
         if mean is not None and std is not None:
             if mean != 0:
                 # Coefficient of variation
@@ -303,7 +293,7 @@ class StatisticalDiagnoser(Diagnoser):
 
         return causes
 
-    def _detect_drift(self, trend: TrendResult, stats: HistoryStatistics) -> list[str]:
+    def _detect_drift(self, trend: TrendResult, stats: StatisticsResult) -> list[str]:
         """
         Detect gradual drift or trend-related statistical issues.
 
@@ -317,7 +307,7 @@ class StatisticalDiagnoser(Diagnoser):
         ----------
         trend : TrendResult
             Trend analysis results.
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Historical statistics for context.
 
         Returns
@@ -341,7 +331,7 @@ class StatisticalDiagnoser(Diagnoser):
 
                 if direction_desc != "stable":
                     # Check if trend is statistically significant
-                    std = stats.std()
+                    std = stats.std
                     if std is not None:
                         if std > 0:
                             trend_z = abs_trend / std
@@ -357,27 +347,27 @@ class StatisticalDiagnoser(Diagnoser):
 
         return causes
 
-    def _check_distribution(self, stats: HistoryStatistics) -> list[str]:
+    def _check_distribution(self, stats: StatisticsResult) -> list[str]:
         """
         Analyze distribution characteristics for potential issues.
 
-        Note: The current HistoryStatistics doesn't have skewness/kurtosis/modes.
-        This method will be updated when those features are added to HistoryStatistics.
+        Note: The current StatisticsResult doesn't have skewness/kurtosis/modes.
+        This method will be updated when those features are added to StatisticsResult.
 
         Parameters
         ----------
-        stats : HistoryStatistics
+        stats : StatisticsResult
             Historical statistics object.
 
         Returns
         -------
         list[str]
             List of distribution-related diagnostic causes.
-            Currently returns empty list until HistoryStatistics is extended.
+            Currently returns empty list until StatisticsResult is extended.
 
         Notes
         -----
-        When HistoryStatistics is extended with skewness, kurtosis, and modes,
+        When StatisticsResult is extended with skewness, kurtosis, and modes,
         this method will analyze:
         - Skewness (asymmetry) using self.skewness_threshold
         - Kurtosis (tailedness)
@@ -385,8 +375,8 @@ class StatisticalDiagnoser(Diagnoser):
         """
         causes: list[str] = []
 
-        # TODO: Enable these checks when HistoryStatistics has these properties
-        # Currently, HistoryStatistics doesn't have skewness, kurtosis, or modes
+        # TODO: Enable these checks when StatisticsResult has these properties
+        # Currently, StatisticsResult doesn't have skewness, kurtosis, or modes
         # Placeholder for future enhancement
 
         return causes

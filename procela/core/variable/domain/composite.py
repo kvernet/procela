@@ -17,7 +17,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from ...memory.variable.statistics import HistoryStatistics
+from ...assessment.statistics import StatisticsResult
 from .value import ValueDomain
 
 
@@ -44,14 +44,6 @@ class CompositeDomain(ValueDomain):
     - Explanation concatenates all sub-domain explanations
     - Empty subdomain list results in a domain that accepts all values
     - The composite can contain other CompositeDomain instances (nesting)
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/variable/domain/composite.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/variable/domain/composite.html
     """
 
     def __init__(self, subdomains: list[ValueDomain], name: str = "") -> None:
@@ -75,7 +67,7 @@ class CompositeDomain(ValueDomain):
         super().__init__(name)
         self.subdomains = subdomains
 
-    def validate(self, value: Any, stats: HistoryStatistics | None = None) -> bool:
+    def validate(self, value: Any, stats: StatisticsResult | None = None) -> bool:
         """
         Validate that a value satisfies ALL sub-domains.
 
@@ -86,7 +78,7 @@ class CompositeDomain(ValueDomain):
         ----------
         value : Any
             Value to validate against all sub-domains.
-        stats : HistoryStatistics | None, optional
+        stats : StatisticsResult | None, optional
             Additional stats for validation. Passed to each sub-domain's
             validate method. Default is None.
 
@@ -100,11 +92,11 @@ class CompositeDomain(ValueDomain):
         -----
         - Empty subdomain list returns True for any value
         - Order of validation follows the subdomains list order
-        - HistoryStatistics is passed to each sub-domain unchanged
+        - StatisticsResult is passed to each sub-domain unchanged
         """
         return all(domain.validate(value, stats) for domain in self.subdomains)
 
-    def explain(self, value: Any, stats: HistoryStatistics | None = None) -> str:
+    def explain(self, value: Any, stats: StatisticsResult | None = None) -> str:
         """
         Generate combined explanation from all sub-domains.
 
@@ -115,7 +107,7 @@ class CompositeDomain(ValueDomain):
         ----------
         value : Any
             Value to generate explanations for.
-        stats : HistoryStatistics | None, optional
+        stats : StatisticsResult | None, optional
             Additional stats for explanation. Passed to each sub-domain's
             explain method. Default is None.
 
