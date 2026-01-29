@@ -174,6 +174,7 @@ class HistoryStatistics:
         if self.count < 2 or mean is None:
             return None
         variance = (self.sumsq / self.count) - mean**2
+        variance = max(variance, 0.0)
         return math.sqrt(variance)
 
     def confidence(self) -> float | None:

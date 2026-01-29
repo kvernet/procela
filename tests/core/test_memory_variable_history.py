@@ -10,6 +10,7 @@ import pytest
 
 from procela.core.assessment import ReasoningResult, ReasoningTask
 from procela.core.memory import (
+    CandidatesHistory,
     HistoryStatistics,
     ReasoningHistory,
     VariableHistory,
@@ -104,14 +105,21 @@ def empty_reasoning_history(mock_key_authority):
 
 
 @pytest.fixture
+def empty_candidates_history(mock_key_authority):
+    """Create an empty CandidatesHistory."""
+    return CandidatesHistory()
+
+
+@pytest.fixture
 def populated_reasoning_history(empty_reasoning_history, mock_reasoning_result):
     """Create a ReasoningHistory with one result."""
     return empty_reasoning_history.new(mock_reasoning_result)
 
 
-# ============================================================================
-# VARIABLEHISTORY TESTS
-# ============================================================================
+@pytest.fixture
+def populated_candidates_history(empty_candidates_history, mock_key):
+    """Create a ReasoningHistory with one result."""
+    return empty_candidates_history.new(mock_key)
 
 
 class TestVariableHistory:
@@ -355,11 +363,6 @@ class TestVariableHistory:
         assert empty_variable_history.__dataclass_params__.frozen is True
 
 
-# ============================================================================
-# REASONINGHISTORY TESTS
-# ============================================================================
-
-
 class TestReasoningHistory:
     """Test suite for ReasoningHistory class."""
 
@@ -581,9 +584,138 @@ class TestReasoningHistory:
         assert results == []  # Should break early
 
 
-# ============================================================================
-# INTEGRATION TESTS
-# ============================================================================
+class TestCandidatesHistory:
+    """Test suite for CandidatesHistory class."""
+
+    def test_initialization_with_previous(self):
+        """Test initialization with previous key."""
+        mock_prev_key = Mock(spec=Key)
+        history = CandidatesHistory(_previous=mock_prev_key)
+
+        assert history._previous == mock_prev_key
+        assert history._source is None
+
+    def test_new_method_valid_source(self, empty_candidates_history):
+        """Test creating new history with valid key."""
+        key = Key()
+        new_history = empty_candidates_history.new(key)
+
+        assert new_history._source == key
+        assert new_history._previous == empty_candidates_history.key()
+
+    def test_new_method_invalid_source(self, empty_candidates_history):
+        """Test creating new history with invalid source type."""
+        invalid_source = "not_a_source"
+
+        with pytest.raises(
+            TypeError, match="The source should be a Key, get 'not_a_source'"
+        ):
+            empty_candidates_history.new(invalid_source)
+
+        history = empty_candidates_history.new(None)
+        assert history is empty_candidates_history
+
+    def test_iter_results_empty(self, empty_candidates_history):
+        """Test iter_results() on empty history."""
+        results = list(empty_candidates_history.iter_results())
+        assert results == []
+
+    def test_iter_results_single_result(self, populated_candidates_history, mock_key):
+        """Test iter_results() with one result."""
+        results = list(populated_candidates_history.iter_results())
+        assert results == [mock_key]
+        assert isinstance(populated_candidates_history.previous_key(), Key)
+
+    def test_iter_results_multiple_results(
+        self,
+    ):
+        """Test iter_results() with multiple results in chain."""
+        # Create chain of histories
+        history1 = CandidatesHistory()
+
+        result1 = Mock(spec=Key)
+        history2 = history1.new(result1)
+
+        result2 = Mock(spec=Key)
+        history3 = history2.new(result2)
+
+        results = list(history3.iter_results())
+        assert results == [result2, result1]
+
+    def test_iter_filtered_results_by_source(
+        self, populated_candidates_history, mock_key
+    ):
+        """Test filtering results by source."""
+        # Create a different source
+        different_source = Key()
+
+        # Test with matching source
+        filtered = list(
+            populated_candidates_history.iter_filtered_results(source=mock_key)
+        )
+        assert filtered == [mock_key]
+
+        candidates_history = CandidatesHistory(_source=different_source)
+        assert list(candidates_history.iter_filtered_results(source=Key())) == []
+
+    def test_iter_filtered_results_no_filter(self, populated_candidates_history):
+        """Test iter_filtered_results with no filters (default success=True)."""
+        filtered = list(populated_candidates_history.iter_filtered_results())
+        assert len(filtered) == 1
+
+    def test_get_results_empty(self, empty_candidates_history):
+        """Test get_results() on empty history."""
+        results = empty_candidates_history.get_results()
+        assert results == []
+
+    def test_len_method_empty(self, empty_candidates_history):
+        """Test __len__() on empty history."""
+        assert len(empty_candidates_history) == 0
+
+    def test_reset(self):
+        """Test the reset() method."""
+        history = CandidatesHistory()
+        history = history.new(Key())
+        assert history._source is not None
+        history.reset()
+        assert history._source is None
+
+    def test_len_method_populated(self, mock_key_authority):
+        """Test __len__() on populated history."""
+        # Create chain
+        history1 = CandidatesHistory()
+        history2 = history1.new(Key())
+
+        result2 = CandidatesHistory()
+        history3 = history2.new(result2.key())
+
+        # Setup resolve
+        mock_key_authority.resolve.return_value = history2
+
+        assert len(history3) == 2
+
+    def test_dataclass_immutability(self, empty_candidates_history):
+        """Test that ReasoningHistory is immutable."""
+        # Should not be able to modify attributes
+        with pytest.raises(Exception):
+            empty_candidates_history._source = "new_value"
+
+        # Verify it's a frozen dataclass
+        assert empty_candidates_history.__dataclass_params__.frozen is True
+
+    def test_iter_results_circular_reference(self, mock_key_authority):
+        """Test iter_results() handles circular references."""
+        # Create circular reference
+        history1 = CandidatesHistory()
+        history2 = CandidatesHistory(_previous=history1.key())
+
+        # Mock resolve to create circular reference
+        mock_key_authority.resolve.side_effect = lambda k: (
+            history2 if k == history1.key() else None
+        )
+
+        results = list(history2.iter_results())
+        assert results == []  # Should break early
 
 
 class TestIntegration:
@@ -594,16 +726,13 @@ class TestIntegration:
         # They should be completely independent classes
         var_history = VariableHistory()
         reasoning_history = ReasoningHistory()
+        candidates_history = CandidatesHistory()
 
         assert isinstance(var_history, VariableHistory)
         assert isinstance(reasoning_history, ReasoningHistory)
+        assert isinstance(candidates_history, CandidatesHistory)
         assert not isinstance(var_history, ReasoningHistory)
         assert not isinstance(reasoning_history, VariableHistory)
-
-
-# ============================================================================
-# EDGE CASE TESTS
-# ============================================================================
 
 
 class TestEdgeCases:

@@ -24,7 +24,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Sequence
 
-from ...symbols.key import Key
+from ..variable.variable import Variable
 
 
 class MechanismTemplate(ABC):
@@ -37,56 +37,56 @@ class MechanismTemplate(ABC):
 
     Attributes
     ----------
-    None. Concrete implementations define specific inputs, outputs,
+    None. Concrete implementations define specific reads, writes,
     and transformation logic.
 
     Notes
     -----
     - Templates are **structural**: they define potential causality but do not
       perform actual variable mutations.
-    - Concrete `Mechanism` instances will bind the template to actual variable keys.
+    - Concrete `Mechanism` instances will bind the template to actual variables.
     """
 
     @abstractmethod
-    def reads(self) -> Sequence[Key]:
+    def reads(self) -> Sequence[Variable]:
         """
-        Return the variable keys this template may read.
+        Return the variables this template may read.
 
         Returns
         -------
-        Sequence[Key]
-            Admissible input variable keys.
+        Sequence[Variable]
+            Admissible variables this template may read.
         """
         raise NotImplementedError
 
     @abstractmethod
-    def writes(self) -> Sequence[Key]:
+    def writes(self) -> Sequence[Variable]:
         """
-        Return the variable keys this template may write.
+        Return the variables this template may write.
 
         Returns
         -------
-        Sequence[Key]
-            Admissible output variable keys.
+        Sequence[Variable]
+            Admissible variables this template may write.
         """
         raise NotImplementedError
 
     @abstractmethod
     def transform(
         self,
-        inputs: list[Key],
-        outputs: list[Key],
+        inputs: list[Variable],
+        outputs: list[Variable],
     ) -> None:
         """
-        Produce candidate proposals for output variables.
+        Produce candidate proposals for written variables.
 
         Parameters
         ----------
-        inputs : list[Key]
-            Variable keys to read. Implementations may inspect current
+        inputs : list[Variable]
+            Variables to read. Implementations may inspect current
             values and history.
-        outputs : list[Key]
-            Variable keys to propose updates for.
+        outputs : list[Variable]
+            Variables to propose updates for.
 
         Notes
         -----

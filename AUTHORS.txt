@@ -4,7 +4,9 @@ Project Lead
 ============
 Kinson Vernet <kinson.vernet@gmail.com> (0009-0009-7535-3357)
   - Project architecture
-  - Core causal reasoning engine
+  - Mechanistic core engine
+  - Causal reasoning
+  - System invariant abstraction
 
 
 Core Contributors

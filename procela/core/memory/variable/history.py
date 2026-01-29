@@ -279,6 +279,7 @@ class VariableHistory:
         """
         object.__setattr__(self, "_record", None)
         object.__setattr__(self, "_previous", None)
+        object.__setattr__(self, "_stats", HistoryStatistics.empty())
 
 
 @dataclass(frozen=True)
@@ -479,4 +480,167 @@ class ReasoningHistory:
         This method must not be called during active reasoning or execution.
         """
         object.__setattr__(self, "_result", None)
+        object.__setattr__(self, "_previous", None)
+
+
+@dataclass(frozen=True)
+class CandidatesHistory:
+    """Variable candidates history."""
+
+    _source: Key | None = field(default=None, repr=False)
+    _previous: Key | None = field(default=None, repr=False)
+
+    _key: Key = field(init=False, repr=False, compare=True, hash=True)
+
+    def __post_init__(self) -> None:
+        """Validate the candidates history node after initialization."""
+        object.__setattr__(self, "_key", KeyAuthority.issue(self))
+
+    def new(self, source: Key | None) -> CandidatesHistory:
+        """
+        Append a new source to the candidates history.
+
+        Parameters
+        ----------
+        source : Key | None
+            The source key to append.
+
+        Returns
+        -------
+        CandidatesHistory
+            A new history instance representing the extended candidates history.
+        """
+        if source is None:
+            return self
+
+        if not isinstance(source, Key):
+            raise TypeError(f"The source should be a Key, get {source!r}")
+
+        return CandidatesHistory(
+            _source=source,
+            _previous=self._key,
+        )
+
+    def key(self) -> Key:
+        """
+        Return the unique identity key of the candidates history node.
+
+        Returns
+        -------
+        Key
+            A key uniquely identifying the candidates history state.
+        """
+        return self._key
+
+    def previous_key(self) -> Key | None:
+        """
+        Return the identity key of the previous candidates history node.
+
+        Returns
+        -------
+        Key | None
+            The key of the previous history node, or None if this is the root.
+        """
+        return self._previous
+
+    def iter_results(self) -> Iterable[Key]:
+        """
+        Iterate over candidate keys from newest to oldest.
+
+        Yields
+        ------
+        Key
+            Candidate keys in reverse chronological order.
+        """
+        current: CandidatesHistory | None = self
+
+        while current is not None:
+            source = current._source
+            if source is not None:
+                yield source
+
+            prev_key = current._previous
+            if prev_key is None:
+                break
+
+            resolved = KeyAuthority.resolve(prev_key)
+            current = resolved if isinstance(resolved, CandidatesHistory) else None
+
+    def iter_filtered_results(
+        self,
+        *,
+        source: Key | None = None,
+    ) -> Iterable[Key]:
+        """
+        Iterate over filtered source from newest to oldest.
+
+        Parameters
+        ----------
+        **criteria
+            Arbitrary filtering criteria applied to each result.
+
+        Yields
+        ------
+        Key
+            Results matching the specified criteria.
+        """
+        for result in self.iter_results():
+            if source is not None and result != source:
+                continue
+            yield result
+
+    def get_results(
+        self,
+        *,
+        source: Key | None = None,
+    ) -> list[Key]:
+        """
+        Retrieve sources matching the specified criteria.
+
+        Parameters
+        ----------
+        **criteria
+            Arbitrary filtering criteria applied to results.
+
+        Returns
+        -------
+        list[Key]
+            Results matching the given criteria.
+        """
+        results = list(self.iter_filtered_results(source=source))
+        results.reverse()
+        return results
+
+    def __len__(self) -> int:
+        """
+        Return the number of sources in the history.
+
+        Returns
+        -------
+        int
+            The length of the candidates history.
+        """
+        return len(list(self.iter_results()))
+
+    def reset(self) -> None:
+        """
+        Reset the candidates history to an empty state.
+
+        This method clears the candidates and removes any reference
+        to previous candidates history. After reset, no inferred or derived
+        candidates state remains.
+
+        The reset operation is part of simulation lifecycle management and is
+        intended to be used between independent simulation runs.
+
+        Notes
+        -----
+        - Candidates history is immutable during execution.
+        - Resetting discards all accumulated candidates.
+
+        Warnings
+        --------
+        This method must not be called during active reasoning or execution.
+        """
+        object.__setattr__(self, "_source", None)
         object.__setattr__(self, "_previous", None)

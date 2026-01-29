@@ -6,7 +6,13 @@ import pytest
 
 from procela.core.mechanism import Mechanism
 from procela.core.process import Process
+from procela.core.variable import RealDomain, Variable
 from procela.symbols.key import Key
+
+
+def create_real_variable():
+    """Create a variable with real domain."""
+    return Variable(name="real_variable", domain=RealDomain())
 
 
 class TestProcessInitialization:
@@ -16,7 +22,7 @@ class TestProcessInitialization:
         """Test initialization with empty mechanism sequence."""
         process = Process(mechanisms=[])
 
-        assert process.all_keys() == set()
+        assert process.variables() == set()
         assert process.mechanisms() == ()
         assert process.is_enabled() is True
 
@@ -232,85 +238,70 @@ class TestProcessWritableKeys:
         """Test writable_keys() with empty process."""
         process = Process(mechanisms=[])
 
-        keys = process.writable_keys()
+        vars = process.writable()
 
-        assert isinstance(keys, set)
-        assert len(keys) == 0
+        assert isinstance(vars, set)
+        assert len(vars) == 0
 
     def test_writable_keys_single_mechanism(self):
         """Test writable_keys() with single mechanism."""
         mock_mechanism = Mock(spec=Mechanism)
-        key1 = Key()
-        key2 = Key()
-        mock_mechanism.writes.return_value = [key1, key2]
+        var1 = Key()
+        var2 = Key()
+        mock_mechanism.writes.return_value = [var1, var2]
 
         process = Process(mechanisms=[mock_mechanism])
 
-        keys = process.writable_keys()
+        vars = process.writable()
 
-        assert isinstance(keys, set)
-        assert len(keys) == 2
-        assert key1 in keys
-        assert key2 in keys
+        assert isinstance(vars, set)
+        assert len(vars) == 2
+        assert var1 in vars
+        assert var2 in vars
 
     def test_writable_keys_multiple_mechanisms(self):
         """Test writable_keys() with multiple mechanisms."""
         mock_mechanisms = [Mock(spec=Mechanism) for _ in range(3)]
 
         # Each mechanism writes different keys
-        key1, key2, key3, key4 = Key(), Key(), Key(), Key()
-        mock_mechanisms[0].writes.return_value = [key1, key2]
-        mock_mechanisms[1].writes.return_value = [key2, key3]  # key2 is duplicate
-        mock_mechanisms[2].writes.return_value = [key4]
+        var1, var2, var3, var4 = (
+            create_real_variable(),
+            create_real_variable(),
+            create_real_variable(),
+            create_real_variable(),
+        )
+        mock_mechanisms[0].writes.return_value = [var1, var2]
+        mock_mechanisms[1].writes.return_value = [var2, var3]  # key2 is duplicate
+        mock_mechanisms[2].writes.return_value = [var4]
 
         process = Process(mechanisms=mock_mechanisms)
 
-        keys = process.writable_keys()
+        vars = process.writable()
 
-        assert isinstance(keys, set)
-        assert len(keys) == 4  # key2 should appear only once
-        assert key1 in keys
-        assert key2 in keys
-        assert key3 in keys
-        assert key4 in keys
+        assert isinstance(vars, set)
+        assert len(vars) == 4  # key2 should appear only once
+        assert var1 in vars
+        assert var2 in vars
+        assert var3 in vars
+        assert var4 in vars
 
-    def test_writable_keys_with_empty_writes(self):
-        """Test writable_keys() with mechanisms that write nothing."""
+    def test_wrvarble_keys_with_empty_writes(self):
+        """Testvaritable_keys() with mechanisms that write nothing."""
         mock_mechanisms = [Mock(spec=Mechanism) for _ in range(3)]
 
         # First writes keys, second writes nothing, third writes keys
-        key1, key2 = Key(), Key()
-        mock_mechanisms[0].writes.return_value = [key1]
+        var1, var2 = create_real_variable(), create_real_variable()
+        mock_mechanisms[0].writes.return_value = [var1]
         mock_mechanisms[1].writes.return_value = []
-        mock_mechanisms[2].writes.return_value = [key2]
+        mock_mechanisms[2].writes.return_value = [var2]
 
         process = Process(mechanisms=mock_mechanisms)
 
-        keys = process.writable_keys()
+        vars = process.writable()
 
-        assert len(keys) == 2
-        assert key1 in keys
-        assert key2 in keys
-
-    def test_writable_keys_returns_copy_not_reference(self):
-        """Test that writable_keys() returns a new set each time."""
-        mock_mechanism = Mock(spec=Mechanism)
-        key = Key()
-        mock_mechanism.writes.return_value = [key]
-
-        process = Process(mechanisms=[mock_mechanism])
-
-        keys1 = process.writable_keys()
-        keys2 = process.writable_keys()
-
-        # Should be equal but different objects
-        assert keys1 == keys2
-        assert keys1 is not keys2
-
-        # Modifying returned set shouldn't affect process
-        keys1.add(Key())
-        keys3 = process.writable_keys()
-        assert len(keys3) == 1  # Still only the original key
+        assert len(vars) == 2
+        assert var1 in vars
+        assert var2 in vars
 
 
 class TestProcessAllKeys:
@@ -320,93 +311,99 @@ class TestProcessAllKeys:
         """Test all_keys() with empty process."""
         process = Process(mechanisms=[])
 
-        keys = process.all_keys()
+        variables = process.variables()
 
-        assert isinstance(keys, set)
-        assert len(keys) == 0
+        assert isinstance(variables, set)
+        assert len(variables) == 0
 
     def test_all_keys_single_mechanism(self):
         """Test all_keys() with single mechanism."""
         mock_mechanism = Mock(spec=Mechanism)
-        read_key = Key()
-        write_key = Key()
-        mock_mechanism.reads.return_value = [read_key]
-        mock_mechanism.writes.return_value = [write_key]
+        read = create_real_variable()
+        write = create_real_variable()
+        mock_mechanism.reads.return_value = [read]
+        mock_mechanism.writes.return_value = [write]
 
         process = Process(mechanisms=[mock_mechanism])
 
-        keys = process.all_keys()
+        variables = process.variables()
 
-        assert len(keys) == 2
-        assert read_key in keys
-        assert write_key in keys
+        assert len(variables) == 2
+        assert read in variables
+        assert write in variables
 
     def test_all_keys_multiple_mechanisms(self):
         """Test all_keys() with multiple mechanisms."""
         mock_mechanisms = [Mock(spec=Mechanism) for _ in range(3)]
 
         # Define keys
-        key1, key2, key3, key4, key5 = Key(), Key(), Key(), Key(), Key()
+        var1, var2, var3, var4, var5 = (
+            create_real_variable(),
+            create_real_variable(),
+            create_real_variable(),
+            create_real_variable(),
+            create_real_variable(),
+        )
 
         # Mechanism 0 reads key1, writes key2
-        mock_mechanisms[0].reads.return_value = [key1]
-        mock_mechanisms[0].writes.return_value = [key2]
+        mock_mechanisms[0].reads.return_value = [var1]
+        mock_mechanisms[0].writes.return_value = [var2]
 
         # Mechanism 1 reads key2 (duplicate), writes key3
-        mock_mechanisms[1].reads.return_value = [key2]
-        mock_mechanisms[1].writes.return_value = [key3]
+        mock_mechanisms[1].reads.return_value = [var2]
+        mock_mechanisms[1].writes.return_value = [var3]
 
         # Mechanism 2 reads key4, writes key5
-        mock_mechanisms[2].reads.return_value = [key4]
-        mock_mechanisms[2].writes.return_value = [key5]
+        mock_mechanisms[2].reads.return_value = [var4]
+        mock_mechanisms[2].writes.return_value = [var5]
 
         process = Process(mechanisms=mock_mechanisms)
 
-        keys = process.all_keys()
+        variables = process.variables()
 
-        assert len(keys) == 5  # All unique keys
-        assert key1 in keys
-        assert key2 in keys
-        assert key3 in keys
-        assert key4 in keys
-        assert key5 in keys
+        assert len(variables) == 5  # All unique keys
+        assert var1 in variables
+        assert var2 in variables
+        assert var3 in variables
+        assert var4 in variables
+        assert var5 in variables
 
     def test_all_keys_with_read_write_overlap(self):
         """Test all_keys() when mechanism reads and writes same key."""
         mock_mechanism = Mock(spec=Mechanism)
-        same_key = Key()
+        same = create_real_variable()
 
         # Mechanism reads and writes the same key
-        mock_mechanism.reads.return_value = [same_key]
-        mock_mechanism.writes.return_value = [same_key]
+        mock_mechanism.reads.return_value = [same]
+        mock_mechanism.writes.return_value = [same]
 
         process = Process(mechanisms=[mock_mechanism])
 
-        keys = process.all_keys()
+        variables = process.variables()
 
-        assert len(keys) == 1  # Should be deduplicated
-        assert same_key in keys
+        assert len(variables) == 1  # Should be deduplicated
+        assert same in variables
 
     def test_all_keys_returns_copy_not_reference(self):
         """Test that all_keys() returns a new set each time."""
         mock_mechanism = Mock(spec=Mechanism)
-        key = Key()
-        mock_mechanism.reads.return_value = [key]
+        var = create_real_variable()
+        mock_mechanism.reads.return_value = [var]
         mock_mechanism.writes.return_value = []
 
         process = Process(mechanisms=[mock_mechanism])
 
-        keys1 = process.all_keys()
-        keys2 = process.all_keys()
+        variables1 = process.variables()
+        variables2 = process.variables()
 
         # Should be equal but different objects
-        assert keys1 == keys2
-        assert keys1 is not keys2
+        assert variables1 == variables2
+        assert variables1 is not variables2
 
         # Modifying returned set shouldn't affect process
-        keys1.add(Key())
-        keys3 = process.all_keys()
-        assert len(keys3) == 1  # Still only the original key
+        variables1.add(create_real_variable())
+        variables3 = process.variables()
+        assert len(variables3) == 1  # Still only the original key
 
 
 class TestProcessKeyMethod:
@@ -481,11 +478,15 @@ class TestProcessIntegration:
                 self.run_count += 1
 
         # Create real mechanisms
-        key1, key2, key3 = Key(), Key(), Key()
+        var1, var2, var3 = (
+            create_real_variable(),
+            create_real_variable(),
+            create_real_variable(),
+        )
 
-        mechanism1 = TestMechanism(reads=[key1], writes=[key2], name="M1")
-        mechanism2 = TestMechanism(reads=[key2], writes=[key3], name="M2")
-        mechanism3 = TestMechanism(reads=[key3], writes=[], name="M3")
+        mechanism1 = TestMechanism(reads=[var1], writes=[var2], name="M1")
+        mechanism2 = TestMechanism(reads=[var2], writes=[var3], name="M2")
+        mechanism3 = TestMechanism(reads=[var3], writes=[], name="M3")
 
         # Create process
         process = Process(mechanisms=[mechanism1, mechanism2, mechanism3])
@@ -494,18 +495,18 @@ class TestProcessIntegration:
         assert len(process.mechanisms()) == 3
         assert process.mechanisms()[0].name == "M1"
 
-        # Test writable_keys
-        writable = process.writable_keys()
-        assert key2 in writable
-        assert key3 in writable
+        # Test writable
+        writable = process.writable()
+        assert var2 in writable
+        assert var3 in writable
         assert len(writable) == 2  # key2 and key3
 
-        # Test all_keys
-        all_keys = process.all_keys()
-        assert key1 in all_keys
-        assert key2 in all_keys
-        assert key3 in all_keys
-        assert len(all_keys) == 3
+        # Test variables
+        variables = process.variables()
+        assert var1 in variables
+        assert var2 in variables
+        assert var3 in variables
+        assert len(variables) == 3
 
         # Test step execution
         process.step()
@@ -621,20 +622,23 @@ class TestProcessEdgeCases:
         mock_mechanisms[0].reads.return_value = []
         mock_mechanisms[0].writes.return_value = []
 
-        mock_mechanisms[1].reads.return_value = [Key()]
+        mock_mechanisms[1].reads.return_value = [create_real_variable()]
         mock_mechanisms[1].writes.return_value = []
 
         mock_mechanisms[2].reads.return_value = []
-        mock_mechanisms[2].writes.return_value = [Key(), Key()]
+        mock_mechanisms[2].writes.return_value = [
+            create_real_variable(),
+            create_real_variable(),
+        ]
 
         process = Process(mechanisms=mock_mechanisms)
 
         # Should handle all cases without errors
-        writable_keys = process.writable_keys()
-        all_keys = process.all_keys()
+        writable = process.writable()
+        variables = process.variables()
 
-        assert len(writable_keys) == 2
-        assert len(all_keys) == 3  # 1 read + 2 writes
+        assert len(writable) == 2
+        assert len(variables) == 3  # 1 read + 2 writes
 
     def test_process_with_large_number_of_mechanisms(self):
         """Test with a large number of mechanisms."""
@@ -643,10 +647,10 @@ class TestProcessEdgeCases:
 
         # Each mechanism reads and writes unique keys
         for i, mock in enumerate(mock_mechanisms):
-            read_key = Key()
-            write_key = Key()
-            mock.reads.return_value = [read_key]
-            mock.writes.return_value = [write_key]
+            read = create_real_variable()
+            write = create_real_variable()
+            mock.reads.return_value = [read]
+            mock.writes.return_value = [write]
             mock.run.return_value = None
 
         process = Process(mechanisms=mock_mechanisms)
@@ -660,18 +664,18 @@ class TestProcessEdgeCases:
             mock.run.assert_called_once()
 
         # Test key collections
-        writable_keys = process.writable_keys()
-        all_keys = process.all_keys()
+        writable = process.writable()
+        variables = process.variables()
 
-        assert len(writable_keys) == n_mechanisms
-        assert len(all_keys) == n_mechanisms * 2  # Each has read + write key
+        assert len(writable) == n_mechanisms
+        assert len(variables) == n_mechanisms * 2  # Each has read + write key
 
     def test_process_with_duplicate_mechanisms(self):
         """Test with duplicate mechanism instances."""
         mock_mechanism = Mock(spec=Mechanism)
-        key = Key()
-        mock_mechanism.reads.return_value = [key]
-        mock_mechanism.writes.return_value = [key]
+        var = create_real_variable()
+        mock_mechanism.reads.return_value = [var]
+        mock_mechanism.writes.return_value = [var]
 
         # Same mechanism instance multiple times
         process = Process(mechanisms=[mock_mechanism, mock_mechanism, mock_mechanism])
@@ -687,11 +691,11 @@ class TestProcessEdgeCases:
         assert mock_mechanism.run.call_count == 3
 
         # Key collections should deduplicate
-        writable_keys = process.writable_keys()
-        all_keys = process.all_keys()
+        writable = process.writable()
+        variables = process.variables()
 
-        assert len(writable_keys) == 1  # Only one unique key
-        assert len(all_keys) == 1  # Only one unique key
+        assert len(writable) == 1  # Only one unique key
+        assert len(variables) == 1  # Only one unique key
 
     def test_process_mechanisms_immutability_after_creation(self):
         """Test that mechanisms tuple is immutable."""

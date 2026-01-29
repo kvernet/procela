@@ -8,7 +8,7 @@ import pytest
 
 from procela.core.action import (
     ActionProposal,
-    SelectionPolicy,
+    ResolutionPolicy,
 )
 from procela.core.assessment import (
     AnomalyResult,
@@ -116,14 +116,14 @@ def statistical_variable(real_statistical_domain):
 
 
 @pytest.fixture
-def last_record_selection():
-    class LastRecordSelection(SelectionPolicy):
-        def select(self, proposals):
+def last_record_resolution():
+    class LastRecordResolution(ResolutionPolicy):
+        def resolve(self, proposals):
             if not proposals:
                 return None
             return proposals[-1]
 
-    return LastRecordSelection()
+    return LastRecordResolution()
 
 
 def test_init_all_params(real_value_domain):
@@ -243,13 +243,14 @@ def test_add_candidates(real_variable):
     """Test add_candidates() on fresh variable."""
     # No record
     policy = real_variable.policy()
-    assert isinstance(policy, SelectionPolicy)
+    assert isinstance(policy, ResolutionPolicy)
 
-    record = real_variable.resolve_conflict(
+    record, validated = real_variable.resolve_conflict(
         candidates=[],
         policy=policy,
     )
     assert record is None
+    assert isinstance(validated, list)
     # None will be skipped
     real_variable.commit(record)
     assert len(real_variable.history()[0].get_records()) == 0
@@ -258,21 +259,26 @@ def test_add_candidates(real_variable):
     assert len(real_variable.history()[0].get_records()) == 0
 
     # 4 records
+    record = VariableRecord(11.0, confidence=0.95, source=Key())
     real_variable.add_candidate(VariableRecord(10.0, confidence=0.5))
     real_variable.add_candidate(VariableRecord(13.0, confidence=0.65))
-    real_variable.add_candidate(VariableRecord(11.0, confidence=0.95))
+    real_variable.add_candidate(record)
     real_variable.add_candidate(VariableRecord(12.0, confidence=0.45))
 
     candidates = real_variable.candidates()
     assert len(candidates) == 4
 
-    record = real_variable.resolve_conflict(
+    candidates = real_variable.candidates(exclude=record.source)
+    assert len(candidates) == 3
+
+    record, validated = real_variable.resolve_conflict(
         candidates=candidates,
         policy=policy,
     )
     assert isinstance(record, VariableRecord)
-    assert record.value == 11.0
-    assert record.confidence == 0.95
+    assert len(validated) == 3
+    assert record.value == 13.0
+    assert record.confidence == 0.65
 
     real_variable.commit(record)
 
@@ -283,6 +289,11 @@ def test_add_candidates(real_variable):
 
     assert real_variable.validators() is None
     real_variable.reset()
+
+
+def test_has_records(real_variable):
+    """Test has_records() method."""
+    assert not real_variable.has_records()
 
 
 def test_repr_method(real_variable):
@@ -374,7 +385,7 @@ def test_explain_method_statistical_variable(statistical_variable):
 
 
 def test_explain_method_statistical_variable_different_scenarios(
-    statistical_variable, last_record_selection
+    statistical_variable, last_record_resolution
 ):
     """Test explain() covers statistical_variable with different scenarios."""
     # Test 1: No anomaly, no trend
@@ -405,7 +416,7 @@ def test_explain_method_statistical_variable_different_scenarios(
             VariableRecord(value=23.4, confidence=0.56),
             VariableRecord(value=26.1, confidence=0.68),
         ],
-        policy=last_record_selection,
+        policy=last_record_resolution,
     )
     statistical_variable.diagnose_causes()
     statistical_variable.plan_intervention()
@@ -476,23 +487,24 @@ def test_analyze_trend(real_variable):
         assert hasattr(result, "direction")
 
 
-def test_resolve_conflict(real_variable, real_variable_record, last_record_selection):
+def test_resolve_conflict(real_variable, real_variable_record, last_record_resolution):
     """Test resolve_conflict()."""
     # Create candidates
     candidates = [real_variable_record]
 
     # Try resolution
-    real_variable.resolve_conflict(candidates, last_record_selection)
+    real_variable.resolve_conflict(candidates, last_record_resolution)
     # Can be None or VariableRecord
 
     # Test with validators
-    real_variable.resolve_conflict(candidates, last_record_selection, validators=[])
+    real_variable.resolve_conflict(candidates, last_record_resolution, validators=[])
 
 
-def test_resolve_conflict_empty(real_variable, last_record_selection):
+def test_resolve_conflict_empty(real_variable, last_record_resolution):
     """Test resolve_conflict() with empty candidates."""
-    result = real_variable.resolve_conflict([], last_record_selection)
+    result, validated = real_variable.resolve_conflict([], last_record_resolution)
     assert result is None
+    assert validated == []
 
 
 def test_propose_actions(real_variable):
@@ -748,7 +760,7 @@ def test_epistemic_none_results(real_variable):
 
 
 def test_resolve_conflict_validation_fails(
-    real_variable, real_variable_record, last_record_selection
+    real_variable, real_variable_record, last_record_resolution
 ):
     """Test resolve_conflict when _record() fails."""
 
@@ -757,10 +769,11 @@ def test_resolve_conflict_validation_fails(
     real_variable._record = lambda x: False
 
     try:
-        result = real_variable.resolve_conflict(
-            [real_variable_record], last_record_selection
+        result, validated = real_variable.resolve_conflict(
+            [real_variable_record], last_record_resolution
         )
         assert result is None
+        assert len(validated) == 1
     finally:
         real_variable._record = original_record
 

@@ -1,7 +1,7 @@
 """
 Policy module for the Procela framework.
 
-This module defines selection policies for action proposals within
+This module defines resolution policies for action proposals within
 Procela's active reasoning engine.
 Policies implement strategic decision-making logic to choose the most
 appropriate action from a set of competing proposals, enabling
@@ -21,45 +21,64 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from typing import Iterable
 
+from ...symbols.key import Key
+from ..key_authority import KeyAuthority
 from .proposal import ActionProposal, ProposalStatus
 
 
-class SelectionPolicy(ABC):
+class ResolutionPolicy(ABC):
     """
-    Abstract base class defining the interface for action selection policies.
+    Abstract base class defining the interface for proposals resolution policies.
 
     In Procela, a policy is an intelligent decision entity that analyzes
     competing `ActionProposal` objects against system constraints, resource
-    availability, and strategic goals to select the optimal next action.
-    Policies implement the core selection logic that drives the system's
+    availability, and strategic goals to resolve competing proposals.
+    Policies implement the core resolution logic that drives the system's
     autonomous behavior and ensures feedback-loop consistency.
 
-    Subclasses must implement the `select` method with specific selection
+    Subclasses must implement the `resolve` method with specific resolution
     algorithms (e.g., highest confidence, multi-criteria optimization,
     constraint satisfaction).
     """
 
-    @abstractmethod
-    def select(self, proposals: Iterable[ActionProposal]) -> ActionProposal | None:
+    def __init__(self) -> None:
+        """Initialize a ResolutionPolicy object."""
+        super().__init__()
+        self._key = KeyAuthority.issue(self)
+        self.name = self.__class__.__name__
+
+    def key(self) -> Key:
         """
-        Select the most appropriate action proposal from a collection.
+        Return the unique identity of the ResolutionPolicy.
+
+        Returns
+        -------
+        Key
+            The unique identity of the ResolutionPolicy.
+        """
+        return self._key
+
+    @abstractmethod
+    def resolve(self, proposals: Iterable[ActionProposal]) -> ActionProposal | None:
+        """
+        Resolve competing proposals from a collection.
 
         This method embodies the policy's decision-making intelligence.
         It evaluates proposals based on the policy's internal criteria
         (confidence, status, etc)
-        and returns a single selected proposal or None if no suitable
+        and returns a single resolved proposal or None if no suitable
         proposal is found.
 
         Parameters
         ----------
         proposals : Iterable[ActionProposal]
-            An iterable of `ActionProposal` objects to evaluate and select from.
+            An iterable of `ActionProposal` objects to evaluate and resolve from.
             The iterable may be empty. Policies should handle this gracefully.
 
         Returns
         -------
         ActionProposal | None
-            The selected `ActionProposal` that best satisfies the policy's
+            The resolved `ActionProposal` that best satisfies the policy's
             criteria, or `None` if the input is empty or no proposal meets
             the minimum requirements.
 
@@ -74,11 +93,11 @@ class SelectionPolicy(ABC):
         pass
 
 
-class HighestConfidencePolicy(SelectionPolicy):
+class HighestConfidencePolicy(ResolutionPolicy):
     """
-    Concrete policy that selects the action proposal with the highest confidence.
+    Concrete policy that resolves competing proposals with the highest confidence.
 
-    This policy implements a simple but effective greedy selection strategy:
+    This policy implements a simple but effective greedy resolution strategy:
     among all valid proposals, choose the one with the numerically largest
     `confidence` value. It assumes confidence is a reliable proxy for
     expected success or utility.
@@ -94,17 +113,9 @@ class HighestConfidencePolicy(SelectionPolicy):
     risk, temporal constraints, and multi-dimensional utility. It should be
     supplemented or replaced with more comprehensive policies in production
     systems with complex trade-offs.
-
-    Semantics Reference
-    -------------------
-    https://procela.org/docs/semantics/core/action/policy.html
-
-    Examples Reference
-    -------------------
-    https://procela.org/docs/examples/core/action/policy.html
     """
 
-    def select(self, proposals: Iterable[ActionProposal]) -> ActionProposal | None:
+    def resolve(self, proposals: Iterable[ActionProposal]) -> ActionProposal | None:
         """
         Select the proposal with the maximum confidence score.
 

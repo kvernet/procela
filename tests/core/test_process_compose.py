@@ -8,9 +8,13 @@ import pytest
 
 from procela.core.mechanism import Mechanism
 from procela.core.process import Compose, Process
-
-# Import the actual implementations
+from procela.core.variable import RealDomain, Variable
 from procela.symbols.key import Key
+
+
+def create_real_variable():
+    """Create a variable with real domain."""
+    return Variable(name="real_variable", domain=RealDomain())
 
 
 class TestComposeInitialization:
@@ -168,56 +172,56 @@ class TestComposeInheritedMethods:
         compose.step()
         mech.run.assert_called_once()  # Should run
 
-    def test_writable_keys_method(self):
-        """Test writable_keys() method inherited from Process."""
-        # Create mechanisms with write keys
+    def test_writable_method(self):
+        """Test writable() method inherited from Process."""
+        # Create mechanisms with write variables
         mech1 = Mock(spec=Mechanism)
-        key1, key2 = Key(), Key()
-        mech1.writes.return_value = [key1, key2]
+        var1, var2 = create_real_variable(), create_real_variable()
+        mech1.writes.return_value = [var1, var2]
 
         mech2 = Mock(spec=Mechanism)
-        key3 = Key()
-        mech2.writes.return_value = [key3]
+        var3 = create_real_variable()
+        mech2.writes.return_value = [var3]
 
         process = Mock(spec=Process)
         process.mechanisms.return_value = (mech1, mech2)
 
         compose = Compose(processes=[process])
 
-        writable_keys = compose.writable_keys()
+        writable = compose.writable()
 
-        assert isinstance(writable_keys, set)
-        assert len(writable_keys) == 3
-        assert key1 in writable_keys
-        assert key2 in writable_keys
-        assert key3 in writable_keys
+        assert isinstance(writable, set)
+        assert len(writable) == 3
+        assert var1 in writable
+        assert var2 in writable
+        assert var3 in writable
 
-    def test_all_keys_method(self):
-        """Test all_keys() method inherited from Process."""
-        # Create mechanisms with read and write keys
+    def test_variables_method(self):
+        """Test variables() method inherited from Process."""
+        # Create mechanisms with read and write variables
         mech1 = Mock(spec=Mechanism)
-        key1, key2 = Key(), Key()
-        mech1.reads.return_value = [key1]
-        mech1.writes.return_value = [key2]
+        var1, var2 = create_real_variable(), create_real_variable()
+        mech1.reads.return_value = [var1]
+        mech1.writes.return_value = [var2]
 
         mech2 = Mock(spec=Mechanism)
-        key3, key4 = Key(), Key()
-        mech2.reads.return_value = [key3]
-        mech2.writes.return_value = [key4]
+        var3, var4 = create_real_variable(), create_real_variable()
+        mech2.reads.return_value = [var3]
+        mech2.writes.return_value = [var4]
 
         process = Mock(spec=Process)
         process.mechanisms.return_value = (mech1, mech2)
 
         compose = Compose(processes=[process])
 
-        all_keys = compose.all_keys()
+        variables = compose.variables()
 
-        assert isinstance(all_keys, set)
-        assert len(all_keys) == 4
-        assert key1 in all_keys
-        assert key2 in all_keys
-        assert key3 in all_keys
-        assert key4 in all_keys
+        assert isinstance(variables, set)
+        assert len(variables) == 4
+        assert var1 in variables
+        assert var2 in variables
+        assert var3 in variables
+        assert var4 in variables
 
     def test_key_method(self):
         """Test key() method inherited from Process."""
@@ -404,18 +408,18 @@ class TestComposeIntegration:
             assert mech.run_count == 2  # Incremented again
 
         # Test key collections
-        # Add some keys to mechanisms for testing
-        key1, key2 = Key(), Key()
-        mechs[0]._reads = [key1]
-        mechs[0]._writes = [key2]
-        mechs[1]._reads = [key2]  # Same as mechs[0] writes
-        mechs[1]._writes = [key1]  # Same as mechs[0] reads
+        # Add some variables to mechanisms for testing
+        var1, var2 = create_real_variable(), create_real_variable()
+        mechs[0]._reads = [var1]
+        mechs[0]._writes = [var2]
+        mechs[1]._reads = [var2]
+        mechs[1]._writes = [var1]
 
-        writable_keys = compose.writable_keys()
-        all_keys = compose.all_keys()
+        writable = compose.writable()
+        variables = compose.variables()
 
-        assert len(writable_keys) == 2  # key1 and key2
-        assert len(all_keys) == 2  # key1 and key2
+        assert len(writable) == 2
+        assert len(variables) == 2
 
     def test_compose_as_process_aggregator(self):
         """Test using Compose to aggregate multiple independent processes."""
@@ -613,8 +617,8 @@ class TestComposeDesignContract:
         assert hasattr(compose, "disable")
         assert hasattr(compose, "is_enabled")
         assert hasattr(compose, "step")
-        assert hasattr(compose, "writable_keys")
-        assert hasattr(compose, "all_keys")
+        assert hasattr(compose, "writable")
+        assert hasattr(compose, "variables")
 
         # Test they work correctly
         assert callable(compose.key)
@@ -623,8 +627,8 @@ class TestComposeDesignContract:
         assert callable(compose.disable)
         assert callable(compose.is_enabled)
         assert callable(compose.step)
-        assert callable(compose.writable_keys)
-        assert callable(compose.all_keys)
+        assert callable(compose.writable)
+        assert callable(compose.variables)
 
 
 if __name__ == "__main__":

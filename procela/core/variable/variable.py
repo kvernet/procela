@@ -23,7 +23,7 @@ from typing import Any, Iterable, Sequence
 
 from ...symbols.key import Key
 from ...symbols.time import TimePoint
-from ..action.policy import HighestConfidencePolicy, SelectionPolicy
+from ..action.policy import HighestConfidencePolicy, ResolutionPolicy
 from ..action.proposal import ActionProposal
 from ..action.proposer import ActionProposer
 from ..action.resolver import ConflictResolver
@@ -36,7 +36,11 @@ from ..assessment.reasoning import ReasoningResult
 from ..assessment.statistics import StatisticsResult
 from ..assessment.task import ReasoningTask
 from ..assessment.trend import TrendResult
-from ..memory.variable.history import ReasoningHistory, VariableHistory
+from ..memory.variable.history import (
+    CandidatesHistory,
+    ReasoningHistory,
+    VariableHistory,
+)
 from ..memory.variable.record import VariableRecord
 from ..reasoning.anomaly.operator import AnomalyOperator, AnomalyOperatorThreshold
 from ..reasoning.diagnosis.operator import (
@@ -107,7 +111,7 @@ class Variable:
         role: VariableRole = VariableRole.ENDOGENOUS,
         config: dict[str, Any] | None = None,
         seed: int | None = None,
-        policy: SelectionPolicy | None = None,
+        policy: ResolutionPolicy | None = None,
         validators: Iterable[ProposalValidator] | None = None,
     ):
         """
@@ -129,6 +133,11 @@ class Variable:
             Variable configuration for reasoning and domain.
         seed : int | None, optional
             Seed for reproducible internal behavior.
+        policy : ResolutionPolicy | None
+            The resolution policy used to resolve conflicts between candidates.
+            Default is None.
+        validators : Iterable[ProposalValidator] | None
+            The iterable ProposalValidators to validate candidates before resolution.
 
         Notes
         -----
@@ -150,6 +159,7 @@ class Variable:
         self._key = KeyAuthority.issue(self)
         self._history = VariableHistory(_config=self.config)
         self._reasoning_history = ReasoningHistory()
+        self._candidates_history = CandidatesHistory()
         self._candidates: list[VariableRecord] = []
 
     def key(self) -> Key:
@@ -253,6 +263,17 @@ class Variable:
         """
         return self._history.stats().last_value
 
+    def has_records(self) -> bool:
+        """
+        Detect whether the variable already has records.
+
+        Returns
+        -------
+        bool
+            Whether the variable has records or not.
+        """
+        return self._history.stats().count > 0
+
     def __repr__(self) -> str:
         """
         Return a string representation of the variable.
@@ -286,20 +307,21 @@ class Variable:
         stats = self.history()[0].stats()
         return (
             "===== Variable summary =====\n"
-            f"name       : {self.name}\n"
-            f"description: {self.description}\n"
-            f"units      : {self.units}\n"
-            f"role       : {self.role.name}\n"
-            f"config keys: {list(self.config.keys())}\n"
-            f"seed       : {self.seed}\n"
-            f"count      : {stats.count}\n"
-            f"mean       : {stats.mean()}\n"
-            f"std        : {stats.std()}\n"
-            f"min        : {stats.min}\n"
-            f"max        : {stats.max}\n"
-            f"confidence : {stats.confidence()}\n"
-            f"ewma       : {stats.ewma}\n"
-            f"sources    : {len(stats.sources)}"
+            f"name             : {self.name}\n"
+            f"description      : {self.description}\n"
+            f"units            : {self.units}\n"
+            f"role             : {self.role.name}\n"
+            f"config keys      : {list(self.config.keys())}\n"
+            f"seed             : {self.seed}\n"
+            f"count            : {stats.count}\n"
+            f"mean             : {stats.mean()}\n"
+            f"std              : {stats.std()}\n"
+            f"min              : {stats.min}\n"
+            f"max              : {stats.max}\n"
+            f"confidence       : {stats.confidence()}\n"
+            f"ewma             : {stats.ewma}\n"
+            f"total candidates : {len(self._candidates_history)}\n"
+            f"committed sources: {len(stats.sources)}"
         )
 
     def epistemic(self) -> VariableEpistemic:
@@ -337,17 +359,26 @@ class Variable:
             The candidate record produced by some mechanism.
         """
         self._candidates.append(candidate)
+        self._candidates_history = self._candidates_history.new(candidate.source)
 
-    def candidates(self) -> list[VariableRecord]:
+    def candidates(self, exclude: Key | None = None) -> list[VariableRecord]:
         """
         Get all current candidates of the variable.
+
+        Parameters
+        ----------
+        exclude : Key | None
+            The key to exclude from candidates. Default is None.
 
         Returns
         -------
         list[VariableRecord]
             The current candidates of the variable.
         """
-        return self._candidates
+        if exclude is None:
+            return self._candidates
+
+        return [record for record in self._candidates if record.source != exclude]
 
     def commit(self, record: VariableRecord | None) -> None:
         """
@@ -375,16 +406,15 @@ class Variable:
             raise ValueError(f"Value {record.value!r} violates domain: {why}")
 
         self._history = self._history.new(record)
-        self.clear_candidates()
 
-    def policy(self) -> SelectionPolicy:
+    def policy(self) -> ResolutionPolicy:
         """
-        Get the selection policy of the variable.
+        Get the resolution policy of the variable.
 
         Returns
         -------
-        SelectionPolicy | None
-            The selection policy of the variable.
+        ResolutionPolicy | None
+            The resolution policy of the variable.
         """
         return self._policy
 
@@ -431,6 +461,7 @@ class Variable:
         """
         self._history.reset()
         self._reasoning_history.reset()
+        self._candidates_history.reset()
         self.clear_candidates()
 
     # -----------------------------
@@ -560,9 +591,9 @@ class Variable:
     def resolve_conflict(
         self,
         candidates: Sequence[VariableRecord],
-        policy: SelectionPolicy,
+        policy: ResolutionPolicy,
         validators: Iterable[ProposalValidator] | None = None,
-    ) -> VariableRecord | None:
+    ) -> tuple[VariableRecord | None, list[VariableRecord]]:
         """
         Resolve conflicting VariableRecords into a single authoritative record.
 
@@ -570,24 +601,26 @@ class Variable:
         ----------
         candidates : Sequence[VariableRecord]
             Competing records to resolve.
-        policy : SelectionPolicy
+        policy : ResolutionPolicy
             Policy used to choose among proposals.
         validators : Iterable[ProposalValidator] | None, optional
             Optional validators for proposals.
 
         Returns
         -------
-        VariableRecord | None
-            Resolved record if successful; otherwise None.
+        tuple[VariableRecord | None, list[VariableRecord]]
+            A tuple of resolved record if successful; otherwise None and the
+            list of validated candidates that participated in the resolution
+            policy.
         """
         with Timer() as t:
-            result, resolved = ConflictResolver().resolve(
+            result, resolved, validated = ConflictResolver().resolve(
                 candidates=candidates, policy=policy, validators=validators
             )
 
             if resolved is None and result is not None:
                 self._record_reasoning(result=result)
-                return None
+                return None, validated
 
             if resolved is not None:
                 if not self._record(resolved):
@@ -596,7 +629,7 @@ class Variable:
                         confidence=resolved.confidence,
                         explanation="Resolved record failed domain validation.",
                     )
-                    return None
+                    return None, validated
 
         self._record_reasoning(
             ReasoningResult(
@@ -608,7 +641,7 @@ class Variable:
                 execution_time=t.elapsed,
             )
         )
-        return resolved
+        return resolved, validated
 
     def propose_actions(self) -> list[ActionProposal]:
         """

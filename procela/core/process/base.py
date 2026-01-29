@@ -21,6 +21,7 @@ from typing import Sequence
 from ...symbols.key import Key
 from ..key_authority import KeyAuthority
 from ..mechanism.base import Mechanism
+from ..variable.variable import Variable
 
 
 class Process:
@@ -118,31 +119,31 @@ class Process:
         for mechanism in self._mechanisms:
             mechanism.run()
 
-    def writable_keys(self) -> set[Key]:
+    def writable(self) -> set[Variable]:
         """
-        Return keys of variables written by the process.
+        Return unique set of variables written by the process.
 
         Returns
         -------
-        set[Key]
-            Writable variable keys.
+        set[Variable]
+            Writable variables.
         """
-        keys: set[Key] = set()
+        vars: set[Variable] = set()
         for mechanism in self._mechanisms:
-            keys.update(mechanism.writes())
-        return keys
+            vars.update(mechanism.writes())
+        return vars
 
-    def all_keys(self) -> set[Key]:
+    def variables(self) -> set[Variable]:
         """
-        Return all variable keys touched by the process.
+        Return all variables touched by the process.
 
         Returns
         -------
-        set[Key]
-            Read and written variable keys.
+        set[Variable]
+            Read and written variables.
         """
-        keys: set[Key] = set()
+        vars: set[Variable] = set()
         for mechanism in self._mechanisms:
-            keys.update(mechanism.reads())
-            keys.update(mechanism.writes())
-        return keys
+            vars.update(mechanism.reads())
+            vars.update(mechanism.writes())
+        return vars

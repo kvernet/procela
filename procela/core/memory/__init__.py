@@ -15,6 +15,7 @@ https://procela.org/docs/examples/core/memory/
 """
 
 from .variable import (
+    CandidatesHistory,
     HistoryStatistics,
     ReasoningHistory,
     VariableHistory,
@@ -24,6 +25,7 @@ from .variable import (
 __all__ = [
     "VariableRecord",
     "HistoryStatistics",
+    "CandidatesHistory",
     "VariableHistory",
     "ReasoningHistory",
 ]

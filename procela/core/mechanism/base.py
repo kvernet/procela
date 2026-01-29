@@ -25,6 +25,7 @@ from typing import Sequence
 
 from ...symbols.key import Key
 from ..key_authority import KeyAuthority
+from ..variable.variable import Variable
 
 
 class Mechanism(ABC):
@@ -38,44 +39,45 @@ class Mechanism(ABC):
     Mechanisms may be dynamically enabled or disabled during execution.
     """
 
-    def __init__(self, reads: Sequence[Key], writes: Sequence[Key]) -> None:
+    def __init__(self, reads: Sequence[Variable], writes: Sequence[Variable]) -> None:
         """
         Initialize a mechanism.
 
         Parameters
         ----------
-        reads : Sequence[Key]
-            Keys of variables read by the mechanism.
-        writes : Sequence[Key]
-            Keys of variables written by the mechanism.
+        reads : Sequence[Variable]
+            Variables read by the mechanism.
+        writes : Sequence[Variable]
+            Variables written by the mechanism.
 
         Notes
         -----
-        - Declared keys define the complete structural footprint
+        - Declared variables define the complete structural footprint
           of the mechanism.
-        - Writing to undeclared keys is structurally invalid.
+        - Writing to undeclared variable is structurally invalid.
         """
         if not isinstance(reads, Sequence):
             raise TypeError(f"`reads` should be Sequence, got {reads!r}")
         for i, key in enumerate(reads):
-            if not isinstance(key, Key):
+            if not isinstance(key, Variable):
                 raise TypeError(
-                    "`reads` should contain only Key instance, "
+                    "`reads` should contain only Variable instance, "
                     f"got {key!r} at index {i}"
                 )
         if not isinstance(writes, Sequence):
             raise TypeError(f"`writes` should be Sequence, got {writes!r}")
         for i, key in enumerate(writes):
-            if not isinstance(key, Key):
+            if not isinstance(key, Variable):
                 raise TypeError(
-                    "`writes` should contain only Key instance, "
+                    "`writes` should contain only Variable instance, "
                     f"got {key!r} at index {i}"
                 )
 
         self._key: Key = KeyAuthority.issue(self)
-        self._reads: tuple[Key, ...] = tuple(reads)
-        self._writes: tuple[Key, ...] = tuple(writes)
+        self._reads: tuple[Variable, ...] = tuple(reads)
+        self._writes: tuple[Variable, ...] = tuple(writes)
         self._enabled: bool = True
+        self.name = self.__class__.__name__
 
     def key(self) -> Key:
         """
@@ -88,25 +90,25 @@ class Mechanism(ABC):
         """
         return self._key
 
-    def reads(self) -> Sequence[Key]:
+    def reads(self) -> Sequence[Variable]:
         """
-        Return the keys of variables read by the mechanism.
+        Return the variables read by the mechanism.
 
         Returns
         -------
-        Sequence[Key]
-            Read variable keys.
+        Sequence[Variable]
+            Variables read by the mechanism.
         """
         return self._reads
 
-    def writes(self) -> Sequence[Key]:
+    def writes(self) -> Sequence[Variable]:
         """
-        Return the keys of variables written by the mechanism.
+        Return the variables written by the mechanism.
 
         Returns
         -------
-        Sequence[Key]
-            Written variable keys.
+        Sequence[Variable]
+            Variables written by the mechanism.
         """
         return self._writes
 

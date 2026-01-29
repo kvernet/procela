@@ -5,6 +5,7 @@ Pytest suite with 100% coverage for Mechanism abstract class.
 import pytest
 
 from procela.core.mechanism import Mechanism
+from procela.core.variable import RealDomain, Variable
 from procela.symbols.key import Key
 
 
@@ -32,8 +33,8 @@ class TestMechanismInitialization:
             def transform(self) -> None:
                 pass
 
-        read_key = Key()
-        write_key = Key()
+        read_key = Variable(name="v1", domain=RealDomain())
+        write_key = Variable(name="v2", domain=RealDomain())
 
         mechanism = TestMechanism(reads=[read_key], writes=[write_key])
 
@@ -49,13 +50,20 @@ class TestMechanismInitialization:
             def transform(self) -> None:
                 pass
 
-        read_keys = [Key(), Key(), Key()]
-        write_keys = [Key(), Key()]
+        reads = [
+            Variable(name="v1", domain=RealDomain()),
+            Variable(name="v2", domain=RealDomain()),
+            Variable(name="v3", domain=RealDomain()),
+        ]
+        writes = [
+            Variable(name="v1", domain=RealDomain()),
+            Variable(name="v2", domain=RealDomain()),
+        ]
 
-        mechanism = TestMechanism(reads=read_keys, writes=write_keys)
+        mechanism = TestMechanism(reads=reads, writes=writes)
 
-        assert mechanism.reads() == tuple(read_keys)
-        assert mechanism.writes() == tuple(write_keys)
+        assert mechanism.reads() == tuple(reads)
+        assert mechanism.writes() == tuple(writes)
         assert len(mechanism.reads()) == 3
         assert len(mechanism.writes()) == 2
 
@@ -66,17 +74,17 @@ class TestMechanismInitialization:
             def transform(self) -> None:
                 pass
 
-        same_key = Key()
-        read_keys = [same_key, same_key, Key()]
-        write_keys = [same_key, Key(), same_key]
+        same = Variable(name="v1", domain=RealDomain())
+        read_keys = [same, same, Variable(name="v1", domain=RealDomain())]
+        write_keys = [same, Variable(name="v1", domain=RealDomain()), same]
 
         mechanism = TestMechanism(reads=read_keys, writes=write_keys)
 
         # Should preserve duplicates
         assert len(mechanism.reads()) == 3
         assert len(mechanism.writes()) == 3
-        assert mechanism.reads().count(same_key) == 2
-        assert mechanism.writes().count(same_key) == 2
+        assert mechanism.reads().count(same) == 2
+        assert mechanism.writes().count(same) == 2
 
     def test_key_uniqueness_per_instance(self):
         """Test that each mechanism instance gets a unique key."""
@@ -87,7 +95,12 @@ class TestMechanismInitialization:
 
         mechanism1 = TestMechanism(reads=[], writes=[])
         mechanism2 = TestMechanism(reads=[], writes=[])
-        mechanism3 = TestMechanism(reads=[Key()], writes=[Key()])
+        mechanism3 = TestMechanism(
+            reads=[Variable(name="v1", domain=RealDomain())],
+            writes=[
+                Variable(name="v2", domain=RealDomain()),
+            ],
+        )
 
         # Each should have a unique key
         key1 = mechanism1.key()
@@ -305,7 +318,13 @@ class TestMechanismTransformMethod:
                 self.result = len(self.reads()) * self.multiplier
 
         mechanism = StatefulMechanism(
-            reads=[Key(), Key(), Key()], writes=[Key()], multiplier=10
+            reads=[
+                Variable(name="v1", domain=RealDomain()),
+                Variable(name="v2", domain=RealDomain()),
+                Variable(name="v3", domain=RealDomain()),
+            ],
+            writes=[Variable(name="v1", domain=RealDomain())],
+            multiplier=10,
         )
 
         mechanism.run()
@@ -353,8 +372,11 @@ class TestMechanismImmutableProperties:
             def transform(self) -> None:
                 pass
 
-        original_keys = [Key(), Key()]
-        mechanism = TestMechanism(reads=original_keys, writes=[])
+        original = [
+            Variable(name="v1", domain=RealDomain()),
+            Variable(name="v2", domain=RealDomain()),
+        ]
+        mechanism = TestMechanism(reads=original, writes=[])
 
         reads_result = mechanism.reads()
 
@@ -366,7 +388,7 @@ class TestMechanismImmutableProperties:
             reads_result.append(Key())
 
         # Original list modification shouldn't affect mechanism
-        original_keys.append(Key())
+        original.append(Variable(name="v1", domain=RealDomain()))
         assert len(mechanism.reads()) == 2  # Still original length
 
     def test_writes_immutable(self):
@@ -376,8 +398,12 @@ class TestMechanismImmutableProperties:
             def transform(self) -> None:
                 pass
 
-        original_keys = [Key(), Key(), Key()]
-        mechanism = TestMechanism(reads=[], writes=original_keys)
+        original = [
+            Variable(name="v1", domain=RealDomain()),
+            Variable(name="v2", domain=RealDomain()),
+            Variable(name="v3", domain=RealDomain()),
+        ]
+        mechanism = TestMechanism(reads=[], writes=original)
 
         writes_result = mechanism.writes()
 
@@ -385,7 +411,7 @@ class TestMechanismImmutableProperties:
         assert isinstance(writes_result, tuple)
 
         # Verify content
-        assert writes_result == tuple(original_keys)
+        assert writes_result == tuple(original)
 
     def test_key_immutable(self):
         """Test that key() returns the same key always."""
@@ -416,12 +442,10 @@ class TestMechanismEdgeCases:
             def transform(self) -> None:
                 pass
 
-        same_key = Key()
-        other_key = Key()
+        same = Variable(name="v1", domain=RealDomain())
+        other = Variable(name="v2", domain=RealDomain())
 
-        mechanism = TestMechanism(
-            reads=[same_key, other_key], writes=[same_key, other_key]
-        )
+        mechanism = TestMechanism(reads=[same, other], writes=[same, other])
 
         assert len(mechanism.reads()) == 2
         assert len(mechanism.writes()) == 2
@@ -459,7 +483,15 @@ class TestMechanismEdgeCases:
                 super().transform()
                 self.derived_called = True
 
-        mechanism = DerivedMechanism(reads=[Key()], writes=[Key()], extra_param="test")
+        mechanism = DerivedMechanism(
+            reads=[
+                Variable(name="v1", domain=RealDomain()),
+            ],
+            writes=[
+                Variable(name="v2", domain=RealDomain()),
+            ],
+            extra_param="test",
+        )
 
         mechanism.run()
 
@@ -528,7 +560,14 @@ class TestMechanismIntegration:
                 self.state = "IDLE"
                 self.transition_count = 0
 
-        mechanism = StateMachineMechanism(reads=[Key()], writes=[Key()])
+        mechanism = StateMachineMechanism(
+            reads=[
+                Variable(name="v1", domain=RealDomain()),
+            ],
+            writes=[
+                Variable(name="v2", domain=RealDomain()),
+            ],
+        )
 
         # Initial state
         assert mechanism.state == "IDLE"
@@ -641,7 +680,15 @@ class TestMechanismErrorConditions:
                 write_count = len(self.declared_writes)
                 self.result = f"R{read_count}W{write_count}"
 
-        mechanism = WellBehavedMechanism(reads=[Key(), Key()], writes=[Key()])
+        mechanism = WellBehavedMechanism(
+            reads=[
+                Variable(name="v1", domain=RealDomain()),
+                Variable(name="v2", domain=RealDomain()),
+            ],
+            writes=[
+                Variable(name="v3", domain=RealDomain()),
+            ],
+        )
 
         mechanism.run()
         assert mechanism.result == "R2W1"

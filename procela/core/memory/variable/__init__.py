@@ -14,13 +14,14 @@ Examples Reference
 https://procela.org/docs/examples/core/memory/variable/
 """
 
-from .history import ReasoningHistory, VariableHistory
+from .history import CandidatesHistory, ReasoningHistory, VariableHistory
 from .record import VariableRecord
 from .statistics import HistoryStatistics
 
 __all__ = [
     "VariableHistory",
     "ReasoningHistory",
+    "CandidatesHistory",
     "VariableRecord",
     "HistoryStatistics",
 ]

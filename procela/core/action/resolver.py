@@ -3,7 +3,7 @@ Conflict resolution operators for the action subsystem.
 
 This module defines the ConflictResolver class, which resolves
 conflicting VariableRecords into a single authoritative record. It
-performs computational selection only; the semantics of resolution
+performs computational resolution only; the semantics of resolution
 and policy interpretation are defined externally.
 
 Semantics Reference
@@ -22,7 +22,7 @@ from typing import Iterable, Sequence
 from ..assessment.reasoning import ReasoningResult
 from ..assessment.task import ReasoningTask
 from ..memory.variable.history import VariableRecord
-from .policy import SelectionPolicy
+from .policy import ResolutionPolicy
 from .proposal import ActionProposal, ProposalStatus
 from .validator import ProposalValidator
 
@@ -31,7 +31,7 @@ class ConflictResolver:
     """
     Resolve conflicts among competing VariableRecords.
 
-    This class applies selection policies and optional validators to
+    This class applies resolution policies and optional validators to
     determine a single authoritative VariableRecord from multiple
     candidates. Semantic interpretation of the result is defined
     externally.
@@ -40,9 +40,9 @@ class ConflictResolver:
     def resolve(
         self,
         candidates: Sequence[VariableRecord],
-        policy: SelectionPolicy,
+        policy: ResolutionPolicy,
         validators: Iterable[ProposalValidator] | None = None,
-    ) -> tuple[ReasoningResult | None, VariableRecord | None]:
+    ) -> tuple[ReasoningResult | None, VariableRecord | None, list[VariableRecord]]:
         """
         Resolve conflicting VariableRecords into a single authoritative record.
 
@@ -50,15 +50,16 @@ class ConflictResolver:
         ----------
         candidates : Sequence[VariableRecord]
             Competing VariableRecords produced by mechanisms.
-        policy : SelectionPolicy
-            Policy used to select among proposals.
+        policy : ResolutionPolicy
+            Policy used to resolve among proposals.
         validators : Iterable[ProposalValidator] | None, optional
-            Optional validators applied to proposals before selection.
+            Optional validators applied to proposals before resolution.
 
         Returns
         -------
-        tuple[ReasoningResult | None, VariableRecord | None]
-            Tuple of a reasoning result and the resolved VariableRecord.
+        tuple[ReasoningResult | None, VariableRecord | None, list[VariableRecord]]
+            Tuple of the reasoning result, the resolved VariableRecord and the
+            list of validated candidates that participate in resolution.
             If resolution fails, the ReasoningResult contains failure details
             and the VariableRecord is None. Otherwise, ReasoningResult is None
             and the resolved record is returned.
@@ -82,16 +83,7 @@ class ConflictResolver:
                     explanation="No candidates.",
                 ),
                 None,
-            )
-
-        if not policy:
-            return (
-                self._create_failed_result(
-                    task=ReasoningTask.CONFLICT_RESOLUTION,
-                    confidence=0.0,
-                    explanation="No policy.",
-                ),
-                None,
+                [],
             )
 
         if not isinstance(candidates, Sequence):
@@ -107,12 +99,9 @@ class ConflictResolver:
                     f"got {candidate!r}"
                 )
 
-        if not isinstance(policy, SelectionPolicy):
-            raise TypeError(f"`policy` should be a SelectionPolicy, got {policy!r}")
-
         if validators is not None and not isinstance(validators, Iterable):
             raise TypeError(
-                f"`validators` should be a Iterable instance, got {validators!r}"
+                f"`validators` should be an Iterable instance, got {validators!r}"
             )
 
         if validators is not None:
@@ -127,18 +116,21 @@ class ConflictResolver:
         proposals = [self._record_to_proposal(r) for r in candidates]
 
         # Step 2 — Apply validators
-        validated: list[ActionProposal] = []
+        proposals_validated: list[ActionProposal] = []
+        validated: list[VariableRecord] = []
         if validators is not None:
-            for proposal in proposals:
+            for record, proposal in zip(candidates, proposals, strict=False):
                 if all(v.validate(proposal) for v in validators):
                     proposal = proposal.with_status(ProposalStatus.VALIDATED)
-                    validated.append(proposal)
+                    proposals_validated.append(proposal)
+                    validated.append(record)
         else:
             for proposal in proposals:
                 proposal = proposal.with_status(ProposalStatus.VALIDATED)
-                validated.append(proposal)
+                proposals_validated.append(proposal)
+            validated = list(candidates)
 
-        proposals = validated
+        proposals = proposals_validated
 
         if not proposals:
             return (
@@ -148,26 +140,42 @@ class ConflictResolver:
                     explanation="All proposals rejected by validators.",
                 ),
                 None,
+                validated,
             )
 
-        # Step 3 — Policy selection
-        selected = policy.select(proposals)
-
-        if selected is None:
+        if not policy:
             return (
                 self._create_failed_result(
                     task=ReasoningTask.CONFLICT_RESOLUTION,
                     confidence=0.0,
-                    explanation="Selection policy returned no proposal.",
+                    explanation="No policy.",
                 ),
                 None,
+                validated,
+            )
+
+        if not isinstance(policy, ResolutionPolicy):
+            raise TypeError(f"`policy` should be a ResolutionPolicy, got {policy!r}")
+
+        # Step 3 — Policy resolution
+        resolved_proposal = policy.resolve(proposals)
+
+        if resolved_proposal is None:
+            return (
+                self._create_failed_result(
+                    task=ReasoningTask.CONFLICT_RESOLUTION,
+                    confidence=0.0,
+                    explanation="Resolution policy returned no proposal.",
+                ),
+                None,
+                validated,
             )
 
         # Step 4 — Build resolved record
         resolved = VariableRecord(
-            value=selected.value,
-            confidence=selected.confidence,
-            source=selected.source,
+            value=resolved_proposal.value,
+            confidence=resolved_proposal.confidence,
+            source=resolved_proposal.source,
             metadata={
                 "resolved_from": [
                     p.metadata.get("record_key")
@@ -178,7 +186,7 @@ class ConflictResolver:
             },
         )
 
-        return None, resolved
+        return None, resolved, validated
 
     def _record_to_proposal(self, record: VariableRecord) -> ActionProposal:
         """
@@ -197,7 +205,7 @@ class ConflictResolver:
         Notes
         -----
         This is a helper method used internally for preparing proposals
-        for validation and policy selection.
+        for validation and policy resolution.
         """
         return ActionProposal(
             value=record.value,

@@ -1,820 +1,481 @@
-"""
-Pytest suite with 100% coverage for Executive class.
-Uses actual API interfaces without mocking implementations.
-"""
+"""Minimal pytest suite for Executive class with 100% coverage."""
+
+from unittest.mock import Mock, create_autospec
 
 import pytest
 
-from procela.core.epistemic import ExecutiveView
 from procela.core.exceptions import ExecutionError
+from procela.core.execution import ExecutionTrace
 from procela.core.executive import Executive
+from procela.core.invariant import (
+    InvariantCategory,
+    InvariantPhase,
+    InvariantSeverity,
+    InvariantViolation,
+    InvariantViolationCritical,
+    InvariantViolationFatal,
+    InvariantViolationInfo,
+    InvariantViolationWarning,
+    SystemInvariant,
+    VariableSnapshot,
+)
 from procela.core.mechanism import Mechanism
-from procela.core.process import Compose, Process
+from procela.core.process import Process
 from procela.core.variable import Variable
 from procela.symbols.key import Key
 
 
-def create_default_mechanism():
-    class DefaultMechanism(Mechanism):
-        def transform(self):
-            pass
+class TestExecutive:
+    """Test suite for the Executive class."""
 
-    return DefaultMechanism(reads=[], writes=[])
+    def test_initialization(self):
+        """Test Executive.__init__ with default and custom parameters."""
+        # Test with defaults
+        exec_default = Executive()
+        assert exec_default._processes == []
+        assert exec_default._mechanisms == []
+        assert exec_default._prepared is True
 
+        # Test with provided processes and mechanisms
+        mock_process = create_autospec(Process)
+        mock_mechanism = create_autospec(Mechanism)
+        exec_with_args = Executive(
+            processes=[mock_process], mechanisms=[mock_mechanism]
+        )
+        assert exec_with_args._processes == [mock_process]
+        assert exec_with_args._mechanisms == [mock_mechanism]
+        assert exec_with_args._prepared is True
 
-class TestExecutiveInitialization:
-    """Test Executive initialization with real objects."""
+    def test_add_and_remove_process(self):
+        """Test add_process and remove_process methods."""
+        executive = Executive()
+        mock_process = create_autospec(Process)
 
-    def test_initialization_with_empty_processes(self):
-        """Test initialization with empty process sequence."""
-        executive = Executive(processes=[])
+        # Test add_process
+        executive.add_process(mock_process)
+        assert mock_process in executive._processes
+        assert executive._prepared is True
 
-        # Executive should have a Key
-        key = executive.key()
-        assert isinstance(key, Key)
+        # Test remove_process
+        executive.remove_process(mock_process)
+        assert mock_process not in executive._processes
+        assert executive._prepared is True
 
-        # Verify all initial states
-        assert executive.processes() == ()
-        assert executive.writable_keys() == set()
-        assert executive.all_keys() == set()
-        assert executive._prepared is False
-        assert executive._step_index == 0
+    def test_add_and_remove_mechanism(self):
+        """Test add_mechanism and remove_mechanism methods."""
+        executive = Executive()
+        mock_mechanism = create_autospec(Mechanism)
 
-    def test_initialization_with_single_process(self):
-        """Test initialization with single process."""
+        # Test add_mechanism
+        executive.add_mechanism(mock_mechanism)
+        assert mock_mechanism in executive._mechanisms
+        assert executive._prepared is True
 
-        # Create minimal mechanism implementation
-        class TestMechanism(Mechanism):
-            def transform(self) -> None:
-                pass
+        # Test remove_mechanism
+        executive.remove_mechanism(mock_mechanism)
+        assert mock_mechanism not in executive._mechanisms
+        assert executive._prepared is True
 
-        # Create process with mechanism
-        mechanism = TestMechanism(reads=[], writes=[])
-        process = Process(mechanisms=[mechanism])
+    def test_prepare_method(self):
+        """Test the prepare method collects variables correctly."""
+        # Create mocks
+        mock_process = create_autospec(Process)
+        mock_mechanism = create_autospec(Mechanism)
+        mock_var1 = create_autospec(Variable)
+        mock_var2 = create_autospec(Variable)
+        mock_var3 = create_autospec(Variable)
 
-        executive = Executive(processes=[process])
+        # Configure mocks
+        mock_process.writable.return_value = [mock_var1]
+        mock_process.variables.return_value = [mock_var1, mock_var2]
+        mock_mechanism.writes.return_value = [mock_var2]
+        mock_mechanism.reads.return_value = [mock_var3]
 
-        assert len(executive.processes()) == 1
-        assert executive.processes()[0] is process
-        assert executive._prepared is False
+        # Create executive and test
+        executive = Executive(processes=[mock_process], mechanisms=[mock_mechanism])
 
-    def test_initialization_with_multiple_processes(self):
-        """Test initialization with multiple processes."""
-
-        # Create simple mechanism
-        class TestMechanism(Mechanism):
-            def transform(self) -> None:
-                pass
-
-        # Create multiple processes
-        processes = []
-        for i in range(3):
-            mechanism = TestMechanism(reads=[Key()], writes=[Key()])
-            process = Process(mechanisms=[mechanism])
-            processes.append(process)
-
-        executive = Executive(processes=processes)
-
-        assert len(executive.processes()) == 3
-        assert executive.processes()[0] is processes[0]
-        assert executive.processes()[1] is processes[1]
-        assert executive.processes()[2] is processes[2]
-
-    def test_key_uniqueness_per_instance(self):
-        """Test that each executive instance gets a unique key."""
-        executive1 = Executive(processes=[])
-        executive2 = Executive(processes=[])
-        executive3 = Executive(processes=[])
-
-        key1 = executive1.key()
-        key2 = executive2.key()
-        key3 = executive3.key()
-
-        # Each should have a different key (Key equality is by identity)
-        assert key1 != key2
-        assert key1 != key3
-        assert key2 != key3
-
-    def test_process_order_preserved(self):
-        """Test that process order is preserved."""
-
-        # Create simple mechanism
-        class TestMechanism(Mechanism):
-            def transform(self) -> None:
-                pass
-
-        processes = []
-        for i in range(5):
-            mechanism = TestMechanism(reads=[], writes=[])
-            process = Process(mechanisms=[mechanism])
-            processes.append(process)
-
-        executive = Executive(processes=processes)
-
-        # Should preserve order
-        for i, process in enumerate(executive.processes()):
-            assert process is processes[i]
-
-
-class TestExecutivePrepareMethod:
-    """Test prepare() method with real objects."""
-
-    def test_prepare_empty_executive(self):
-        """Test prepare() with empty executive."""
-        executive = Executive(processes=[])
+        executive._prepared = False
+        executive._writable = {mock_var3}
+        executive._variables = {mock_var3}
 
         executive.prepare()
 
         assert executive._prepared is True
-        assert executive.writable_keys() == set()
-        assert executive.all_keys() == set()
+        assert executive._writable == {mock_var1, mock_var2}
+        assert executive._variables == {mock_var1, mock_var2, mock_var3}
 
-    def test_prepare_with_processes_having_keys(self):
-        """Test prepare() with processes that have keys."""
-        # Create keys
-        read_key1, read_key2 = Key(), Key()
-        write_key1, write_key2 = Key(), Key()
+    def test_step_method_normal_flow(self):
+        """Test the step method with normal execution flow."""
+        # Create comprehensive mocks
+        mock_process = create_autospec(Process)
+        mock_mechanism = create_autospec(Mechanism)
+        mock_variable = create_autospec(Variable)
+        mock_key = create_autospec(Key)
+        mock_record = Mock()
 
-        # Create mechanism implementation
-        class TestMechanism(Mechanism):
-            def __init__(self, reads, writes):
-                super().__init__(reads, writes)
+        # Configure mocks
+        mock_variable.key.return_value = mock_key
+        mock_variable.candidates.return_value = [mock_record]
+        mock_variable.policy.return_value = Mock()
+        mock_variable.validators.return_value = []
+        mock_variable.resolve_conflict.return_value = (mock_record, [mock_record])
+        mock_record.source = mock_key
 
-            def transform(self) -> None:
-                pass
-
-        # Create mechanisms with specific keys
-        mechanism1 = TestMechanism(reads=[read_key1], writes=[write_key1])
-        mechanism2 = TestMechanism(reads=[read_key2], writes=[write_key2])
-
-        process = Process(mechanisms=[mechanism1, mechanism2])
-
-        executive = Executive(processes=[process])
-        executive.prepare()
-
-        # Check writable keys (should be write_key1 and write_key2)
-        writable_keys = executive.writable_keys()
-        assert isinstance(writable_keys, set)
-        assert write_key1 in writable_keys
-        assert write_key2 in writable_keys
-        assert len(writable_keys) == 2
-
-        # Check all keys (should include read keys too)
-        all_keys = executive.all_keys()
-        assert isinstance(all_keys, set)
-        assert read_key1 in all_keys
-        assert read_key2 in all_keys
-        assert write_key1 in all_keys
-        assert write_key2 in all_keys
-        assert len(all_keys) == 4
-
-        assert executive._prepared is True
-
-    def test_prepare_updates_existing_sets(self):
-        """Test that prepare() updates existing sets, not just initializes."""
-
-        # Create simple mechanism
-        class TestMechanism(Mechanism):
-            def transform(self) -> None:
-                pass
-
-        # Create process with some keys
-        key1, key2 = Key(), Key()
-        mechanism = TestMechanism(reads=[key1], writes=[key2])
-        process = Process(mechanisms=[mechanism])
-
-        executive = Executive(processes=[process])
-
-        # First prepare
-        executive.prepare()
-        assert key2 in executive.writable_keys()
-        assert key1 in executive.all_keys()
-
-        # Create new process with different keys
-        key3, key4 = Key(), Key()
-        new_mechanism = TestMechanism(reads=[key3], writes=[key4])
-        new_process = Process(mechanisms=[new_mechanism])
-
-        # Update executive with new process and prepare again
-        executive._processes = (new_process,)
-        executive.prepare()
-
-        # Should now have new keys, not old ones
-        assert key4 in executive.writable_keys()
-        assert key3 in executive.all_keys()
-        assert key2 not in executive.writable_keys()  # Old key should be gone
-        assert key1 not in executive.all_keys()  # Old key should be gone
-
-    def test_prepare_called_multiple_times(self):
-        """Test that prepare() can be called multiple times."""
-        executive = Executive(processes=[])
-
-        # Can call prepare multiple times
-        executive.prepare()
-        assert executive._prepared is True
-
-        executive.prepare()
-        assert executive._prepared is True
-
-        executive.prepare()
-        assert executive._prepared is True
-
-
-class TestExecutiveStepMethod:
-    """Test step() method execution."""
-
-    def test_step_without_prepare_raises_execution_error(self):
-        """Test step() raises ExecutionError if not prepared."""
-        executive = Executive(processes=[])
-
-        with pytest.raises(
-            ExecutionError, match="Executive must be prepared before execution"
-        ):
-            executive.step()
-
-    def test_step_executes_all_processes(self):
-        """Test step() executes all processes in order."""
-        # Track execution order
-        execution_order = []
-
-        # Create mechanism that tracks execution
-        class TrackingMechanism(Mechanism):
-            def __init__(self, idx):
-                super().__init__(reads=[], writes=[])
-                self.idx = idx
-
-            def transform(self) -> None:
-                execution_order.append(self.idx)
-
-        # Create processes with tracking mechanisms
-        processes = []
-        for i in range(3):
-            mechanism = TrackingMechanism(i)
-            process = Process(mechanisms=[mechanism])
-            processes.append(process)
-
-        executive = Executive(processes=processes)
-        executive.prepare()
+        # Create executive
+        executive = Executive(processes=[mock_process], mechanisms=[mock_mechanism])
+        executive._writable = {mock_variable}
+        executive._step_index = 0
 
         # Execute step
         executive.step()
 
-        # All processes should have been executed in order
-        assert execution_order == [0, 1, 2]
+        # Verify calls
+        mock_process.step.assert_called_once()
+        mock_mechanism.run.assert_called_once()
+        mock_variable.resolve_conflict.assert_called_once()
+        mock_variable.commit.assert_called_once_with(mock_record)
+        mock_variable.clear_candidates.assert_called_once()
 
-        # Step index should be incremented
+        # Verify trace was updated
+        assert len(executive.execution_trace) == 1
         assert executive._step_index == 1
 
-    def test_step_processes_executed_in_order(self):
-        """Test that processes are executed in the order provided."""
-        execution_order = []
+    def test_step_method_no_candidates(self):
+        """Test step method when variables have no candidates."""
+        # Create mocks
+        mock_process = create_autospec(Process)
+        mock_mechanism = create_autospec(Mechanism)
+        mock_variable = create_autospec(Variable)
 
-        class TrackingProcess(Process):
-            def __init__(self, idx):
-                super().__init__([])
-                self.idx = idx
+        # Configure variable with no candidates
+        mock_variable.candidates.return_value = []
 
-            def step(self) -> None:
-                execution_order.append(self.idx)
-                super().step()
+        # Create executive
+        executive = Executive(processes=[mock_process], mechanisms=[mock_mechanism])
+        executive._writable = {mock_variable}
 
-        # Create processes
-        processes = [TrackingProcess(i) for i in range(4)]
-
-        executive = Executive(processes=processes)
-        executive.prepare()
-
+        # Execute step
         executive.step()
 
-        # Should execute in order 0, 1, 2, 3
-        assert execution_order == [0, 1, 2, 3]
+        # Verify variable wasn't resolved
+        mock_variable.resolve_conflict.assert_not_called()
 
-    def test_step_increments_step_index(self):
-        """Test step() increments step index."""
-        executive = Executive(processes=[])
-        executive.prepare()
+    def test_step_method_not_prepared(self):
+        """Test step method when not prepared."""
+        executive = Executive()
+        executive._prepared = False
 
-        assert executive._step_index == 0
-
-        # Execute multiple steps
-        for i in range(1, 6):
-            try:
-                executive.step()
-            except Exception:
-                # Ignore errors from empty processes
-                pass
-            assert executive._step_index == i
-
-    def test_step_with_process_raising_exception(self):
-        """Test step() when a process raises an exception."""
-
-        class FailingProcess(Process):
-            def step(self) -> None:
-                raise RuntimeError("Process failed")
-
-        process = FailingProcess([])
-        executive = Executive(processes=[process])
-        executive.prepare()
-
-        # Exception should propagate through step()
-        with pytest.raises(RuntimeError, match="Process failed"):
+        with pytest.raises(ExecutionError, match="Executive must be prepared"):
             executive.step()
 
+    def test_step_method_invalid_variable(self):
+        """Test step method handles non-Variable in writable set."""
+        # Create executive with non-Variable in writable
+        executive = Executive(processes=[], mechanisms=[])
+        executive._writable = {None}  # Invalid value
 
-class TestExecutiveResetMethod:
-    """Test reset() method."""
+        # Should skip None without error
+        executive.step()
 
-    def test_reset_empty_executive(self):
-        """Test reset() with empty executive."""
-        executive = Executive(processes=[])
-        executive.prepare()
+        executive._writable = {Key()}  # Invalid value
 
-        # Should not raise error
-        executive.reset()
-
-    def test_reset_with_variable_keys(self):
-        """Test reset() with variable keys in the system."""
-
-        # Create a variable implementation
-        class TestVariable(Variable):
-            def __init__(self):
-                self._key = Key()
-                self.reset_called = False
-
-            def key(self) -> Key:
-                return self._key
-
-            def reset(self) -> None:
-                self.reset_called = True
-
-        # Create a process that references the variable
-        class TestMechanism(Mechanism):
-            def __init__(self):
-                self.variable = TestVariable()
-                super().__init__(
-                    reads=[self.variable.key()], writes=[self.variable.key()]
-                )
-
-            def transform(self) -> None:
-                pass
-
-        mechanism = TestMechanism()
-        process = Process(mechanisms=[mechanism])
-
-        executive = Executive(processes=[process])
-        executive.prepare()
-
-        # Reset should call reset on the variable
-        executive.reset()
-        assert executive._step_index == 0
-
-
-class TestExecutiveSnapshotMethod:
-    """Test snapshot() method."""
-
-    def test_snapshot_empty_executive(self):
-        """Test snapshot() with empty executive."""
-        executive = Executive(processes=[])
-        executive.prepare()
-
-        snapshot = executive.snapshot()
-
-        # Should return ExecutiveView
-        assert isinstance(snapshot, ExecutiveView)
-        assert snapshot.key == executive.key()
-        assert snapshot.step == 0
-        assert snapshot.process_keys == ()
-
-    def test_snapshot_with_processes(self):
-        """Test snapshot() with processes."""
-        # Create processes
-        processes = []
-        for i in range(3):
-            mechanism = create_default_mechanism()
-            process = Process(mechanisms=[mechanism])
-            processes.append(process)
-
-        executive = Executive(processes=processes)
-        executive.prepare()
-
-        # Execute some steps
-        for _ in range(5):
+        # Should raise error
+        with pytest.raises(TypeError, match="Expected `Variable`, got <Key>"):
             executive.step()
 
-        snapshot = executive.snapshot()
+    def test_run_method(self):
+        """Test the run method with all phases."""
+        # Create executive with mock invariant
+        executive = Executive()
 
-        assert isinstance(snapshot, ExecutiveView)
-        assert snapshot.key == executive.key()
-        assert snapshot.step == 5
-        assert len(snapshot.process_keys) == 3
-        for i, key in enumerate(snapshot.process_keys):
-            assert key == processes[i].key()
+        # Mock invariant that passes check
+        mock_invariant = create_autospec(SystemInvariant)
+        mock_invariant.phase = InvariantPhase.PRE
+        executive._invariants = [mock_invariant]
 
-    def test_snapshot_returns_new_view_each_time(self):
-        """Test that snapshot() returns a new view each time."""
-        executive = Executive(processes=[])
-        executive.prepare()
-
-        snapshot1 = executive.snapshot()
-        snapshot2 = executive.snapshot()
-
-        # Should have same values but may be different objects
-        assert snapshot1.key == snapshot2.key
-        assert snapshot1.step == snapshot2.step
-        assert snapshot1.process_keys == snapshot2.process_keys
-
-
-class TestExecutiveProperties:
-    """Test property methods."""
-
-    def test_key_returns_same_key_always(self):
-        """Test key() always returns the same key."""
-        executive = Executive(processes=[])
-
-        key1 = executive.key()
-        key2 = executive.key()
-        key3 = executive.key()
-
-        # Should return the same Key object each time
-        assert key1 is key2
-        assert key1 is key3
-
-    def test_processes_returns_immutable_sequence(self):
-        """Test processes() returns immutable sequence."""
-        # Create processes
-        processes = []
-        for i in range(3):
-            mechanism = create_default_mechanism()
-            process = Process(mechanisms=[mechanism])
-            processes.append(process)
-
-        executive = Executive(processes=processes)
-
-        processes_result = executive.processes()
-
-        # Should be a tuple (immutable)
-        assert isinstance(processes_result, tuple)
-        assert len(processes_result) == 3
-
-    def test_writable_keys_before_prepare(self):
-        """Test writable_keys() returns empty set before prepare()."""
-        executive = Executive(processes=[])
-
-        writable_keys = executive.writable_keys()
-
-        assert isinstance(writable_keys, set)
-        assert len(writable_keys) == 0
-
-    def test_all_keys_before_prepare(self):
-        """Test all_keys() returns empty set before prepare()."""
-        executive = Executive(processes=[])
-
-        all_keys = executive.all_keys()
-
-        assert isinstance(all_keys, set)
-        assert len(all_keys) == 0
-
-
-class TestExecutiveIntegration:
-    """Integration tests for Executive."""
-
-    def test_executive_with_compose_process(self):
-        """Test Executive with Compose process (which is a Process)."""
-
-        # Create simple mechanisms
-        class TestMechanism(Mechanism):
-            def transform(self):
-                pass
-
-        # Create individual processes
-        process1 = Process(mechanisms=[TestMechanism(reads=[], writes=[])])
-        process2 = Process(mechanisms=[TestMechanism(reads=[], writes=[])])
-
-        # Create composed process
-        compose = Compose(processes=[process1, process2])
-
-        # Create executive with composed process
-        executive = Executive(processes=[compose])
-
-        assert len(executive.processes()) == 1
-        assert isinstance(executive.processes()[0], Compose)
-
-        executive.prepare()
-        assert executive._prepared is True
-
-    def test_executive_multiple_steps(self):
-        """Test Executive over multiple steps."""
-        # Track step executions
+        # Mock step to count calls
         step_count = 0
+        original_step = executive.step
 
-        class TrackingProcess(Process):
-            def step(self) -> None:
-                nonlocal step_count
-                step_count += 1
-                super().step()
+        def mock_step():
+            nonlocal step_count
+            step_count += 1
 
-        process = TrackingProcess([])
-        executive = Executive(processes=[process])
-        executive.prepare()
+        executive.step = mock_step
 
-        # Execute multiple steps
-        for i in range(5):
-            executive.step()
-            assert step_count == i + 1
-            assert executive._step_index == i + 1
+        # Mock _check_invariants to track calls
+        check_calls = []
+        original_check = executive._check_invariants
 
-        # Take snapshot
+        def mock_check(phase):
+            check_calls.append(phase)
+
+        executive._check_invariants = mock_check
+
+        # Test run with callback
+        callback_calls = []
+
+        def on_step(exec, i):
+            callback_calls.append((exec, i))
+
+        executive.run(steps=3, on_step=on_step)
+
+        # Verify results
+        assert step_count == 3
+        assert check_calls == [InvariantPhase.PRE, InvariantPhase.POST]
+        assert len(callback_calls) == 3
+        for i, (exec, step_num) in enumerate(callback_calls):
+            assert exec is executive
+            assert step_num == i
+
+        # Restore original methods
+        executive.step = original_step
+        executive._check_invariants = original_check
+
+    def test_run_method_not_prepared(self):
+        """Test run method raises error when not prepared."""
+        executive = Executive()
+        executive._prepared = False
+
+        with pytest.raises(ExecutionError, match="Executive must be prepared"):
+            executive.run(steps=1)
+
+    def test_key_method(self):
+        """Test the key method returns correct key."""
+        executive = Executive()
+        key = executive.key()
+
+        assert isinstance(key, Key)
+        assert key == executive._key
+
+    def test_processes_method(self):
+        """Test processes method returns correct sequence."""
+        mock_process = create_autospec(Process)
+        executive = Executive(processes=[mock_process])
+
+        processes = executive.processes()
+        assert processes == [mock_process]
+
+    def test_mechanisms_method(self):
+        """Test mechanisms method returns correct sequence."""
+        mock_mechanism = create_autospec(Mechanism)
+        executive = Executive(mechanisms=[mock_mechanism])
+
+        mechanisms = executive.mechanisms()
+        assert mechanisms == [mock_mechanism]
+
+    def test_writable_method(self):
+        """Test writable method returns correct set."""
+        mock_variable = create_autospec(Variable)
+        executive = Executive()
+        executive._writable = {mock_variable}
+
+        writable = executive.writable()
+        assert writable == {mock_variable}
+
+    def test_variables_method(self):
+        """Test variables method returns correct set."""
+        mock_variable = create_autospec(Variable)
+        executive = Executive()
+        executive._variables = {mock_variable}
+
+        variables = executive.variables()
+        assert variables == {mock_variable}
+
+    def test_reset_method(self):
+        """Test reset method resets all variables."""
+        # Create mock variables
+        mock_var1 = create_autospec(Variable)
+        mock_var2 = create_autospec(Variable)
+
+        # Create executive with variables
+        executive = Executive()
+        executive._variables = {mock_var1, mock_var2}
+        executive._step_index = 5
+
+        # Execute reset
+        executive.reset()
+
+        # Verify all variables were reset
+        mock_var1.reset.assert_called_once()
+        mock_var2.reset.assert_called_once()
+        assert executive._step_index == 0
+
+    def test_snapshot_method(self):
+        """Test snapshot method creates VariableSnapshot."""
+        # Create mock variable with epistemic view
+        mock_variable = create_autospec(Variable)
+        mock_view = Mock()
+        mock_variable.epistemic.return_value = mock_view
+
+        # Create executive
+        executive = Executive()
+        executive._variables = {mock_variable}
+
+        # Get snapshot
         snapshot = executive.snapshot()
-        assert snapshot.step == 5
 
-    def test_executive_reset_after_steps(self):
-        """Test reset() after executing steps."""
+        # Verify snapshot was created
+        assert isinstance(snapshot, VariableSnapshot)
+        mock_variable.epistemic.assert_called_once()
 
-        # Create a simple variable that tracks resets
-        class ResettableVariable(Variable):
-            def __init__(self):
-                self._key = Key()
-                self.reset_count = 0
+    def test_add_invariant_method(self):
+        """Test add_invariant method adds to list."""
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
 
-            def key(self) -> Key:
-                return self._key
+        executive.add_invariant(mock_invariant)
 
-            def reset(self) -> None:
-                self.reset_count += 1
+        assert executive._invariants == [mock_invariant]
 
-        # Create mechanism that references the variable
-        variable = ResettableVariable()
+    def test_execution_trace_property(self):
+        """Test execution_trace property returns trace."""
+        executive = Executive()
+        trace = executive.execution_trace
 
-        class TestMechanism(Mechanism):
-            def __init__(self):
-                super().__init__(reads=[variable.key()], writes=[variable.key()])
+        assert isinstance(trace, ExecutionTrace)
+        assert trace is executive._execution_trace
 
-            def transform(self) -> None:
-                pass
+    def test_safe_mode_method(self):
+        """Test safe_mode method (currently not implemented)."""
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
 
-        mechanism = TestMechanism()
-        process = Process(mechanisms=[mechanism])
+        # Should not raise (method exists but doesn't do anything)
+        executive.safe_mode(mock_invariant)
 
-        executive = Executive(processes=[process])
-        executive.prepare()
+    def test_abort_method(self):
+        """Test abort method raises InvariantViolationFatal."""
+        executive = Executive()
 
-        # Execute some steps
-        for i in range(3):
-            try:
-                executive.step()
-            except Exception:
-                pass
+        # Create invariant with required attributes
+        mock_invariant = Mock(spec=SystemInvariant)
+        mock_invariant.name = "TestViolation"
+        mock_invariant.message = "Test message"
+        mock_invariant.category = InvariantCategory.CONSISTENCY
+        mock_invariant.phase = InvariantPhase.RUNTIME
 
-        # Reset
-        executive.reset()
-        assert variable.reset_count == 0
+        # Verify abort raises the expected exception
+        with pytest.raises(InvariantViolationFatal) as exc_info:
+            executive.abort(mock_invariant)
 
-        # Step index remains (reset doesn't reset executive state)
-        assert executive._step_index == 3
+        assert exc_info.value.name == "TestViolation"
 
+    def test_check_invariants_method(self):
+        """Test _check_invariants method with different violation types."""
+        # Test 1: No invariants
+        executive = Executive()
+        executive._check_invariants(InvariantPhase.PRE)
+        # Should return without error
 
-class TestExecutiveEdgeCases:
-    """Test edge cases and robustness."""
+        # Test 2: Invariant with different phase (should be skipped)
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
+        mock_invariant.phase = InvariantPhase.POST  # Different from PRE
+        executive._invariants = [mock_invariant]
 
-    def test_executive_with_large_number_of_processes(self):
-        """Test with large number of processes."""
-        n_processes = 10  # Using reasonable number for testing
+        executive._check_invariants(InvariantPhase.PRE)
+        mock_invariant.check.assert_not_called()
 
-        # Create many processes
-        processes = []
-        for i in range(n_processes):
-            mechanism = create_default_mechanism()
-            process = Process(mechanisms=[mechanism])
-            processes.append(process)
-
-        executive = Executive(processes=processes)
-
-        # Should initialize successfully
-        assert len(executive.processes()) == n_processes
-
-        # Prepare should work
-        executive.prepare()
-        assert executive._prepared is True
-
-    def test_executive_with_duplicate_keys_across_processes(self):
-        """Test with duplicate keys across processes."""
-        # Create shared keys
-        shared_read_key = Key()
-        shared_write_key = Key()
-
-        # Create mechanism that uses shared keys
-        class TestMechanism(Mechanism):
-            def __init__(self):
-                super().__init__(reads=[shared_read_key], writes=[shared_write_key])
-
-            def transform(self) -> None:
-                pass
-
-        # Create multiple processes with same keys
-        processes = []
-        for i in range(3):
-            mechanism = TestMechanism()
-            process = Process(mechanisms=[mechanism])
-            processes.append(process)
-
-        executive = Executive(processes=processes)
-        executive.prepare()
-
-        # Sets should deduplicate
-        writable_keys = executive.writable_keys()
-        all_keys = executive.all_keys()
-
-        # shared_write_key appears in all 3 processes
-        assert shared_write_key in writable_keys
-        assert len(writable_keys) == 1  # Only one unique writable key
-
-        # Both keys should be in all_keys
-        assert shared_read_key in all_keys
-        assert shared_write_key in all_keys
-        assert len(all_keys) == 2  # Only two unique keys total
-
-
-class TestExecutiveErrorHandling:
-    """Test error handling scenarios."""
-
-    def test_prepare_then_step_then_reset_cycle(self):
-        """Test full cycle of prepare, step, reset."""
-        executive = Executive(processes=[])
-
-        # Must prepare before step
-        executive.prepare()
-        assert executive._prepared is True
-
-        # Step should work (empty processes)
-        try:
-            executive.step()
-        except Exception:
-            pass
-
-        assert executive._step_index == 1
-
-        # Reset should work
-        executive.reset()
-
-        # Can still step after reset
-        try:
-            executive.step()
-        except Exception:
-            pass
-
-        assert executive._step_index == 2
-
-    def test_executive_with_disabled_processes(self):
-        """Test Executive with disabled processes."""
-
-        # Create a process that can be disabled
-        class DisablableProcess(Process):
-            def __init__(self):
-                super().__init__([])
-                self._enabled = True
-
-            def enable(self) -> None:
-                self._enabled = True
-
-            def disable(self) -> None:
-                self._enabled = False
-
-            def is_enabled(self) -> bool:
-                return self._enabled
-
-            def step(self) -> None:
-                if self._enabled:
-                    super().step()
-
-        process = DisablableProcess()
-        executive = Executive(processes=[process])
-        executive.prepare()
-
-        # Initially enabled
-        executive.step()
-
-        # Disable and step
-        process.disable()
-        executive.step()
-
-    def test_executive_with_errors_raised(self):
-        """Test executive with errors raised."""
-        from procela.core.action import HighestConfidencePolicy
-        from procela.core.variable import RangeDomain
-        from procela.symbols.time import TimePoint
-
-        x = Variable(
-            name="x",
-            domain=RangeDomain(0, 100),
-            policy=HighestConfidencePolicy(),
-            validators=[],
+        # Test 3: InvariantViolationInfo (should be caught and ignored)
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
+        mock_invariant.phase = InvariantPhase.RUNTIME
+        mock_invariant.check.side_effect = InvariantViolationInfo(
+            "Test", "Info", category=Mock(), phase=InvariantPhase.RUNTIME
         )
-        y = TimePoint()
+        executive._invariants = [mock_invariant]
 
-        class RaisesMechanism(Mechanism):
-            def transform(self):
-                pass
+        executive._check_invariants(InvariantPhase.RUNTIME)
 
-        executive = Executive(
-            processes=[Process([RaisesMechanism(reads=[], writes=[x.key(), y.key()])])]
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
+        mock_invariant.phase = InvariantPhase.RUNTIME
+        mock_invariant.check.side_effect = InvariantViolationWarning(
+            "Test", "Warning", category=Mock(), phase=InvariantPhase.RUNTIME
         )
+        executive._invariants = [mock_invariant]
 
-        executive.prepare()
-        with pytest.raises(TypeError):
-            executive.step()
+        executive._check_invariants(InvariantPhase.RUNTIME)
+        # Should not raise
 
-    def test_executive_with_conflict_resolution(self):
-        """Test executive with conflict resolution."""
-        from procela.core.action import HighestConfidencePolicy
-        from procela.core.key_authority import KeyAuthority
-        from procela.core.memory import VariableRecord
-        from procela.core.variable import RealDomain
-
-        x = Variable(
-            name="x",
-            domain=RealDomain(),
-            policy=HighestConfidencePolicy(),
-            validators=[],
+        # Test 5: InvariantViolationCritical (should call safe_mode)
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
+        mock_invariant.phase = InvariantPhase.RUNTIME
+        mock_invariant.check.side_effect = InvariantViolationCritical(
+            "Test", "Critical", category=Mock(), phase=InvariantPhase.RUNTIME
         )
-        y = Variable(name="y", domain=RealDomain(), validators=[])
+        executive._invariants = [mock_invariant]
 
-        class DivideMechanism(Mechanism):
-            def transform(self):
-                inputs = self.reads()
-                outputs = self.writes()
-                x: Variable = KeyAuthority.resolve(inputs[0])
-                y: Variable = KeyAuthority.resolve(outputs[0])
-                y.add_candidate(VariableRecord(value=x.value / 2, confidence=0.75))
+        # Mock safe_mode to track calls
+        safe_mode_called = []
+        original_safe_mode = executive.safe_mode
+        executive.safe_mode = lambda inv: safe_mode_called.append(inv)
 
-        class SquareMechanism(Mechanism):
-            def transform(self):
-                inputs = self.reads()
-                outputs = self.writes()
-                x: Variable = KeyAuthority.resolve(inputs[0])
-                y: Variable = KeyAuthority.resolve(outputs[0])
-                y.add_candidate(VariableRecord(value=x.value**2, confidence=0.8))
+        executive._check_invariants(InvariantPhase.RUNTIME)
+        assert len(safe_mode_called) == 1
+        assert safe_mode_called[0] is mock_invariant
 
-        executive = Executive(
-            processes=[
-                Process(
-                    [
-                        DivideMechanism(reads=[x.key()], writes=[y.key()]),
-                        SquareMechanism(reads=[x.key()], writes=[y.key()]),
-                        DivideMechanism(reads=[y.key()], writes=[x.key()]),
-                    ]
-                )
-            ]
+        executive.safe_mode = original_safe_mode
+
+        # Test 6: InvariantViolationFatal (should call abort)
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
+        mock_invariant.phase = InvariantPhase.RUNTIME
+        mock_invariant.check.side_effect = InvariantViolationFatal(
+            "Test", "Fatal", category=Mock(), phase=InvariantPhase.RUNTIME
         )
+        executive._invariants = [mock_invariant]
 
-        # Init variables
-        x.record(value=0.2, confidence=0.67)
-        y.record(value=0.7, confidence=0.8)
+        # Mock abort to track calls
+        abort_called = []
+        original_abort = executive.abort
+        executive.abort = lambda inv: abort_called.append(inv)
 
-        executive.prepare()
-        for _ in range(20):
-            executive.step()
-            executive.reset()
+        executive._check_invariants(InvariantPhase.RUNTIME)
+        assert len(abort_called) == 1
+        assert abort_called[0] is mock_invariant
 
-    def test_executive_with_no_candidates(self):
-        """Test executive with no candidates."""
-        from procela.core.action import HighestConfidencePolicy
-        from procela.core.variable import RealDomain
+        executive.abort = original_abort
 
-        x = Variable(
-            name="x",
-            domain=RealDomain(),
-            policy=HighestConfidencePolicy(),
-            validators=[],
+    def test_check_invariants_generic_exception(self):
+        """Test _check_invariants with generic InvariantViolation."""
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
+        mock_invariant.phase = InvariantPhase.RUNTIME
+        mock_invariant.name = "Test"
+        mock_invariant.message = "Generic violation"
+        mock_invariant.category = InvariantCategory.CONSISTENCY
+        mock_invariant.severity = InvariantSeverity.CRITICAL
+
+        # Create a generic InvariantViolation (not one of the specific subclasses)
+        generic_violation = InvariantViolation(
+            name="Test",
+            message="Generic violation",
+            category=InvariantCategory.CONSISTENCY,
+            severity=InvariantSeverity.CRITICAL,
+            phase=InvariantPhase.RUNTIME,
         )
-        y = Variable(name="y", domain=RealDomain(), validators=[])
+        mock_invariant.check.side_effect = generic_violation
 
-        class DivideMechanism(Mechanism):
-            def transform(self): ...
+        executive._invariants = [mock_invariant]
 
-        class SquareMechanism(Mechanism):
-            def transform(self): ...
+        # Should re-raise the generic InvariantViolation
+        with pytest.raises(InvariantViolation) as exc_info:
+            executive._check_invariants(InvariantPhase.RUNTIME)
 
-        executive = Executive(
-            processes=[
-                Process(
-                    [
-                        DivideMechanism(reads=[x.key()], writes=[y.key()]),
-                        SquareMechanism(reads=[x.key()], writes=[y.key()]),
-                        DivideMechanism(reads=[y.key()], writes=[x.key()]),
-                    ]
-                )
-            ]
-        )
+        assert exc_info.value.severity is InvariantSeverity.CRITICAL
 
-        # Init variables
-        x.record(value=0.2, confidence=0.67)
-        y.record(value=0.7, confidence=0.8)
+    def test_check_invariants_other_exception(self):
+        """Test _check_invariants with non-InvariantViolation exception."""
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
+        mock_invariant.phase = InvariantPhase.RUNTIME
+        mock_invariant.check.side_effect = ValueError("Some other error")
 
-        executive.prepare()
-        for _ in range(20):
-            executive.step()
-            executive.reset()
+        executive._invariants = [mock_invariant]
 
-
-if __name__ == "__main__":
-    pytest.main([__file__, "-v", "--tb=short"])
+        # Should re-raise as generic Exception
+        with pytest.raises(ExecutionError):
+            executive._check_invariants(InvariantPhase.RUNTIME)
