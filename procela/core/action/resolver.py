@@ -1,8 +1,8 @@
 """
-Conflict resolution operators for the action subsystem.
+Conflict resolution operators in Procela.
 
 This module defines the ConflictResolver class, which resolves
-conflicting VariableRecords into a single authoritative record. It
+competing candidates into a single authoritative record. It
 performs computational resolution only; the semantics of resolution
 and policy interpretation are defined externally.
 
@@ -21,7 +21,9 @@ from typing import Iterable, Sequence
 
 from ..assessment.reasoning import ReasoningResult
 from ..assessment.task import ReasoningTask
-from ..memory.variable.history import VariableRecord
+from ..memory.candidate import CandidateRecord
+from ..memory.record import VariableRecord
+from ..timer import Timer
 from .policy import ResolutionPolicy
 from .proposal import ActionProposal, ProposalStatus
 from .validator import ProposalValidator
@@ -29,7 +31,7 @@ from .validator import ProposalValidator
 
 class ConflictResolver:
     """
-    Resolve conflicts among competing VariableRecords.
+    Resolve conflicts among competing candidates.
 
     This class applies resolution policies and optional validators to
     determine a single authoritative VariableRecord from multiple
@@ -39,30 +41,28 @@ class ConflictResolver:
 
     def resolve(
         self,
-        candidates: Sequence[VariableRecord],
+        candidates: Sequence[CandidateRecord],
         policy: ResolutionPolicy,
         validators: Iterable[ProposalValidator] | None = None,
-    ) -> tuple[ReasoningResult | None, VariableRecord | None, list[VariableRecord]]:
+    ) -> tuple[VariableRecord | None, ReasoningResult | None]:
         """
-        Resolve conflicting VariableRecords into a single authoritative record.
+        Resolve conflicting candidates into a single authoritative record.
 
         Parameters
         ----------
-        candidates : Sequence[VariableRecord]
-            Competing VariableRecords produced by mechanisms.
+        candidates : Sequence[CandidateRecord]
+            Competing candidates produced by mechanisms.
         policy : ResolutionPolicy
-            Policy used to resolve among proposals.
+            Policy used to resolve among candidates.
         validators : Iterable[ProposalValidator] | None, optional
-            Optional validators applied to proposals before resolution.
+            Optional validators applied to candidates before resolution.
 
         Returns
         -------
-        tuple[ReasoningResult | None, VariableRecord | None, list[VariableRecord]]
-            Tuple of the reasoning result, the resolved VariableRecord and the
-            list of validated candidates that participate in resolution.
+        tuple[VariableRecord | None, ReasoningResult | None]
+            Tuple of the resolved record and the reasoning result.
             If resolution fails, the ReasoningResult contains failure details
-            and the VariableRecord is None. Otherwise, ReasoningResult is None
-            and the resolved record is returned.
+            and the resolved is None.
 
         Raises
         ------
@@ -75,118 +75,134 @@ class ConflictResolver:
         logic are applied mechanically, while the semantic meaning of
         resolution outcomes is defined externally.
         """
-        if not candidates:
-            return (
-                self._create_failed_result(
-                    task=ReasoningTask.CONFLICT_RESOLUTION,
-                    confidence=0.0,
-                    explanation="No candidates.",
-                ),
-                None,
-                [],
-            )
-
-        if not isinstance(candidates, Sequence):
-            raise TypeError(
-                "`candidates` should be a Sequence of `VariableRecord`, "
-                f"got {candidates!r}"
-            )
-
-        for i, candidate in enumerate(candidates):
-            if not isinstance(candidate, VariableRecord):
-                raise TypeError(
-                    f"`candidate` {i} should be a `VariableRecord` instance, "
-                    f"got {candidate!r}"
+        with Timer() as timer:
+            if not candidates:
+                return (
+                    None,
+                    ReasoningResult.failed_result(
+                        task=ReasoningTask.CONFLICT_RESOLUTION,
+                        confidence=None,
+                        explanation="No candidates.",
+                    ),
                 )
 
-        if validators is not None and not isinstance(validators, Iterable):
-            raise TypeError(
-                f"`validators` should be an Iterable instance, got {validators!r}"
-            )
+            if not isinstance(candidates, Sequence):
+                raise TypeError(
+                    "`candidates` should be a Sequence of `CandidateRecord`, "
+                    f"got {type(candidates)}"
+                )
 
-        if validators is not None:
-            for i, validator in enumerate(validators):
-                if not isinstance(validator, ProposalValidator):
+            for i, candidate in enumerate(candidates):
+                if not isinstance(candidate, CandidateRecord):
                     raise TypeError(
-                        f"`validator` {i} should be a ProposalValidator instance, "
-                        f"got {validator!r}"
+                        f"`candidate` {i} should be a `CandidateRecord` instance, "
+                        f"got {type(candidate)}"
                     )
 
-        # Step 1 — Convert records to proposals
-        proposals = [self._record_to_proposal(r) for r in candidates]
+            if validators is not None:
+                if not isinstance(validators, Iterable):
+                    raise TypeError(
+                        f"`validators` should be a Iterable instance, "
+                        f"got {validators!r}"
+                    )
 
-        # Step 2 — Apply validators
-        proposals_validated: list[ActionProposal] = []
-        validated: list[VariableRecord] = []
-        if validators is not None:
-            for record, proposal in zip(candidates, proposals, strict=False):
-                if all(v.validate(proposal) for v in validators):
+                for i, validator in enumerate(validators):
+                    if not isinstance(validator, ProposalValidator):
+                        raise TypeError(
+                            f"`validator` {i} should be a ProposalValidator instance, "
+                            f"got {validator!r}"
+                        )
+
+            # Step 1 — Convert records to proposals
+            proposals = [
+                self._record_to_proposal(r.record)
+                for r in candidates
+                if r is not None and r.record is not None
+            ]
+
+            # Step 2 — Apply validators
+            proposals_validated: list[ActionProposal] = []
+            validated: list[VariableRecord] = []
+            if validators is not None:
+                for candidate, proposal in zip(candidates, proposals, strict=False):
+                    if all(v.validate(proposal) for v in validators):
+                        proposal = proposal.with_status(ProposalStatus.VALIDATED)
+                        proposals_validated.append(proposal)
+                        if candidate is not None and candidate.record is not None:
+                            validated.append(candidate.record)
+            else:
+                for candidate, proposal in zip(candidates, proposals, strict=False):
                     proposal = proposal.with_status(ProposalStatus.VALIDATED)
                     proposals_validated.append(proposal)
-                    validated.append(record)
-        else:
-            for proposal in proposals:
-                proposal = proposal.with_status(ProposalStatus.VALIDATED)
-                proposals_validated.append(proposal)
-            validated = list(candidates)
+                    if candidate is not None and candidate.record is not None:
+                        validated.append(candidate.record)
 
-        proposals = proposals_validated
+            proposals = proposals_validated
 
-        if not proposals:
-            return (
-                self._create_failed_result(
-                    task=ReasoningTask.CONFLICT_RESOLUTION,
-                    confidence=0.0,
-                    explanation="All proposals rejected by validators.",
-                ),
-                None,
-                validated,
+            if not proposals:
+                return (
+                    None,
+                    ReasoningResult.failed_result(
+                        task=ReasoningTask.CONFLICT_RESOLUTION,
+                        confidence=None,
+                        explanation="All proposals rejected by validators.",
+                    ),
+                )
+
+            if not policy:
+                return (
+                    None,
+                    ReasoningResult.failed_result(
+                        task=ReasoningTask.CONFLICT_RESOLUTION,
+                        confidence=None,
+                        explanation="No policy.",
+                    ),
+                )
+
+            if not isinstance(policy, ResolutionPolicy):
+                raise TypeError(
+                    f"`policy` should be a ResolutionPolicy, got {type(policy)}"
+                )
+
+            # Step 3 — Policy resolution
+            resolved_proposal = policy.resolve(proposals)
+
+            if resolved_proposal is None:
+                return (
+                    None,
+                    ReasoningResult.failed_result(
+                        task=ReasoningTask.CONFLICT_RESOLUTION,
+                        confidence=None,
+                        explanation="Resolution policy returned no proposal.",
+                    ),
+                )
+
+            # Step 4 — Build resolved record
+            resolved = VariableRecord(
+                value=resolved_proposal.value,
+                confidence=resolved_proposal.confidence,
+                source=resolved_proposal.source,
+                metadata={
+                    "resolved_from": [
+                        p.metadata.get("record_key")
+                        for p in proposals
+                        if p.metadata is not None
+                    ],
+                    "policy": policy.name,
+                },
             )
 
-        if not policy:
-            return (
-                self._create_failed_result(
-                    task=ReasoningTask.CONFLICT_RESOLUTION,
-                    confidence=0.0,
-                    explanation="No policy.",
-                ),
-                None,
-                validated,
-            )
-
-        if not isinstance(policy, ResolutionPolicy):
-            raise TypeError(f"`policy` should be a ResolutionPolicy, got {policy!r}")
-
-        # Step 3 — Policy resolution
-        resolved_proposal = policy.resolve(proposals)
-
-        if resolved_proposal is None:
-            return (
-                self._create_failed_result(
-                    task=ReasoningTask.CONFLICT_RESOLUTION,
-                    confidence=0.0,
-                    explanation="Resolution policy returned no proposal.",
-                ),
-                None,
-                validated,
-            )
-
-        # Step 4 — Build resolved record
-        resolved = VariableRecord(
-            value=resolved_proposal.value,
-            confidence=resolved_proposal.confidence,
-            source=resolved_proposal.source,
-            metadata={
-                "resolved_from": [
-                    p.metadata.get("record_key")
-                    for p in proposals
-                    if p.metadata is not None
-                ],
-                "policy": policy.__class__.__name__,
-            },
+        return (
+            resolved,
+            ReasoningResult(
+                task=ReasoningTask.CONFLICT_RESOLUTION,
+                success=True,
+                result=resolved.key(),
+                confidence=resolved.confidence,
+                explanation="Conflict resolved succesfully.",
+                execution_time=timer.elapsed,
+            ),
         )
-
-        return None, resolved, validated
 
     def _record_to_proposal(self, record: VariableRecord) -> ActionProposal:
         """
@@ -215,37 +231,4 @@ class ConflictResolver:
                 "record_key": record.key(),
                 "time": record.time,
             },
-        )
-
-    def _create_failed_result(
-        self, task: ReasoningTask, confidence: float, explanation: str
-    ) -> ReasoningResult:
-        """
-        Create a failed ReasoningResult for conflict resolution.
-
-        Parameters
-        ----------
-        task : ReasoningTask
-            The reasoning task associated with the failure.
-        confidence : float
-            Confidence value to attach to the failure.
-        explanation : str
-            Explanation of why the result failed.
-
-        Returns
-        -------
-        ReasoningResult
-            Result object representing a failed resolution attempt.
-
-        Notes
-        -----
-        This is an internal helper method. Semantic interpretation of
-        failure is handled externally.
-        """
-        return ReasoningResult(
-            task=task,
-            success=False,
-            result=None,
-            confidence=confidence,
-            explanation=explanation,
         )

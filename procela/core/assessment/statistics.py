@@ -6,7 +6,7 @@ statistical summaries derived from variable histories. These results
 are epistemic artifacts: they expose descriptive properties of observed
 data without implying causality, execution, or decision-making.
 
-Statistical results are typically produced by history analysis layers
+Statistical results are typically produced by memory analysis layers
 and consumed through epistemic views by reasoning, diagnosis, anomaly
 detection, and monitoring components.
 
@@ -27,7 +27,7 @@ from dataclasses import dataclass
 @dataclass(frozen=True, slots=True)
 class StatisticsResult:
     """
-    Immutable statistical summary of a variable history.
+    Immutable statistical summary of a variable memory.
 
     ``StatisticsResult`` represents aggregated descriptive statistics
     computed over a variable's historical records at a specific
@@ -44,7 +44,7 @@ class StatisticsResult:
     count : int
         Number of historical observations used to compute the statistics.
 
-    sum : float
+    sum : float | None, Optional
         Sum of all observed values.
 
     min : float | None, optional
@@ -78,7 +78,7 @@ class StatisticsResult:
     """
 
     count: int = 0
-    sum: float = 0.0
+    sum: float | None = None
     min: float | None = None
     max: float | None = None
     mean: float | None = None

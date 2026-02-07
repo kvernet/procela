@@ -89,7 +89,7 @@ class KeyAuthority:
             return key
 
     @classmethod
-    def resolve(cls, key: Key) -> object | None:
+    def resolve(cls, key: Key | None) -> object | None:
         """
         Return the object associated with a Key, if any.
 
@@ -99,7 +99,7 @@ class KeyAuthority:
 
         Parameters
         ----------
-        key : Key
+        key : Key | None
             Key to look up in the registry.
 
         Returns
@@ -117,4 +117,6 @@ class KeyAuthority:
         The registry is append-only; once a Key is registered, it
         remains in the registry for the lifetime of the process.
         """
+        if key is None:
+            return None
         return cls._registry.get(key)

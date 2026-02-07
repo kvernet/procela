@@ -12,7 +12,8 @@ from procela.core.action.proposal import ActionProposal
 from procela.core.action.resolver import ConflictResolver
 from procela.core.action.validator import ProposalValidator
 from procela.core.assessment import ReasoningResult, ReasoningTask
-from procela.core.memory.variable.history import VariableRecord
+from procela.core.memory.candidate import CandidateRecord, CandidateState
+from procela.core.memory.record import VariableRecord
 from procela.symbols.key import Key
 from procela.symbols.time import TimePoint
 
@@ -28,13 +29,13 @@ class TestConflictResolver:
         resolver = ConflictResolver()
         policy_mock = create_autospec(ResolutionPolicy)
 
-        result, resolved, _ = resolver.resolve([], policy_mock)
+        resolved, result = resolver.resolve([], policy_mock)
 
         # Should return failure result
         assert isinstance(result, ReasoningResult)
         assert result.success is False
         assert result.task == ReasoningTask.CONFLICT_RESOLUTION
-        assert result.confidence == 0.0
+        assert result.confidence is None
         assert "No candidates" in result.explanation
         assert resolved is None
 
@@ -45,8 +46,9 @@ class TestConflictResolver:
         """Test resolve with None policy returns failure."""
         resolver = ConflictResolver()
         records = [VariableRecord(value=0.8), VariableRecord(value=19.7)]
+        candidates = [CandidateRecord(record) for record in records]
 
-        result, resolved, validated = resolver.resolve(records, None)
+        resolved, result = resolver.resolve(candidates, None)
         assert isinstance(result, ReasoningResult)
         assert isinstance(resolved, VariableRecord | None)
 
@@ -72,7 +74,7 @@ class TestConflictResolver:
         with pytest.raises(TypeError) as exc_info:
             resolver.resolve("not a sequence", policy_mock)
 
-        assert "`candidate` 0 should be a `VariableRecord` instance" in str(
+        assert "`candidate` 0 should be a `CandidateRecord` instance" in str(
             exc_info.value
         )
         assert "got" in str(exc_info.value)
@@ -85,30 +87,30 @@ class TestConflictResolver:
         with pytest.raises(TypeError) as exc_info:
             resolver.resolve(["not a record", "also not"], policy_mock)
 
-        assert "`candidate` 0 should be a `VariableRecord` instance" in str(
+        assert "`candidate` 0 should be a `CandidateRecord` instance" in str(
             exc_info.value
         )
 
     def test_resolve_policy_not_resolutionPolicy_policy(self):
         """Test resolve raises TypeError when policy is not ResolutionPolicy."""
         resolver = ConflictResolver()
-        record_mock = create_autospec(VariableRecord)
+        candidate_mock = create_autospec(CandidateRecord)
 
         with pytest.raises(AttributeError) as exc_info:
-            resolver.resolve([record_mock], "not a policy")
+            resolver.resolve([candidate_mock], "not a policy")
 
-        assert "no attribute 'value'" in str(exc_info.value)
+        assert "no attribute 'record'" in str(exc_info.value)
 
     def test_resolve_validators_not_iterable(self):
         """Test resolve raises TypeError when validators is not Iterable."""
         resolver = ConflictResolver()
         policy_mock = create_autospec(ResolutionPolicy)
-        record_mock = create_autospec(VariableRecord)
+        candidate_mock = create_autospec(CandidateRecord)
 
         with pytest.raises(TypeError) as exc_info:
-            resolver.resolve(record_mock, policy_mock, validators="not iterable")
+            resolver.resolve(candidate_mock, policy_mock, validators="not iterable")
 
-        assert "`candidates` should be a Sequence of `VariableRecord`" in str(
+        assert "`candidates` should be a Sequence of `CandidateRecord`" in str(
             exc_info.value
         )
 
@@ -116,10 +118,12 @@ class TestConflictResolver:
         """Test resolve raises TypeError when validator is not ProposalValidator."""
         resolver = ConflictResolver()
         policy_mock = create_autospec(ResolutionPolicy)
-        record_mock = create_autospec(VariableRecord)
+        candidate_mock = create_autospec(CandidateRecord)
 
         with pytest.raises(TypeError) as exc_info:
-            resolver.resolve([record_mock], policy_mock, validators=["not validator"])
+            resolver.resolve(
+                [candidate_mock], policy_mock, validators=["not validator"]
+            )
 
         assert "`validator` 0 should be a ProposalValidator instance" in str(
             exc_info.value
@@ -143,10 +147,13 @@ class TestConflictResolver:
         record_mock.source = Key()
         record_mock.key.return_value = mock_key  # Returns Key, not string
         record_mock.time = mock_timepoint  # TimePoint, not string
+        candidate_mock = create_autospec(CandidateRecord)
+        candidate_mock.record = record_mock
+        candidate_mock.state = CandidateState.PROPOSED
 
         # Create mock ResolutionPolicy
         policy_mock = create_autospec(ResolutionPolicy)
-        policy_mock.__class__.__name__ = "TestResolutionPolicy"
+        policy_mock.name = "TestResolutionPolicy"
 
         # Create ActionProposal with correct metadata types
         expected_proposal = ActionProposal(
@@ -163,10 +170,10 @@ class TestConflictResolver:
         policy_mock.resolve.return_value = expected_proposal
 
         # Execute
-        result, resolved, _ = resolver.resolve([record_mock], policy_mock)
+        resolved, result = resolver.resolve([candidate_mock], policy_mock)
 
         # Verify
-        assert result is None  # Success case returns None for result
+        assert result is not None
         assert isinstance(resolved, VariableRecord)
 
         # Check resolved record values match proposal
@@ -251,10 +258,13 @@ class TestConflictResolver:
         record_mock.source = Key()
         record_mock.key.return_value = mock_key
         record_mock.time = mock_timepoint
+        candidate_mock = create_autospec(CandidateRecord)
+        candidate_mock.record = record_mock
+        candidate_mock.state = CandidateState.PROPOSED
 
         # Create mock ResolutionPolicy
         policy_mock = create_autospec(ResolutionPolicy)
-        policy_mock.__class__.__name__ = "TestPolicy"
+        policy_mock.name = "TestPolicy"
 
         # Create mock validators
         validator_mock = create_autospec(ProposalValidator)
@@ -271,8 +281,8 @@ class TestConflictResolver:
         policy_mock.resolve.return_value = expected_proposal
 
         # Execute with validators
-        result, resolved, _ = resolver.resolve(
-            [record_mock], policy_mock, validators=[validator_mock]
+        resolved, result = resolver.resolve(
+            [candidate_mock], policy_mock, validators=[validator_mock]
         )
 
         # Verify validators were called with correct proposal
@@ -282,7 +292,7 @@ class TestConflictResolver:
         assert called_proposal.metadata["time"] == mock_timepoint
 
         # Verify successful resolution
-        assert result is None
+        assert result is not None
         assert isinstance(resolved, VariableRecord)
 
     def test_resolve_with_validators_incorrect_types(self):
@@ -300,10 +310,13 @@ class TestConflictResolver:
         record_mock.source = Key()
         record_mock.key.return_value = mock_key
         record_mock.time = mock_timepoint
+        candidate_mock = create_autospec(CandidateRecord)
+        candidate_mock.record = record_mock
+        candidate_mock.state = CandidateState.PROPOSED
 
         # Create mock ResolutionPolicy
         policy_mock = create_autospec(ResolutionPolicy)
-        policy_mock.__class__.__name__ = "TestPolicy"
+        policy_mock.name = "TestPolicy"
 
         # Create mock validators
         validator_mock = create_autospec(ProposalValidator)
@@ -321,7 +334,11 @@ class TestConflictResolver:
 
         # Execute with incorrect validators
         with pytest.raises(TypeError):
-            resolver.resolve([record_mock], policy_mock, validators=True)
+            resolver.resolve([candidate_mock], policy_mock, validators=True)
+
+        # Execute with incorrect policy
+        with pytest.raises(TypeError):
+            resolver.resolve([candidate_mock], policy=Key())
 
     # ------------------------------------------------------------
     # Test: All proposals rejected by validators
@@ -341,6 +358,9 @@ class TestConflictResolver:
         record_mock.source = "sensor"
         record_mock.key.return_value = mock_key
         record_mock.time = mock_timepoint
+        candidate_mock = create_autospec(CandidateRecord)
+        candidate_mock.record = record_mock
+        candidate_mock.state = CandidateState.PROPOSED
 
         # Create mock ResolutionPolicy
         policy_mock = create_autospec(ResolutionPolicy)
@@ -350,8 +370,8 @@ class TestConflictResolver:
         validator_mock.validate.return_value = False
 
         # Execute
-        result, resolved, _ = resolver.resolve(
-            [record_mock], policy_mock, validators=[validator_mock]
+        resolved, result = resolver.resolve(
+            [candidate_mock], policy_mock, validators=[validator_mock]
         )
 
         # Should return failure
@@ -378,42 +398,22 @@ class TestConflictResolver:
         record_mock.source = "source"
         record_mock.key.return_value = mock_key
         record_mock.time = mock_timepoint
+        candidate_mock = create_autospec(CandidateRecord)
+        candidate_mock.record = record_mock
+        candidate_mock.state = CandidateState.PROPOSED
 
         # Create mock ResolutionPolicy that returns None
         policy_mock = create_autospec(ResolutionPolicy)
         policy_mock.resolve.return_value = None
 
         # Execute
-        result, resolved, validated = resolver.resolve([record_mock], policy_mock)
+        resolved, result = resolver.resolve([candidate_mock], policy_mock)
 
         # Should return failure
         assert isinstance(result, ReasoningResult)
-        assert isinstance(validated, list)
         assert result.success is False
         assert "Resolution policy returned no proposal" in result.explanation
         assert resolved is None
-
-    # ------------------------------------------------------------
-    # Test: Helper method _create_failed_result
-    # ------------------------------------------------------------
-    def test_create_failed_result(self):
-        """Test _create_failed_result helper method."""
-        resolver = ConflictResolver()
-
-        task = ReasoningTask.CONFLICT_RESOLUTION
-        confidence = 0.25
-        explanation = "Test failure message"
-
-        # Execute
-        result = resolver._create_failed_result(task, confidence, explanation)
-
-        # Verify
-        assert isinstance(result, ReasoningResult)
-        assert result.task == task
-        assert result.success is False
-        assert result.result is None
-        assert result.confidence == confidence
-        assert result.explanation == explanation
 
     # ------------------------------------------------------------
     # Test: Edge cases with correct types
@@ -432,9 +432,12 @@ class TestConflictResolver:
         record_mock.source = Key()
         record_mock.key.return_value = mock_key
         record_mock.time = mock_timepoint
+        candidate_mock = create_autospec(CandidateRecord)
+        candidate_mock.record = record_mock
+        candidate_mock.state = CandidateState.PROPOSED
 
         policy_mock = create_autospec(ResolutionPolicy)
-        policy_mock.__class__.__name__ = "TestPolicy"
+        policy_mock.name = "TestPolicy"
 
         # Create a proposal
         expected_proposal = ActionProposal(
@@ -446,14 +449,13 @@ class TestConflictResolver:
         policy_mock.resolve.return_value = expected_proposal
 
         # Execute with validators=None
-        result, resolved, validated = resolver.resolve(
-            [record_mock], policy_mock, validators=None
+        resolved, result = resolver.resolve(
+            [candidate_mock], policy_mock, validators=None
         )
 
         # Should succeed
-        assert result is None
+        assert result is not None
         assert isinstance(resolved, VariableRecord)
-        assert isinstance(validated[0], VariableRecord)
 
     def test_resolve_proposal_with_none_metadata(self):
         """Test resolution when proposal has None metadata."""
@@ -469,9 +471,11 @@ class TestConflictResolver:
         record_mock.source = Key()
         record_mock.key.return_value = mock_key
         record_mock.time = mock_timepoint
+        candidate_mock = create_autospec(CandidateRecord)
+        candidate_mock.record = record_mock
 
         policy_mock = create_autospec(ResolutionPolicy)
-        policy_mock.__class__.__name__ = "TestPolicy"
+        policy_mock.name = "TestPolicy"
 
         # Create a proposal with None metadata
         proposal_with_none_metadata = ActionProposal(
@@ -487,10 +491,10 @@ class TestConflictResolver:
         ):
             policy_mock.resolve.return_value = proposal_with_none_metadata
 
-            result, resolved, _ = resolver.resolve([record_mock], policy_mock)
+            resolved, result = resolver.resolve([candidate_mock], policy_mock)
 
         # Should still succeed
-        assert result is None
+        assert result is not None
         assert isinstance(resolved, VariableRecord)
         # resolved_from list should handle None metadata gracefully
         assert "resolved_from" in resolved.metadata
@@ -500,7 +504,7 @@ class TestConflictResolver:
         resolver = ConflictResolver()
 
         # Create multiple mock VariableRecords with unique Keys
-        records = []
+        candidates = []
         keys = []
         timepoints = []
 
@@ -522,19 +526,21 @@ class TestConflictResolver:
             record_mock.source = Key()
             record_mock.key.return_value = key_mock
             record_mock.time = timepoint_mock
-            records.append(record_mock)
+            candidate = create_autospec(CandidateRecord)
+            candidate.record = record_mock
+            candidates.append(candidate)
 
         # Create mock ResolutionPolicy
         policy_mock = create_autospec(ResolutionPolicy)
-        policy_mock.__class__.__name__ = "HighestValuePolicy"
+        policy_mock.name = "HighestValuePolicy"
 
         # Create proposals that would be generated
         proposals = []
-        for i, record in enumerate(records):
+        for i, candidate in enumerate(candidates):
             proposal = ActionProposal(
-                value=record.value,
-                confidence=record.confidence,
-                source=record.source,
+                value=candidate.record.value,
+                confidence=candidate.record.confidence,
+                source=candidate.record.source,
                 metadata={"record_key": keys[i], "time": timepoints[i]},
             )
             proposals.append(proposal)
@@ -543,10 +549,10 @@ class TestConflictResolver:
         policy_mock.resolve.return_value = proposals[1]
 
         # Execute
-        result, resolved, _ = resolver.resolve(records, policy_mock)
+        resolved, result = resolver.resolve(candidates, policy_mock)
 
         # Verify
-        assert result is None
+        assert result is not None
         assert isinstance(resolved, VariableRecord)
         assert abs(resolved.value - 10.0) < 1e-6
         assert abs(resolved.confidence - 0.8) < 1e-6
@@ -565,7 +571,7 @@ class TestConflictResolver:
         resolver = ConflictResolver()
 
         # Simulate three different sensors with proper Keys and TimePoints
-        sensor_records = []
+        sensor_candidates = []
         sensor_keys = []
         sensor_timepoints = []
 
@@ -591,11 +597,13 @@ class TestConflictResolver:
             record.source = Key()
             record.key.return_value = key_mock
             record.time = timepoint_mock
-            sensor_records.append(record)
+            candidate = create_autospec(CandidateRecord)
+            candidate.record = record
+            sensor_candidates.append(candidate)
 
         # Create a policy that resolves highest confidence
         policy_mock = create_autospec(ResolutionPolicy)
-        policy_mock.__class__.__name__ = "HighestConfidencePolicy"
+        policy_mock.name = "HighestConfidencePolicy"
 
         # Create a validator that requires confidence > 0.8
         validator_mock = create_autospec(ProposalValidator)
@@ -607,11 +615,11 @@ class TestConflictResolver:
 
         # Create proposals that would be generated
         proposals = []
-        for i, record in enumerate(sensor_records):
+        for i, candidate in enumerate(sensor_candidates):
             proposal = ActionProposal(
-                value=record.value,
-                confidence=record.confidence,
-                source=record.source,
+                value=candidate.record.value,
+                confidence=candidate.record.confidence,
+                source=candidate.record.source,
                 metadata={"record_key": sensor_keys[i], "time": sensor_timepoints[i]},
             )
             proposals.append(proposal)
@@ -620,12 +628,12 @@ class TestConflictResolver:
         policy_mock.resolve.return_value = proposals[0]
 
         # Execute resolution
-        result, resolved, _ = resolver.resolve(
-            sensor_records, policy_mock, validators=[validator_mock]
+        resolved, result = resolver.resolve(
+            sensor_candidates, policy_mock, validators=[validator_mock]
         )
 
         # Verify successful resolution
-        assert result is None
+        assert result is not None
         assert resolved is not None
         assert resolved.value == 72.5  # sensor_a value
         assert resolved.confidence == 0.95
@@ -661,6 +669,10 @@ class TestConflictResolver:
         record1.source = Key()
         record1.key.return_value = key1
         record1.time = time1
+        candidate1 = create_autospec(CandidateRecord)
+        candidate1.record = record1
+        candidate1.state = CandidateState.PROPOSED
+        candidate1 = CandidateRecord(record1)
 
         record2 = create_autospec(VariableRecord)
         record2.value = 20.0
@@ -668,6 +680,9 @@ class TestConflictResolver:
         record2.source = Key()
         record2.key.return_value = key2
         record2.time = time2
+        candidate2 = create_autospec(CandidateRecord)
+        candidate2.record = record2
+        candidate2.state = CandidateState.PROPOSED
 
         record3 = create_autospec(VariableRecord)
         record3.value = 30.0
@@ -675,10 +690,13 @@ class TestConflictResolver:
         record3.source = Key()
         record3.key.return_value = key3
         record3.time = time3
+        candidate3 = create_autospec(CandidateRecord)
+        candidate3.record = record3
+        candidate3.state = CandidateState.PROPOSED
 
         # Create mock ResolutionPolicy
         policy_mock = create_autospec(ResolutionPolicy)
-        policy_mock.__class__.__name__ = "TestPolicy"
+        policy_mock.name = "TestPolicy"
 
         # Create proposals - second one has None metadata
         proposal1 = ActionProposal(
@@ -716,12 +734,12 @@ class TestConflictResolver:
         ):
             policy_mock.resolve.return_value = proposal1
 
-            result, resolved, _ = resolver.resolve(
-                [record1, record2, record3], policy_mock
+            resolved, result = resolver.resolve(
+                [candidate1, candidate2, candidate3], policy_mock
             )
 
         # Should succeed
-        assert result is None
+        assert result is not None
         assert isinstance(resolved, VariableRecord)
 
         assert len(resolved.metadata["resolved_from"]) == 2
@@ -740,7 +758,7 @@ def test_imports_with_correct_types():
     from procela.core.action.resolver import ConflictResolver
     from procela.core.action.validator import ProposalValidator
     from procela.core.assessment import ReasoningResult, ReasoningTask
-    from procela.core.memory.variable.history import VariableRecord
+    from procela.core.memory.record import VariableRecord
     from procela.symbols.key import Key
     from procela.symbols.time import TimePoint
 

@@ -4,6 +4,8 @@ Tests the last value predictor using epistemic.stats.last_value.
 100% coverage guaranteed.
 """
 
+from unittest.mock import create_autospec
+
 import pytest
 
 from procela.core.assessment import PredictionResult, StatisticsResult
@@ -12,12 +14,13 @@ from procela.core.reasoning import (
     Predictor,
 )
 from procela.core.variable import VariableEpistemic
+from procela.symbols.key import Key
 
 
 @pytest.fixture
 def default_predictor():
     """Provides a default LastPredictor instance (allow_none=False)."""
-    return LastPredictor()
+    return LastPredictor(allow_none=True)
 
 
 @pytest.fixture
@@ -34,7 +37,7 @@ def mock_view_with_last_value():
     )
 
     view = VariableEpistemic(
-        key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+        key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
     )
     return view
 
@@ -44,7 +47,7 @@ def mock_view_with_none_last_value():
     """Provides a mock VariableEpistemic with last_value = None."""
     stats = StatisticsResult(value=None)
     view = VariableEpistemic(
-        key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+        key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
     )
 
     return view
@@ -53,8 +56,9 @@ def mock_view_with_none_last_value():
 @pytest.fixture
 def mock_view_missing_stats():
     """Provides a mock VariableEpistemic without stats structure."""
+    stats = StatisticsResult(value=None)
     view = VariableEpistemic(
-        key=None, reasoning=None, stats=None, anomaly=None, trend=None
+        key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
     )
 
     return view
@@ -121,7 +125,7 @@ class TestPredictMethod:
             stats = StatisticsResult(value=last_val)
 
             view = VariableEpistemic(
-                key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+                key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
             )
 
             result = default_predictor.predict(view, horizon=2)
@@ -153,8 +157,9 @@ class TestPredictMethod:
         self, default_predictor, mock_view_with_none_last_value
     ):
         """Test predict when last_value is None and allow_none=False."""
+        prdictor = LastPredictor(allow_none=False)
         with pytest.raises(ValueError) as exc_info:
-            default_predictor.predict(mock_view_with_none_last_value)
+            prdictor.predict(mock_view_with_none_last_value)
         assert "last_value is None" in str(exc_info.value)
         assert "allow_none=True" in str(exc_info.value)
 
@@ -165,10 +170,21 @@ class TestPredictMethod:
         result = allow_none_predictor.predict(mock_view_with_none_last_value, horizon=3)
         assert result.value == [0.0, 0.0, 0.0]
 
-    def test_predict_missing_stats(self, default_predictor, mock_view_missing_stats):
+    def test_predict_missing_stats(self, default_predictor):
         """Test predict when stats structure is missing."""
         with pytest.raises(TypeError, match="view.stats must be provided"):
-            default_predictor.predict(mock_view_missing_stats)
+            mock_view = create_autospec(VariableEpistemic)
+            mock_view.key = Key()
+            mock_view.reasoning = None
+            mock_view.stats = None
+            mock_view.anomaly = None
+            mock_view.trend = None
+            default_predictor.predict(mock_view)
+
+            predictor = LastPredictor(allow_none=False)
+            mock_view.stats = create_autospec(StatisticsResult)
+            mock_view.stats.last_value = None
+            predictor.predict(mock_view)
 
     def test_predict_large_horizon(self, default_predictor, mock_view_with_last_value):
         """Test predict with very large horizon."""
@@ -181,7 +197,7 @@ class TestPredictMethod:
         stats = StatisticsResult(value=0.0)
 
         view = VariableEpistemic(
-            key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+            key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
         )
 
         result = default_predictor.predict(view, horizon=2)
@@ -272,7 +288,7 @@ class TestEdgeCases:
         stats = StatisticsResult(value=42)
 
         view = VariableEpistemic(
-            key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+            key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
         )
 
         result = default_predictor.predict(view, horizon=1)
@@ -324,7 +340,7 @@ def test_all_public_methods_covered():
         value=10.0,
     )
     view = VariableEpistemic(
-        key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+        key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
     )
 
     result = predictor.predict(view, horizon=2)
@@ -355,25 +371,6 @@ class TestErrorMessages:
         error_msg = str(exc_info.value)
         assert "horizon must be >= 1" in error_msg
         assert "got 0" in error_msg
-
-    def test_value_error_none_message(
-        self, default_predictor, mock_view_with_none_last_value
-    ):
-        """Test ValueError message for None last_value."""
-        with pytest.raises(ValueError) as exc_info:
-            default_predictor.predict(mock_view_with_none_last_value)
-        error_msg = str(exc_info.value)
-        assert "last_value is None" in error_msg
-        assert "allow_none=True" in error_msg
-
-    def test_runtime_error_message_missing_stats(
-        self, default_predictor, mock_view_missing_stats
-    ):
-        """Test RuntimeError message for missing stats."""
-        with pytest.raises(TypeError) as exc_info:
-            default_predictor.predict(mock_view_missing_stats)
-        error_msg = str(exc_info.value)
-        assert "view.stats must be provided" in error_msg
 
 
 # ==================== RUN TESTS ====================

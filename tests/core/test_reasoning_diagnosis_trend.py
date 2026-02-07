@@ -12,7 +12,7 @@ from procela.core.assessment import (
     DiagnosisResult,
     TrendResult,
 )
-from procela.core.memory import HistoryStatistics
+from procela.core.memory import MemoryStatistics
 from procela.core.reasoning import TrendDiagnoser
 from procela.core.variable import VariableEpistemic
 
@@ -106,7 +106,7 @@ def mock_view_with_stats_and_anomaly(mock_trend_down):
     view.key = None
     view.reasoning = None
     view.trend = mock_trend_down
-    view.stats = Mock(spec=HistoryStatistics)
+    view.stats = Mock(spec=MemoryStatistics)
     view.anomaly = Mock(spec=AnomalyResult)
     view.anomaly.is_anomaly = True
     view.anomaly.score = 0.8
@@ -366,7 +366,7 @@ class TestPrivateMethods:
             key = None
             reasoning = None
             trend = TrendResult(value=0.0001, direction="up", threshold=0.3)
-            stats = HistoryStatistics.empty().stats()
+            stats = MemoryStatistics.empty().result()
             anomaly = None
 
         result = diagnoser.diagnose(View())
@@ -390,7 +390,7 @@ class TestPrivateMethods:
             key = None
             reasoning = None
             trend = TrendResult(value=1000, direction="stable", threshold=1000)
-            stats = HistoryStatistics.empty().stats()
+            stats = MemoryStatistics.empty().result()
             anomaly = None
 
         result = diagnoser.diagnose(View())
@@ -399,7 +399,7 @@ class TestPrivateMethods:
     def test_statistical_context_method_exists(self, default_diagnoser, mock_trend_up):
         """Test that _statistical_context method exists."""
         # Create a mock stats object
-        mock_stats = Mock(spec=HistoryStatistics)
+        mock_stats = Mock(spec=MemoryStatistics)
         mock_stats.std = 0.7
 
         try:
@@ -429,18 +429,18 @@ class TestPrivateMethods:
 
         class View:
             trend = TrendResult(value=1000, direction="stable", threshold=1000)
-            stats = HistoryStatistics(count=20, sum=18, sumsq=200).stats()
+            stats = MemoryStatistics(count=20, sum=18, sumsq=200).result()
             anomaly = None
 
         view = View()
         result = diagnoser._statistical_context(view.trend, view.stats)
         assert len(result) == 1
 
-        view.stats = HistoryStatistics(count=2, sum=18, sumsq=1700000).stats()
+        view.stats = MemoryStatistics(count=2, sum=18, sumsq=1700000).result()
         result = diagnoser._statistical_context(view.trend, view.stats)
         assert len(result) == 1
 
-        view.stats = HistoryStatistics(count=2, sum=18, sumsq=1700, min=1.8).stats()
+        view.stats = MemoryStatistics(count=2, sum=18, sumsq=1700, min=1.8).result()
         view.trend = TrendResult(value=-1000, direction="down", threshold=10)
         result = diagnoser._statistical_context(view.trend, view.stats)
         assert len(result) == 1
@@ -555,7 +555,7 @@ class TestEdgeCases:
         view.key = None
         view.reasoning = None
         view.trend = trend
-        view.stats = Mock(spec=HistoryStatistics)
+        view.stats = Mock(spec=MemoryStatistics)
         view.anomaly = Mock(spec=AnomalyResult)
         view.anomaly.is_anomaly = True
         view.anomaly.score = 0.85

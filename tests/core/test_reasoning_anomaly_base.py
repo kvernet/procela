@@ -11,7 +11,7 @@ from unittest.mock import Mock
 import pytest
 
 from procela.core.assessment import AnomalyResult
-from procela.core.memory import HistoryStatistics
+from procela.core.memory import MemoryStatistics
 from procela.core.reasoning import AnomalyDetector
 
 
@@ -55,7 +55,7 @@ class TestAnomalyDetector:
 
         class NamelessDetector(AnomalyDetector):
             # Has detect method but no name attribute
-            def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+            def detect(self, stats: MemoryStatistics) -> AnomalyResult:
                 return AnomalyResult(is_anomaly=False)
 
         # This should still be instantiable (Python won't enforce class var)
@@ -71,7 +71,7 @@ class TestAnomalyDetector:
         class ConcreteDetector(AnomalyDetector):
             name = "ConcreteDetector"
 
-            def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+            def detect(self, stats: MemoryStatistics) -> AnomalyResult:
                 return AnomalyResult(
                     is_anomaly=False,
                     score=0.0,
@@ -86,7 +86,7 @@ class TestAnomalyDetector:
         assert detector.name == "ConcreteDetector"
 
         # Should be able to call detect
-        stats = HistoryStatistics.empty()
+        stats = MemoryStatistics.empty()
         result = detector.detect(stats)
         assert isinstance(result, AnomalyResult)
         assert result.method == "ConcreteDetector"
@@ -97,14 +97,14 @@ class TestAnomalyDetector:
         class TestDetector(AnomalyDetector):
             name = "TestDetector"
 
-            def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+            def detect(self, stats: MemoryStatistics) -> AnomalyResult:
                 # Return a valid AnomalyResult
                 return AnomalyResult(
                     is_anomaly=True, score=2.5, threshold=2.0, method=self.name
                 )
 
         detector = TestDetector()
-        stats = Mock(spec=HistoryStatistics)
+        stats = Mock(spec=MemoryStatistics)
         result = detector.detect(stats)
 
         assert isinstance(result, AnomalyResult)
@@ -113,19 +113,19 @@ class TestAnomalyDetector:
         assert result.threshold == 2.0
         assert result.method == "TestDetector"
 
-    def test_detect_receives_historystatistics(self) -> None:
-        """Test that detect receives HistoryStatistics parameter."""
+    def test_detect_receives_MemoryStatistics(self) -> None:
+        """Test that detect receives MemoryStatistics parameter."""
 
         class TrackingDetector(AnomalyDetector):
             name = "TrackingDetector"
             received_stats = None
 
-            def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+            def detect(self, stats: MemoryStatistics) -> AnomalyResult:
                 self.received_stats = stats
                 return AnomalyResult(is_anomaly=False)
 
         detector = TrackingDetector()
-        mock_stats = Mock(spec=HistoryStatistics)
+        mock_stats = Mock(spec=MemoryStatistics)
         result = detector.detect(mock_stats)
 
         assert detector.received_stats is mock_stats
@@ -143,7 +143,7 @@ class TestAnomalyDetector:
                 CounterDetector.instance_count += 1
                 self.instance_id = CounterDetector.instance_count
 
-            def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+            def detect(self, stats: MemoryStatistics) -> AnomalyResult:
                 return AnomalyResult(
                     is_anomaly=False, method=f"{self.name}_{self.instance_id}"
                 )
@@ -161,20 +161,20 @@ class TestAnomalyDetector:
         assert detector2.name == "CounterDetector"
 
         # But detect results can be instance-specific
-        stats = Mock(spec=HistoryStatistics)
+        stats = Mock(spec=MemoryStatistics)
         result1 = detector1.detect(stats)
         result2 = detector2.detect(stats)
 
         assert result1.method == "CounterDetector_1"
         assert result2.method == "CounterDetector_2"
 
-    def test_detect_with_real_historystatistics(self) -> None:
-        """Test detect with actual HistoryStatistics object."""
+    def test_detect_with_real_MemoryStatistics(self) -> None:
+        """Test detect with actual MemoryStatistics object."""
 
         class MeanThresholdDetector(AnomalyDetector):
             name = "MeanThresholdDetector"
 
-            def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+            def detect(self, stats: MemoryStatistics) -> AnomalyResult:
                 threshold = 100.0
                 if stats.mean is None:
                     is_anomaly = False
@@ -194,7 +194,7 @@ class TestAnomalyDetector:
         detector = MeanThresholdDetector()
 
         # Test with high mean (should be anomaly)
-        stats_high = Mock(spec=HistoryStatistics)
+        stats_high = Mock(spec=MemoryStatistics)
         stats_high.mean = 150.0
         result_high = detector.detect(stats_high)
         assert result_high.is_anomaly is True
@@ -202,7 +202,7 @@ class TestAnomalyDetector:
         assert result_high.threshold == 100.0
 
         # Test with low mean (should not be anomaly)
-        stats_low = Mock(spec=HistoryStatistics)
+        stats_low = Mock(spec=MemoryStatistics)
         stats_low.mean = 50.0
         result_low = detector.detect(stats_low)
         assert result_low.is_anomaly is False
@@ -214,7 +214,7 @@ class TestAnomalyDetector:
         class RobustDetector(AnomalyDetector):
             name = "RobustDetector"
 
-            def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+            def detect(self, stats: MemoryStatistics) -> AnomalyResult:
                 # Handle missing or invalid stats gracefully
                 mean = stats.mean
                 if mean is None or stats.count == 0:
@@ -237,7 +237,7 @@ class TestAnomalyDetector:
         detector = RobustDetector()
 
         # Test with None mean
-        stats_none = Mock(spec=HistoryStatistics)
+        stats_none = Mock(spec=MemoryStatistics)
         stats_none.mean = None
         stats_none.count = 0
         result_none = detector.detect(stats_none)
@@ -245,7 +245,7 @@ class TestAnomalyDetector:
         assert "error" in result_none.metadata
 
         # Test with valid mean
-        stats_valid = Mock(spec=HistoryStatistics)
+        stats_valid = Mock(spec=MemoryStatistics)
         stats_valid.mean = 150.0
         stats_valid.count = 10
         result_valid = detector.detect(stats_valid)
@@ -258,7 +258,7 @@ class TestAnomalyDetector:
         class ParentDetector(AnomalyDetector):
             name = "ParentDetector"
 
-            def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+            def detect(self, stats: MemoryStatistics) -> AnomalyResult:
                 return AnomalyResult(is_anomaly=False)
 
         class ChildDetector(ParentDetector):
@@ -295,7 +295,7 @@ class TestAnomalyDetector:
 
         # The method should raise NotImplementedError with our message
         try:
-            method(instance, Mock(spec=HistoryStatistics))
+            method(instance, Mock(spec=MemoryStatistics))
             assert False, "Should have raised NotImplementedError"
         except NotImplementedError as e:
             assert "Subclasses must implement the detect method" in str(e)
@@ -319,7 +319,7 @@ def test_usage_with_type_hints() -> None:
     def process_detectors(detectors: List[AnomalyDetector]) -> List[AnomalyResult]:
         """Process multiple detectors (demonstrates type hint usage)."""
         results = []
-        stats = Mock(spec=HistoryStatistics)
+        stats = Mock(spec=MemoryStatistics)
         for detector in detectors:
             results.append(detector.detect(stats))
         return results
@@ -328,7 +328,7 @@ def test_usage_with_type_hints() -> None:
     class MockDetector(AnomalyDetector):
         name = "MockDetector"
 
-        def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+        def detect(self, stats: MemoryStatistics) -> AnomalyResult:
             return AnomalyResult(is_anomaly=False)
 
     detectors = [MockDetector(), MockDetector()]
@@ -350,7 +350,7 @@ def test_framework_integration_pattern() -> None:
         def __init__(self, threshold: float = 3.0):
             self.threshold = threshold
 
-        def detect(self, stats: HistoryStatistics) -> AnomalyResult:
+        def detect(self, stats: MemoryStatistics) -> AnomalyResult:
             if stats.mean is None or stats.std is None or stats.recent_value is None:
                 return AnomalyResult(
                     is_anomaly=False,
@@ -384,7 +384,7 @@ def test_framework_integration_pattern() -> None:
     assert detector.threshold == 2.5
 
     # Simulate statistics for a variable
-    stats = Mock(spec=HistoryStatistics)
+    stats = Mock(spec=MemoryStatistics)
     stats.mean = 100.0
     stats.std = 10.0
     stats.recent_value = 130.0  # 3 standard deviations above mean

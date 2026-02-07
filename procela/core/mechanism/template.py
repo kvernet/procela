@@ -84,7 +84,7 @@ class MechanismTemplate(ABC):
         ----------
         inputs : list[Variable]
             Variables to read. Implementations may inspect current
-            values and history.
+            values and memory.
         outputs : list[Variable]
             Variables to propose updates for.
 

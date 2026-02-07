@@ -54,6 +54,24 @@ class TestReasoningResult:
         assert result.timestamp == custom_time
         assert result.execution_time == 0.125
 
+    def test_empty_reasoning(self) -> None:
+        """Test empty reasoning"""
+        reasoning = ReasoningResult.empty()
+
+        assert reasoning.task is ReasoningTask.NONE
+        assert not reasoning.success
+        assert reasoning.result is None
+
+    def test_failed_reasoning(self) -> None:
+        """Test failed reasoning"""
+        reasoning = ReasoningResult.failed_result(
+            task=ReasoningTask.CONFLICT_RESOLUTION, confidence=0.76, explanation=""
+        )
+
+        assert reasoning.task is ReasoningTask.CONFLICT_RESOLUTION
+        assert reasoning.confidence == 0.76
+        assert reasoning.result is None
+
     def test_naive_timestamp_gets_timezone(self) -> None:
         """Test that naive datetime gets converted to UTC."""
         naive_time = datetime(2024, 1, 1, 12, 0, 0)

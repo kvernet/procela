@@ -7,7 +7,7 @@ Tests the EWMADetector class with 100% coverage.
 import pytest
 
 from procela.core.assessment import AnomalyResult
-from procela.core.memory import HistoryStatistics
+from procela.core.memory import MemoryStatistics
 from procela.core.reasoning import EWMADetector
 
 
@@ -52,11 +52,11 @@ class TestEWMADetectorDetectMethod:
         detector = EWMADetector(threshold=2.0)
 
         # Create mock statistics
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=5, sum=90.0, sumsq=1745.0, last_value=105.0, ewma=100.0
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         # Verify result
         assert isinstance(result, AnomalyResult)
@@ -69,7 +69,7 @@ class TestEWMADetectorDetectMethod:
         """Test detection when anomaly exists."""
         detector = EWMADetector(threshold=2.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=70.0,
             sumsq=740.0,
@@ -77,7 +77,7 @@ class TestEWMADetectorDetectMethod:
             ewma=100.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert result.score == 3.0
         assert result.is_anomaly
@@ -86,7 +86,7 @@ class TestEWMADetectorDetectMethod:
         """Test detection when score equals threshold."""
         detector = EWMADetector(threshold=2.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=8,
             sum=80.0,
             sumsq=1000.0,
@@ -94,7 +94,7 @@ class TestEWMADetectorDetectMethod:
             ewma=100.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert result.score == 2.0
         assert not result.is_anomaly
@@ -103,7 +103,7 @@ class TestEWMADetectorDetectMethod:
         """Test detection with negative difference (below EWMA)."""
         detector = EWMADetector(threshold=2.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=4,
             sum=20.0,
             sumsq=200.0,
@@ -111,7 +111,7 @@ class TestEWMADetectorDetectMethod:
             ewma=100.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert result.score == 2.0
         assert not result.is_anomaly
@@ -120,7 +120,7 @@ class TestEWMADetectorDetectMethod:
         """Test that metadata contains all expected fields."""
         detector = EWMADetector(threshold=2.5)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=75.0,
             sumsq=812.5,
@@ -128,7 +128,7 @@ class TestEWMADetectorDetectMethod:
             ewma=100.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         # Check metadata
         assert "value" in result.metadata
@@ -145,7 +145,7 @@ class TestEWMADetectorDetectMethod:
         """Test detection fails when last_value is None."""
         detector = EWMADetector()
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=5,
             sum=30.0,
             sumsq=305.0,
@@ -154,13 +154,13 @@ class TestEWMADetectorDetectMethod:
         )
 
         with pytest.raises(ValueError, match="stats.value is None"):
-            detector.detect(stats.stats())
+            detector.detect(stats.result())
 
     def test_detect_missing_ewma(self) -> None:
         """Test detection fails when ewma is None."""
         detector = EWMADetector()
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=6,
             sum=102.0,
             sumsq=1884.0,
@@ -169,13 +169,13 @@ class TestEWMADetectorDetectMethod:
         )
 
         with pytest.raises(ValueError, match="ewma is None"):
-            detector.detect(stats.stats())
+            detector.detect(stats.result())
 
     def test_detect_missing_std(self) -> None:
         """Test detection fails when std is None."""
         detector = EWMADetector()
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=1,
             sum=20.0,
             sumsq=400.0,
@@ -184,13 +184,13 @@ class TestEWMADetectorDetectMethod:
         )
 
         with pytest.raises(ValueError, match="std is None"):
-            detector.detect(stats.stats())
+            detector.detect(stats.result())
 
     def test_detect_zero_std(self) -> None:
         """Test detection fails when std is zero."""
         detector = EWMADetector()
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=5,
             sum=40.0,
             sumsq=320.0,
@@ -199,7 +199,7 @@ class TestEWMADetectorDetectMethod:
         )
 
         with pytest.raises(ValueError, match="std is zero"):
-            detector.detect(stats.stats())
+            detector.detect(stats.result())
 
     def test_detect_wrong_stats_type(self) -> None:
         """Test detection fails with wrong input type."""
@@ -213,7 +213,7 @@ class TestEWMADetectorDetectMethod:
         # Test with very small std (score should be large)
         detector = EWMADetector(threshold=3.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=5,
             sum=30.0,
             sumsq=180.0,
@@ -222,7 +222,7 @@ class TestEWMADetectorDetectMethod:
         )
 
         with pytest.raises(ValueError, match="stats.std is zero, cannot normalize"):
-            detector.detect(stats.stats())
+            detector.detect(stats.result())
 
 
 class TestEWMADetectorStringRepresentations:
@@ -254,10 +254,10 @@ class TestEWMADetectorIntegration:
         assert hasattr(detector, "detect")
         assert callable(detector.detect)
 
-    def test_with_real_historystatistics(self) -> None:
-        """Test with actual HistoryStatistics object."""
+    def test_with_real_MemoryStatistics(self) -> None:
+        """Test with actual MemoryStatistics object."""
 
-        # Assuming HistoryStatistics has these attributes
+        # Assuming MemoryStatistics has these attributes
         class MockStats:
             def __init__(self):
                 self.last_value = 105.0
@@ -266,9 +266,9 @@ class TestEWMADetectorIntegration:
                 self.count = 20
 
         detector = EWMADetector(threshold=2.0)
-        stats = HistoryStatistics.empty()
+        stats = MemoryStatistics.empty()
         with pytest.raises(ValueError, match="stats.value is None"):
-            _ = detector.detect(stats.stats())
+            _ = detector.detect(stats.result())
 
 
 def test_module_import() -> None:

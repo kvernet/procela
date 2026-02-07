@@ -7,7 +7,7 @@ Tests the ZScoreDetector class with 100% coverage.
 import pytest
 
 from procela.core.assessment import AnomalyResult, StatisticsResult
-from procela.core.memory import HistoryStatistics
+from procela.core.memory import MemoryStatistics
 from procela.core.reasoning import ZScoreDetector
 
 
@@ -50,14 +50,14 @@ class TestZScoreDetectorDetectMethod:
         detector = ZScoreDetector(threshold=2.0)
 
         # Create mock statistics
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=100250.0,
             last_value=105.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         # Verify result
         assert isinstance(result, AnomalyResult)
@@ -76,14 +76,14 @@ class TestZScoreDetectorDetectMethod:
         """Test detection when anomaly exists (score >= threshold)."""
         detector = ZScoreDetector(threshold=2.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=100250.0,
             last_value=115.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert result.score == 3.0
         assert result.is_anomaly
@@ -92,14 +92,14 @@ class TestZScoreDetectorDetectMethod:
         """Test detection when score exactly equals threshold."""
         detector = ZScoreDetector(threshold=2.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=100250.0,
             last_value=110.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert result.score == 2.0
         assert result.is_anomaly  # 2.0 >= 2.0 (uses >= operator)
@@ -108,14 +108,14 @@ class TestZScoreDetectorDetectMethod:
         """Test detection with insufficient data (count < 2)."""
         detector = ZScoreDetector()
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=1,
             sum=100.0,
             sumsq=10000.0,
             last_value=105.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert not result.is_anomaly
         assert result.score is None
@@ -141,14 +141,14 @@ class TestZScoreDetectorDetectMethod:
         """Test detection when standard deviation is zero."""
         detector = ZScoreDetector()
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=100000.0,
             last_value=105.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert not result.is_anomaly
         assert result.score is None
@@ -160,14 +160,14 @@ class TestZScoreDetectorDetectMethod:
         """Test detection when last_value is None."""
         detector = ZScoreDetector()
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=100250.0,
             last_value=None,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert not result.is_anomaly
         assert result.score is None
@@ -177,9 +177,9 @@ class TestZScoreDetectorDetectMethod:
         """Test detection when mean is None."""
         detector = ZScoreDetector()
 
-        stats = HistoryStatistics(count=10, sum=None, sumsq=None, last_value=105.0)
+        stats = MemoryStatistics(count=10, sum=None, sumsq=None, last_value=105.0)
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert not result.is_anomaly
         assert result.score is None
@@ -189,14 +189,14 @@ class TestZScoreDetectorDetectMethod:
         """Test detection when mean and std are callable methods."""
         detector = ZScoreDetector(threshold=2.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=100250.0,
             last_value=110.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert result.score == 2.0
         assert result.is_anomaly
@@ -212,14 +212,14 @@ class TestZScoreDetectorDetectMethod:
         """Test detection with negative mean and values."""
         detector = ZScoreDetector(threshold=2.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=-500.0,
             sumsq=26000.0,
             last_value=-75.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert result.score == 2.5
         assert result.is_anomaly
@@ -228,14 +228,14 @@ class TestZScoreDetectorDetectMethod:
         """Test detection with large standard deviation."""
         detector = ZScoreDetector(threshold=3.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=125000.0,
             last_value=120.0,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         assert result.score == pytest.approx(0.4)
         assert not result.is_anomaly
@@ -244,7 +244,7 @@ class TestZScoreDetectorDetectMethod:
         """Test detection with small standard deviation."""
         detector = ZScoreDetector(threshold=3.0)
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=100000.1,
@@ -252,19 +252,19 @@ class TestZScoreDetectorDetectMethod:
         )
 
         # This should trigger zero-std check before calculation
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
 
         # Actually, 0.1 != 0, so it should calculate
         # But in our mock, std is 0.1, not 0
         # Let me correct this test:
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=1000.0,
             sumsq=100000.0,
             last_value=100.5,
         )
 
-        result = detector.detect(stats.stats())
+        result = detector.detect(stats.result())
         assert not result.is_anomaly
         assert result.score is None
         assert result.metadata["reason"] == "degenerate distribution"
@@ -315,14 +315,14 @@ class TestZScoreDetectorIntegration:
         for mean, std, value, expected_zscore in test_cases:
             count = 10
             sum = mean * count
-            stats = HistoryStatistics(
+            stats = MemoryStatistics(
                 count=count,
                 sum=sum,
                 sumsq=count * (std**2 + mean**2),
                 last_value=value,
             )
 
-            result = detector.detect(stats.stats())
+            result = detector.detect(stats.result())
 
             assert result.score == pytest.approx(
                 expected_zscore, rel=1e-10

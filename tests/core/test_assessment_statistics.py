@@ -17,7 +17,7 @@ class TestStatisticsResult:
         result = StatisticsResult()
 
         assert result.count == 0
-        assert result.sum == 0.0
+        assert result.sum is None
         assert result.min is None
         assert result.max is None
         assert result.mean is None
@@ -198,7 +198,7 @@ class TestStatisticsResult:
         type_hints = get_type_hints(StatisticsResult)
 
         assert type_hints["count"] == int
-        assert type_hints["sum"] == float
+        assert type_hints["sum"] == float | None
         assert type_hints["min"] == float | None
         assert type_hints["max"] == float | None
         assert type_hints["mean"] == float | None

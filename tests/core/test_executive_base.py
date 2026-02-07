@@ -5,7 +5,6 @@ from unittest.mock import Mock, create_autospec
 import pytest
 
 from procela.core.exceptions import ExecutionError
-from procela.core.execution import ExecutionTrace
 from procela.core.executive import Executive
 from procela.core.invariant import (
     InvariantCategory,
@@ -116,8 +115,6 @@ class TestExecutive:
         # Configure mocks
         mock_variable.key.return_value = mock_key
         mock_variable.candidates.return_value = [mock_record]
-        mock_variable.policy.return_value = Mock()
-        mock_variable.validators.return_value = []
         mock_variable.resolve_conflict.return_value = (mock_record, [mock_record])
         mock_record.source = mock_key
 
@@ -133,11 +130,10 @@ class TestExecutive:
         mock_process.step.assert_called_once()
         mock_mechanism.run.assert_called_once()
         mock_variable.resolve_conflict.assert_called_once()
-        mock_variable.commit.assert_called_once_with(mock_record)
+        mock_variable.commit.assert_called_once_with()
         mock_variable.clear_candidates.assert_called_once()
 
         # Verify trace was updated
-        assert len(executive.execution_trace) == 1
         assert executive._step_index == 1
 
     def test_step_method_no_candidates(self):
@@ -158,7 +154,7 @@ class TestExecutive:
         executive.step()
 
         # Verify variable wasn't resolved
-        mock_variable.resolve_conflict.assert_not_called()
+        mock_variable.resolve_conflict.assert_called()
 
     def test_step_method_not_prepared(self):
         """Test step method when not prepared."""
@@ -174,13 +170,18 @@ class TestExecutive:
         executive = Executive(processes=[], mechanisms=[])
         executive._writable = {None}  # Invalid value
 
-        # Should skip None without error
-        executive.step()
+        with pytest.raises(
+            TypeError, match="Expected `Variable`, got <class 'NoneType'>"
+        ):
+            executive.step()
 
         executive._writable = {Key()}  # Invalid value
 
         # Should raise error
-        with pytest.raises(TypeError, match="Expected `Variable`, got <Key>"):
+        with pytest.raises(
+            TypeError,
+            match="Expected `Variable`, got <class 'procela.symbols.key.Key'>",
+        ):
             executive.step()
 
     def test_run_method(self):
@@ -215,10 +216,13 @@ class TestExecutive:
         # Test run with callback
         callback_calls = []
 
-        def on_step(exec, i):
+        def pre_step(exec, i):
             callback_calls.append((exec, i))
 
-        executive.run(steps=3, on_step=on_step)
+        def post_step(exec, i):
+            pass
+
+        executive.run(steps=3, pre_step=pre_step, post_step=post_step)
 
         # Verify results
         assert step_count == 3
@@ -327,14 +331,6 @@ class TestExecutive:
         executive.add_invariant(mock_invariant)
 
         assert executive._invariants == [mock_invariant]
-
-    def test_execution_trace_property(self):
-        """Test execution_trace property returns trace."""
-        executive = Executive()
-        trace = executive.execution_trace
-
-        assert isinstance(trace, ExecutionTrace)
-        assert trace is executive._execution_trace
 
     def test_safe_mode_method(self):
         """Test safe_mode method (currently not implemented)."""

@@ -4,6 +4,8 @@ Tests the mean value predictor using epistemic.stats.mean().
 100% coverage guaranteed.
 """
 
+from unittest.mock import create_autospec
+
 import pytest
 
 from procela.core.assessment import PredictionResult, StatisticsResult
@@ -12,6 +14,7 @@ from procela.core.reasoning import (
     Predictor,
 )
 from procela.core.variable import VariableEpistemic
+from procela.symbols.key import Key
 
 
 @pytest.fixture
@@ -26,7 +29,7 @@ def mock_view_with_mean():
     stats = StatisticsResult(mean=42.5, confidence=0.5)
 
     view = VariableEpistemic(
-        key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+        key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
     )
     return view
 
@@ -37,7 +40,7 @@ def mock_view_with_none_mean():
     stats = StatisticsResult(mean=None, confidence=0.5)
 
     view = VariableEpistemic(
-        key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+        key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
     )
     return view
 
@@ -46,8 +49,10 @@ def mock_view_with_none_mean():
 def mock_view_missing_stats():
     """Provides a mock VariableEpistemic without stats structure."""
 
+    stats = StatisticsResult(count=0)
+
     view = VariableEpistemic(
-        key=None, reasoning=None, stats=None, anomaly=None, trend=None
+        key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
     )
     return view
 
@@ -58,7 +63,7 @@ def mock_view_with_mean_zero():
     stats = StatisticsResult(mean=0.0, confidence=0.5)
 
     view = VariableEpistemic(
-        key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+        key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
     )
     return view
 
@@ -103,7 +108,7 @@ class TestPredictMethod:
             stats = StatisticsResult(mean=mean_val, confidence=0.5)
 
             view = VariableEpistemic(
-                key=None, reasoning=None, stats=stats, anomaly=None, trend=None
+                key=Key(), reasoning=None, stats=stats, anomaly=None, trend=None
             )
 
             result = mean_predictor.predict(view)
@@ -122,11 +127,15 @@ class TestPredictMethod:
         assert "view must be VariableView, got str" in str(exc_info.value)
         assert "got str" in str(exc_info.value)
 
-    def test_predict_missing_stats_raises_attribute_error(
-        self, mean_predictor, mock_view_missing_stats
-    ):
+    def test_predict_missing_stats_raises_attribute_error(self, mean_predictor):
         """Test predict when stats structure is missing."""
-        result = mean_predictor.predict(mock_view_missing_stats)
+        mock_view = create_autospec(VariableEpistemic)
+        mock_view.key = Key()
+        mock_view.reasoning = None
+        mock_view.stats = None
+        mock_view.anomaly = None
+        mock_view.trend = None
+        result = mean_predictor.predict(mock_view)
         assert isinstance(result, PredictionResult)
 
     def test_predict_with_zero_mean(self, mean_predictor, mock_view_with_mean_zero):

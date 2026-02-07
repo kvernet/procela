@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from procela.core.assessment import DiagnosisResult, TrendResult
-from procela.core.memory import HistoryStatistics
+from procela.core.memory import MemoryStatistics
 from procela.core.reasoning import (
     DiagnosisOperator,
     DiagnosisOperatorThreshold,
@@ -51,8 +51,8 @@ class TestTrendOperatorThreshold:
 
     @pytest.fixture
     def mock_history_statistics(self):
-        """Create a mock HistoryStatistics object with required attributes."""
-        stats = HistoryStatistics(count=10, ewma=50.0)
+        """Create a mock MemoryStatistics object with required attributes."""
+        stats = MemoryStatistics(count=10, ewma=50.0)
         return stats
 
     @pytest.fixture
@@ -88,46 +88,46 @@ class TestTrendOperatorThreshold:
         assert result is None
 
     def test_analyze_with_wrong_stats_type(self):
-        """Test analyze when stats is not a HistoryStatistics instance."""
+        """Test analyze when stats is not a MemoryStatistics instance."""
         operator = TrendOperatorThreshold()
 
         with pytest.raises(TypeError) as exc_info:
-            operator.analyze("not a HistoryStatistics")
+            operator.analyze("not a MemoryStatistics")
 
-        assert "HistoryStatistics" in str(exc_info.value)
+        assert "MemoryStatistics" in str(exc_info.value)
         assert "got" in str(exc_info.value)
 
     def test_analyze_with_count_less_than_2(self):
         """Test analyze when stats.count < 2."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=1,
             ewma=50.0,
         )
 
         operator = TrendOperatorThreshold()
-        result = operator.analyze(stats.stats())
+        result = operator.analyze(stats.result())
         assert result is None
 
     def test_analyze_with_none_ewma(self):
         """Test analyze when stats.ewma is None."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             ewma=None,
         )
 
         operator = TrendOperatorThreshold()
-        result = operator.analyze(stats.stats())
+        result = operator.analyze(stats.result())
         assert result is None
 
     def test_analyze_with_none_mean(self, mock_history_statistics):
         """Test analyze when mean() returns None."""
         operator = TrendOperatorThreshold()
-        result = operator.analyze(mock_history_statistics.stats())
-        assert result.direction == "up"
+        result = operator.analyze(mock_history_statistics.result())
+        assert result is None
 
     def test_analyze_stable_trend(self):
         """Test analyze when delta is within threshold (stable trend)."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=485.0,
             sumsq=23772.5,
@@ -135,7 +135,7 @@ class TestTrendOperatorThreshold:
         )
 
         operator = TrendOperatorThreshold(threshold=3.0)
-        result = operator.analyze(stats.stats())
+        result = operator.analyze(stats.result())
 
         assert result is not None
         assert isinstance(result, TrendResult)
@@ -145,7 +145,7 @@ class TestTrendOperatorThreshold:
 
     def test_analyze_upward_trend(self):
         """Test analyze when delta is positive and exceeds threshold (upward trend)."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=480.0,
             sumsq=23290.0,
@@ -153,7 +153,7 @@ class TestTrendOperatorThreshold:
         )
 
         operator = TrendOperatorThreshold(threshold=3.0)
-        result = operator.analyze(stats.stats())
+        result = operator.analyze(stats.result())
 
         assert result is not None
         assert result.value == 7.0
@@ -162,7 +162,7 @@ class TestTrendOperatorThreshold:
 
     def test_analyze_downward_trend(self):
         """Test analyze when delta is negative and exceeds threshold."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=500.0,
             sumsq=25250.0,
@@ -170,7 +170,7 @@ class TestTrendOperatorThreshold:
         )
 
         operator = TrendOperatorThreshold(threshold=3.0)
-        result = operator.analyze(stats.stats())
+        result = operator.analyze(stats.result())
 
         assert result is not None
         assert result.value == -8.0
@@ -179,7 +179,7 @@ class TestTrendOperatorThreshold:
 
     def test_analyze_exact_at_threshold(self):
         """Test analyze when delta equals exactly the threshold."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=500.0,
             sumsq=25250.0,
@@ -187,7 +187,7 @@ class TestTrendOperatorThreshold:
         )
 
         operator = TrendOperatorThreshold(threshold=3.0)
-        result = operator.analyze(stats.stats())
+        result = operator.analyze(stats.result())
 
         # Should be up
         assert result is not None
@@ -196,7 +196,7 @@ class TestTrendOperatorThreshold:
 
     def test_analyze_negative_threshold_edge_case(self):
         """Test analyze with negative threshold (edge case)."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=480.0,
             sumsq=23290.0,
@@ -205,11 +205,11 @@ class TestTrendOperatorThreshold:
 
         operator = TrendOperatorThreshold(threshold=-5.0)  # Negative threshold!
         with pytest.raises(ValueError):
-            operator.analyze(stats.stats())
+            operator.analyze(stats.result())
 
     def test_analyze_zero_threshold(self):
         """Test analyze with zero threshold."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=500.0,
             sumsq=25250.0,
@@ -218,11 +218,11 @@ class TestTrendOperatorThreshold:
 
         operator = TrendOperatorThreshold(threshold=0.0)
         with pytest.raises(ValueError, match="Threshold must be positive, got 0.0"):
-            operator.analyze(stats.stats())
+            operator.analyze(stats.result())
 
     def test_analyze_with_realistic_values(self):
         """Test analyze with realistic statistical values."""
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=100,
             sum=4520.0,
             sumsq=206804.0,
@@ -230,7 +230,7 @@ class TestTrendOperatorThreshold:
         )
 
         operator = TrendOperatorThreshold(threshold=2.5)
-        result = operator.analyze(stats.stats())
+        result = operator.analyze(stats.result())
 
         assert result is not None
         assert abs(result.value - (-2.45)) < 0.001
@@ -436,7 +436,7 @@ class TestIntegration:
     def test_trend_operator_full_workflow(self):
         """Test complete trend analysis workflow."""
         # Create realistic statistics
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=50,
             sum=6000.0,
             sumsq=721250.0,
@@ -445,7 +445,7 @@ class TestIntegration:
 
         # Test with threshold that makes it stable
         operator = TrendOperatorThreshold(threshold=5.0)
-        result = operator.analyze(stats.stats())
+        result = operator.analyze(stats.result())
 
         assert result is not None
         assert abs(result.value - 3.45) < 1e-6
@@ -454,7 +454,7 @@ class TestIntegration:
 
         # Test with threshold that makes it upward trend
         operator2 = TrendOperatorThreshold(threshold=3.0)
-        result2 = operator2.analyze(stats.stats())
+        result2 = operator2.analyze(stats.result())
 
         assert result2 is not None
         assert abs(result2.value - 3.45) < 1e-6
@@ -531,13 +531,13 @@ def test_coverage_edge_cases():
     operator = TrendOperatorThreshold(threshold=3.0)
 
     # Test with stats that has all required attributes but mean returns None
-    stats = HistoryStatistics(count=10, sum=None, ewma=50.0)
-    assert operator.analyze(stats.stats()) is None
+    stats = MemoryStatistics(count=10, sum=None, ewma=50.0)
+    assert operator.analyze(stats.result()) is None
 
     # Test with stats that has ewma as 0.0
-    stats2 = Mock(spec=HistoryStatistics)
-    stats2 = HistoryStatistics(count=10, sum=0.0, ewma=0.0)
-    result = operator.analyze(stats2.stats())
+    stats2 = Mock(spec=MemoryStatistics)
+    stats2 = MemoryStatistics(count=10, sum=0.0, ewma=0.0)
+    result = operator.analyze(stats2.result())
     assert result is not None
     assert result.value == 0.0
     assert result.direction == "stable"

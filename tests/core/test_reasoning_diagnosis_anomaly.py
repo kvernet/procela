@@ -14,7 +14,7 @@ from procela.core.assessment import (
     StatisticsResult,
     TrendResult,
 )
-from procela.core.memory import HistoryStatistics
+from procela.core.memory import MemoryStatistics
 from procela.core.reasoning import AnomalyDiagnoser
 from procela.core.variable import VariableEpistemic
 
@@ -88,7 +88,7 @@ class TestAnomalyDiagnoserDiagnoseMethod:
         view.key = None
         view.reasoning = None
         view.anomaly = None
-        view.stats = Mock(spec=HistoryStatistics)
+        view.stats = Mock(spec=MemoryStatistics)
         view.trend = None
 
         result = diagnoser.diagnose(view)
@@ -133,11 +133,11 @@ class TestAnomalyDiagnoserDiagnoseMethod:
         anomaly.score = 7.5  # Extreme
         anomaly.method = "z-score"
 
-        stats = HistoryStatistics(
+        stats = MemoryStatistics(
             count=10,
             sum=48,
             sumsq=25230.4,
-        ).stats()
+        ).result()
 
         trend = TrendResult(
             value=None,
@@ -357,7 +357,7 @@ class TestAnomalyDiagnoserIntegration:
             )
 
             trend = TrendResult(value=2.5, direction="up", threshold=0.5)
-            stats = HistoryStatistics(count=1, sum=None, sumsq=None).stats()
+            stats = MemoryStatistics(count=1, sum=None, sumsq=None).result()
 
         # Mock to pass isinstance check
         with pytest.MonkeyPatch.context() as mp:

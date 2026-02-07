@@ -1,9 +1,9 @@
 """
-Core memory management for persistent, immutable state tracking.
+Core components for managing variable memory in Procela.
 
-Provides immutable data structures for tracking variable changes and
-reasoning outcomes with full historical context, statistical analysis,
-and epistemic view.
+This module provides the foundational data structures for tracking variable
+changes over time, maintaining immutable memory, and computing
+epistemic statistics for reasoning about variable behavior.
 
 Semantics Reference
 -------------------
@@ -14,18 +14,17 @@ Examples Reference
 https://procela.org/docs/examples/core/memory/
 """
 
-from .variable import (
-    CandidatesHistory,
-    HistoryStatistics,
-    ReasoningHistory,
-    VariableHistory,
-    VariableRecord,
-)
+from .base import VariableMemory
+from .candidate import CandidateRecord, CandidateState
+from .context import ResolutionContext
+from .record import VariableRecord
+from .statistics import MemoryStatistics
 
 __all__ = [
+    "CandidateState",
+    "CandidateRecord",
+    "VariableMemory",
+    "ResolutionContext",
     "VariableRecord",
-    "HistoryStatistics",
-    "CandidatesHistory",
-    "VariableHistory",
-    "ReasoningHistory",
+    "MemoryStatistics",
 ]

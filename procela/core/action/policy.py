@@ -93,6 +93,79 @@ class ResolutionPolicy(ABC):
         pass
 
 
+class MeanResolutionPolicy(ResolutionPolicy):
+    """
+    Policy that resolves competing proposals by computing the mean of values.
+
+    The mean is computing over numeric values. Non-numeric are skipped.
+    """
+
+    def resolve(self, proposals: Iterable[ActionProposal]) -> ActionProposal | None:
+        """
+        Create a new proposal where value is the mean of all the numeric values.
+
+        Parameters
+        ----------
+        proposals : Iterable[ActionProposal]
+            An iterable of validated `ActionProposal` objects.
+            All proposals must have a valid `confidence` attribute
+            (float typically between 0.0 and 1.0).
+
+        Returns
+        -------
+        ActionProposal | None
+            The proposal with the mean value and mean confidence,
+            or `None` if the input iterable is empty.
+
+        Raises
+        ------
+        TypeError
+            If any item in `proposals` is not an `ActionProposal` instance.
+        ValueError
+            If any proposal's confidence is not comparable (e.g., `None` or
+            of an inappropriate type).
+
+        Notes
+        -----
+        Only proposals with validated status are used during the resolution.
+        """
+        # Convert to list for reusability and to check emptiness
+        proposals_list = list(proposals)
+
+        if not proposals_list:
+            return None
+
+        # Type checking (optional but good for robustness)
+        for proposal in proposals_list:
+            if not isinstance(proposal, ActionProposal):
+                raise TypeError(
+                    f"All items must be ActionProposal instances, "
+                    f"got {type(proposal).__name__}"
+                )
+
+        validated = [p for p in proposals_list if p.status == ProposalStatus.VALIDATED]
+        if not validated:
+            return None
+
+        value, confidence = 0.0, 0.0
+        n = 0
+        for p in validated:
+            if p.value is not None and p.confidence is not None:
+                value += float(p.value)
+                confidence += float(p.confidence)
+                n += 1
+        if n < 1:
+            return None
+
+        return ActionProposal(
+            value=value / n,
+            confidence=confidence / n,
+            source=self.key(),
+            rationale="mean resolution policy",
+            status=ProposalStatus.SELECTED,
+        )
+
+
 class HighestConfidencePolicy(ResolutionPolicy):
     """
     Concrete policy that resolves competing proposals with the highest confidence.

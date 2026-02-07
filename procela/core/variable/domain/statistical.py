@@ -155,7 +155,7 @@ class StatisticalDomain(ValueDomain):
         -------
         str
             Explanation string. Either:
-            - "Insufficient history for statistical validation." if stats
+            - "Insufficient memory for statistical validation." if stats
               is missing mean or std
             - "Value X must be within [lower, upper]." showing the
               calculated bounds
@@ -167,7 +167,7 @@ class StatisticalDomain(ValueDomain):
         std = stats.std if stats else None
 
         if mean is None or std is None:
-            return "Insufficient history for statistical validation."
+            return "Insufficient memory for statistical validation."
 
         lower = mean - self.k * std
         upper = mean + self.k * std
@@ -183,7 +183,7 @@ class StatisticalDomain(ValueDomain):
         std_factor: float | None = 1.0,
     ) -> float | None:
         """
-        Compute trend threshold for some history statistics.
+        Compute trend threshold for some memory statistics.
 
         Parameters
         ----------

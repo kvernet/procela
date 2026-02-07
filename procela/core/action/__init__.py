@@ -16,7 +16,7 @@ https://procela.org/docs/examples/core/action/
 """
 
 from .effect import ActionEffect
-from .policy import HighestConfidencePolicy, ResolutionPolicy
+from .policy import HighestConfidencePolicy, MeanResolutionPolicy, ResolutionPolicy
 from .proposal import ActionProposal, ProposalStatus
 from .proposer import ActionProposer
 from .resolver import ConflictResolver
@@ -27,6 +27,7 @@ __all__ = [
     "ActionEffect",
     # Selection policies
     "ResolutionPolicy",
+    "MeanResolutionPolicy",
     "HighestConfidencePolicy",
     # Proposal system
     "ProposalStatus",

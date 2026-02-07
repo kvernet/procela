@@ -8,7 +8,7 @@ from unittest.mock import Mock, patch
 import pytest
 
 from procela.core.assessment import AnomalyResult
-from procela.core.memory import HistoryStatistics
+from procela.core.memory import MemoryStatistics
 from procela.core.reasoning import (
     AnomalyOperator,
     AnomalyOperatorThreshold,
@@ -58,8 +58,8 @@ class TestAnomalyOperatorThreshold:
 
     @pytest.fixture
     def mock_history_statistics(self):
-        """Create a mock HistoryStatistics object."""
-        return Mock(spec=HistoryStatistics)
+        """Create a mock MemoryStatistics object."""
+        return Mock(spec=MemoryStatistics)
 
     @pytest.fixture
     def mock_anomaly_result(self):
@@ -137,8 +137,8 @@ class TestAnomalyOperatorThreshold:
         expected_result = Mock(spec=AnomalyResult)
         mock_detector.detect.return_value = expected_result
 
-        # Create a realistic HistoryStatistics mock
-        mock_stats = Mock(spec=HistoryStatistics)
+        # Create a realistic MemoryStatistics mock
+        mock_stats = Mock(spec=MemoryStatistics)
         mock_stats.mean = 100.0
         mock_stats.std = 15.0
         mock_stats.count = 50
@@ -218,7 +218,7 @@ class TestIntegration:
     def test_full_workflow_integration(self):
         """Test a complete workflow from initialization to detection."""
         # Create realistic mocks
-        mock_stats = Mock(spec=HistoryStatistics)
+        mock_stats = Mock(spec=MemoryStatistics)
         mock_stats.mean = 42.0
         mock_stats.values = [40, 41, 42, 43, 44]
 
@@ -278,7 +278,7 @@ class TestIntegration:
             assert operator1.detector != operator2.detector
 
             # Test they work independently
-            mock_stats = Mock(spec=HistoryStatistics)
+            mock_stats = Mock(spec=MemoryStatistics)
 
             result1 = Mock()
             result2 = Mock()
@@ -321,9 +321,9 @@ def test_coverage_completeness():
 
         # This would likely cause an exception in the detector, but we're testing
         # that the operator properly delegates the call
-        mock_detector.detect.side_effect = TypeError("Expected HistoryStatistics")
+        mock_detector.detect.side_effect = TypeError("Expected MemoryStatistics")
 
         with pytest.raises(TypeError) as exc_info:
             operator.detect(None)  # Passing None should cause detector to fail
 
-        assert "Expected HistoryStatistics" in str(exc_info.value)
+        assert "Expected MemoryStatistics" in str(exc_info.value)

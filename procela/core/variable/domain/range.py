@@ -136,4 +136,4 @@ class RangeDomain(ValueDomain):
             return f"Value {value} is less than minimum {self.min_value}."
         if self.max_value is not None and value > self.max_value:
             return f"Value {value} is greater than maximum {self.max_value}."
-        return f"Value {value} is valid in RangeDomain."
+        return f"Value {value} is valid in {self.__class__.__name__}."

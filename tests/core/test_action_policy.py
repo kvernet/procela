@@ -14,6 +14,7 @@ import pytest
 from procela.core.action import (
     ActionProposal,
     HighestConfidencePolicy,
+    MeanResolutionPolicy,
     ProposalStatus,
     ResolutionPolicy,
 )
@@ -231,18 +232,119 @@ class TestHighestConfidencePolicy:
         assert resolved is proposals[0]
 
 
+class TestMeanResolutionPolicy:
+    """Comprehensive tests for MeanResolutionPolicy."""
+
+    # --- Test Basic Resolution Logic ---
+    def test_resolve_mean_resolution(self) -> None:
+        """Policy correctly resolves proposal with mean value."""
+        policy = MeanResolutionPolicy()
+        proposals = [
+            ActionProposal(value=10, confidence=0.2, status=ProposalStatus.VALIDATED),
+            ActionProposal(value=13, confidence=0.9, status=ProposalStatus.VALIDATED),
+            ActionProposal(value=12, confidence=0.5, status=ProposalStatus.VALIDATED),
+            ActionProposal(value=11, confidence=0.7, status=ProposalStatus.VALIDATED),
+        ]
+
+        assert isinstance(policy.key(), Key)
+        resolved = policy.resolve(proposals)
+        assert resolved is not None
+        assert resolved.value == (10 + 13 + 12 + 11) / 4
+        assert resolved.confidence == (0.2 + 0.9 + 0.5 + 0.7) / 4
+
+    def test_resolve_with_ties(self) -> None:
+        """Test Resolution when multiple proposals have the same value."""
+        policy = MeanResolutionPolicy()
+        prop1 = ActionProposal(
+            value=0.5, confidence=0.8, status=ProposalStatus.VALIDATED
+        )
+        prop2 = ActionProposal(
+            value=0.5, confidence=0.8, status=ProposalStatus.VALIDATED
+        )
+        prop3 = ActionProposal(
+            value=0.5, confidence=0.8, status=ProposalStatus.VALIDATED
+        )
+
+        resolved = policy.resolve([prop1, prop2, prop3])
+        assert abs(resolved.value - 0.5) < 1e-6
+        assert abs(resolved.confidence - 0.8) < 1e-6
+
+    def test_empty_iterable_returns_none(self) -> None:
+        """Policy should return None when given no proposals."""
+        policy = MeanResolutionPolicy()
+        empty_list: List[ActionProposal] = []
+        assert policy.resolve(empty_list) is None
+
+        # Also test with empty generator
+        def empty_gen() -> Iterable[ActionProposal]:
+            return
+            yield  # pragma: no cover
+
+        assert policy.resolve(empty_gen()) is None
+
+    # --- Test Input Validation and Error Handling ---
+    def test_invalid_proposal_type_raises(self) -> None:
+        """Policy should raise TypeError if input contains non-ActionProposal."""
+        policy = MeanResolutionPolicy()
+        invalid_mix = [
+            ActionProposal(value=98, confidence=0.5, status=ProposalStatus.VALIDATED),
+            "not_a_proposal",  # type: ignore
+            ActionProposal(value=65, confidence=0.7, status=ProposalStatus.VALIDATED),
+        ]
+
+        with pytest.raises(TypeError, match="must be ActionProposal"):
+            policy.resolve(invalid_mix)
+
+    def test_proposal_with_none_confidence_raises(self) -> None:
+        """Policy should raise ValueError if confidence is None."""
+        policy = MeanResolutionPolicy()
+
+        # Create a mock proposal with None confidence
+        invalid_proposal = Mock(spec=ActionProposal)
+        invalid_proposal.confidence = None
+        invalid_proposal.value = "test"
+        invalid_proposal.status = ProposalStatus.VALIDATED
+
+        assert policy.resolve([invalid_proposal]) is None
+
+    def test_proposal_with_no_validated_proposals(self) -> None:
+        """Test proposal with no validated action proposals."""
+        policy = MeanResolutionPolicy()
+
+        # Create mock proposals with incompatible confidence types
+        prop1 = Mock(spec=ActionProposal)
+        prop1.confidence = 0.5
+        prop1.value = 34.8
+
+        prop2 = Mock(spec=ActionProposal)
+        prop2.confidence = 0.89
+        prop2.value = 72.9
+
+        assert policy.resolve([prop1, prop2]) is None
+
+
 # --- Integration and Smoke Tests ---
 def test_import() -> None:
-    """Test that the module can be imported correctly."""
-    from procela.core.action.policy import HighestConfidencePolicy, ResolutionPolicy
+    """Test that the modules can be imported correctly."""
+    from procela.core.action.policy import (
+        HighestConfidencePolicy,
+        MeanResolutionPolicy,
+        ResolutionPolicy,
+    )
 
     assert HighestConfidencePolicy.__name__ == "HighestConfidencePolicy"
+    assert MeanResolutionPolicy.__name__ == "MeanResolutionPolicy"
     assert ResolutionPolicy.__name__ == "ResolutionPolicy"
 
 
 def test_policy_inheritance() -> None:
-    """Verify HighestConfidencePolicy is a proper subclass of ResolutionPolicy."""
+    """Verify default policies are proper subclasses of ResolutionPolicy."""
     policy = HighestConfidencePolicy()
+    assert isinstance(policy, ResolutionPolicy)
+    assert hasattr(policy, "resolve")
+    assert callable(policy.resolve)
+
+    policy = MeanResolutionPolicy()
     assert isinstance(policy, ResolutionPolicy)
     assert hasattr(policy, "resolve")
     assert callable(policy.resolve)

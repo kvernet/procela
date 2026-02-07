@@ -31,7 +31,7 @@ class TrendOperator(ABC):
     """
     Abstract base class for trend operators.
 
-    Trend operators evaluate changes in history statistics and produce
+    Trend operators evaluate changes in memory statistics and produce
     trend results for downstream reasoning. This class defines the
     computational interface for trend analysis.
     """
@@ -39,12 +39,12 @@ class TrendOperator(ABC):
     @abstractmethod
     def analyze(self, stats: StatisticsResult) -> TrendResult | None:
         """
-        Analyze trend from history statistics.
+        Analyze trend from memory statistics.
 
         Parameters
         ----------
         stats : StatisticsResult
-            Aggregated statistics from variable history.
+            Aggregated statistics from variable memory.
 
         Returns
         -------
@@ -64,7 +64,7 @@ class TrendOperatorThreshold(TrendOperator):
     Threshold-based trend operator.
 
     This operator uses a threshold to determine whether a trend is stable,
-    upward, or downward based on EWMA and mean values from history
+    upward, or downward based on EWMA and mean values from memory
     statistics.
     """
 
@@ -93,7 +93,7 @@ class TrendOperatorThreshold(TrendOperator):
         Parameters
         ----------
         stats : StatisticsResult
-            Aggregated statistics from variable history.
+            Aggregated statistics from variable memory.
 
         Returns
         -------

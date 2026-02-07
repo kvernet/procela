@@ -143,3 +143,50 @@ class ReasoningResult:
                 raise ValueError(
                     "Execution time must be non-negative, " f"got {self.execution_time}"
                 )
+
+    @classmethod
+    def empty(cls) -> ReasoningResult:
+        """
+        Create an empty ReasoningResult.
+
+        The returned object represents no ReasoningResult.
+
+        Returns
+        -------
+        ReasoningResult
+            A ReasoningResult instance with no reasoning.
+        """
+        return cls(
+            task=ReasoningTask.NONE,
+            success=False,
+            result=None,
+        )
+
+    @classmethod
+    def failed_result(
+        cls, task: ReasoningTask, confidence: float | None, explanation: str
+    ) -> ReasoningResult:
+        """
+        Create a failed reasoning result.
+
+        Parameters
+        ----------
+        task : ReasoningTask
+            The task of the failed reasoning.
+        confidence : float | None
+            The confidence of the failed reasoning if provided.
+        explanation : str
+            The explanation containing details of the failure.
+
+        Returns
+        -------
+        ReasoningResult
+            The result of the failed reasoning.
+        """
+        return cls(
+            task=task,
+            success=False,
+            result=None,
+            confidence=confidence,
+            explanation=explanation,
+        )

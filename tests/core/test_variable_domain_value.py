@@ -4,7 +4,7 @@ from typing import Any, Optional
 
 import pytest
 
-from procela.core.variable import HistoryStatistics, ValueDomain
+from procela.core.variable import MemoryStatistics, ValueDomain
 
 
 # Concrete implementation for testing
@@ -75,7 +75,7 @@ class TestValueDomain:
     def test_trend_threshold(self):
         """Test trend threshold."""
         domain = ConcreteDomain()
-        stats = HistoryStatistics.empty()
+        stats = MemoryStatistics.empty()
         res = domain.trend_threshold(stats=stats)
         assert res is None
 

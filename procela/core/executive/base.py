@@ -22,7 +22,6 @@ from typing import Callable, Sequence
 
 from ...symbols.key import Key
 from ..exceptions import ExecutionError
-from ..execution import ExecutionStepTrace, ExecutionTrace
 from ..invariant.exceptions import (
     InvariantViolation,
     InvariantViolationCritical,
@@ -35,7 +34,6 @@ from ..invariant.snapshot import VariableSnapshot
 from ..invariant.system import SystemInvariant
 from ..key_authority import KeyAuthority
 from ..mechanism.base import Mechanism
-from ..memory.variable.record import VariableRecord
 from ..process.base import Process
 from ..variable.variable import Variable
 
@@ -51,7 +49,7 @@ class Executive:
     """
 
     def __init__(
-        self, processes: Sequence[Process] = [], mechanisms: Sequence[Mechanism] = []
+        self, *, processes: Sequence[Process] = [], mechanisms: Sequence[Mechanism] = []
     ) -> None:
         """
         Initialize the executive.
@@ -60,6 +58,8 @@ class Executive:
         ----------
         processes : Sequence[Process]
             Processes participating in the world.
+        mechanisms : Sequence[Mechanism]
+            Mechanisms participating in the world.
 
         Notes
         -----
@@ -73,7 +73,6 @@ class Executive:
         self._variables: set[Variable] = set()
         self._prepared: bool = False
         self._invariants: list[SystemInvariant] = []
-        self._execution_trace = ExecutionTrace()
         self._step_index: int = 0
         self.prepare()
 
@@ -147,7 +146,6 @@ class Executive:
         -----
         - Collects unique writable variables.
         - Collects all variables touched by the system.
-        - Must be called once before stepping.
         """
         self._writable.clear()
         self._variables.clear()
@@ -172,11 +170,6 @@ class Executive:
         2. Conflict resolution and commitment
         3. Check runtime invariants
 
-        Raises
-        ------
-        RuntimeError
-            If the executive has not been prepared.
-
         Warnings
         --------
         - Only runtime invariants are checked.
@@ -187,18 +180,12 @@ class Executive:
         -----
         - All processes are executed before any conflict resolution.
         - Each variable is resolved and committed at most once.
-        - Variables without candidates are skipped.
         """
         if not self._prepared:
             raise ExecutionError("Executive must be prepared before execution.")
 
         # Increment step index
         self._step_index += 1
-
-        proposed: dict[Key, list[VariableRecord]] = {}
-        validated: dict[Key, list[VariableRecord]] = {}
-        resolved: dict[Key, VariableRecord | None] = {}
-        proposing_mechanisms: dict[Key, set[Key | None]] = {}
 
         # Phase 1: execute processes and mechanisms
         for process in self._processes:
@@ -208,70 +195,38 @@ class Executive:
 
         # Phase 2: resolve conflicts per writable variable
         for variable in self.writable():
-            if variable is None:
-                continue
             if not isinstance(variable, Variable):
-                raise TypeError(f"Expected `Variable`, got {variable!r}")
-
-            key = variable.key()
-            candidates = variable.candidates()
-            if not candidates:
-                continue
-
-            # Save proposed candidates per variable
-            proposed[key] = list(candidates)
-            # Save proposing mechanisms
-            for cand in candidates:
-                proposing_mechanisms.setdefault(key, set()).add(cand.source)
-
-            policy = variable.policy()
-            validators = variable.validators()
+                raise TypeError(f"Expected `Variable`, got {type(variable)}")
 
             # Variable is resolving conflicts
-            rd, vd = variable.resolve_conflict(
-                candidates=candidates,
-                policy=policy,
-                validators=validators,
-            )
-
-            # Save validated and resolved candidates
-            validated[key] = vd
-            resolved[key] = rd
+            variable.resolve_conflict()
 
             # Commit resolved candidate
-            variable.commit(rd)
+            variable.commit()
 
             # Clear candidates
             variable.clear_candidates()
 
-        # Finalize trace
-        self._execution_trace.append(
-            ExecutionStepTrace(
-                step=self._step_index,
-                proposed=proposed,
-                validated=validated,
-                resolved=resolved,
-                proposing_mechanisms={
-                    k: tuple(v) for k, v in proposing_mechanisms.items()
-                },
-            )
-        )
         # Check invariants
         self._check_invariants(InvariantPhase.RUNTIME)
 
     def run(
-        self, steps: int, on_step: Callable[[Executive, int], None] | None = None
+        self,
+        steps: int,
+        pre_step: Callable[[Executive, int], None] | None = None,
+        post_step: Callable[[Executive, int], None] | None = None,
     ) -> None:
         """
         Execute all the steps by allowing an optional callable at each step.
 
-        Execution consists of two strictly ordered phases:
+        Execution consists of five strictly ordered phases:
 
         1. Check pre invariants before stepping
-        2. Process execution where conflicts are collected by calling
-           the optionally on_step() function provided by users.
-           Conflict resolution and commitment
-        3. Check the post invariants
+        2. Call pre_step event
+        3. Process execution where conflicts are collected
+           then resolution policy applied
+        4. Call post_step event
+        5. Check post invariants after stepping
 
         Raises
         ------
@@ -282,7 +237,6 @@ class Executive:
         -----
         - All processes are executed before any conflict resolution.
         - Each variable is resolved and committed at most once.
-        - Variables without candidates are skipped.
         """
         if not self._prepared:
             raise ExecutionError("Executive must be prepared before execution.")
@@ -290,9 +244,11 @@ class Executive:
         self._check_invariants(InvariantPhase.PRE)
 
         for i in range(steps):
+            if pre_step is not None:
+                pre_step(self, i)
             self.step()
-            if on_step is not None:
-                on_step(self, i)
+            if post_step is not None:
+                post_step(self, i)
 
         self._check_invariants(InvariantPhase.POST)
 
@@ -399,18 +355,6 @@ class Executive:
             The system invariant to add.
         """
         self._invariants.append(invariant)
-
-    @property
-    def execution_trace(self) -> ExecutionTrace:
-        """
-        Access execution trace history.
-
-        Returns
-        -------
-        ExecutionTrace
-            The execution trace.
-        """
-        return self._execution_trace
 
     def safe_mode(self, invariant: SystemInvariant) -> None:
         """

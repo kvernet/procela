@@ -3,7 +3,7 @@ Anomaly operator base definitions.
 
 This module defines the base classes for anomaly operators used by the
 reasoning subsystem. Operators encapsulate computational behavior for
-detecting anomalies from variable history statistics. They do not define
+detecting anomalies from variable memory statistics. They do not define
 the semantics of what constitutes an anomaly.
 
 Semantics Reference
@@ -30,19 +30,19 @@ class AnomalyOperator(ABC):
     Abstract base class for anomaly operators.
 
     Subclasses implement a specific strategy for detecting anomalies given
-    a set of history statistics. This class defines the interface that all
+    a set of memory statistics. This class defines the interface that all
     anomaly operators must follow.
     """
 
     @abstractmethod
     def detect(self, stats: StatisticsResult) -> AnomalyResult:
         """
-        Perform anomaly detection on history statistics.
+        Perform anomaly detection on memory statistics.
 
         Parameters
         ----------
         stats : StatisticsResult
-            Aggregated statistics for a variable history to be evaluated.
+            Aggregated statistics for a variable memory to be evaluated.
 
         Returns
         -------
@@ -91,7 +91,7 @@ class AnomalyOperatorThreshold(AnomalyOperator):
         Parameters
         ----------
         stats : StatisticsResult
-            Aggregated history statistics to evaluate.
+            Aggregated memory statistics to evaluate.
 
         Returns
         -------

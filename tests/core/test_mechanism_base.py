@@ -1,6 +1,4 @@
-"""
-Pytest suite with 100% coverage for Mechanism abstract class.
-"""
+"""Pytest suite with 100% coverage for Mechanism abstract class."""
 
 import pytest
 

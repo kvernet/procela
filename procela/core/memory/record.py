@@ -18,10 +18,10 @@ https://procela.org/docs/examples/core/memory/variable/record.html
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Any, Mapping, Optional
+from typing import Any, Mapping
 
-from ....symbols.key import Key
-from ....symbols.time import TimePoint
+from ...symbols.key import Key
+from ...symbols.time import TimePoint
 
 
 @dataclass(frozen=True, eq=True)
@@ -46,11 +46,11 @@ class VariableRecord:
     """
 
     value: Any = field(compare=False)
-    time: Optional[TimePoint] = field(default=None, compare=False)
-    source: Optional[Key] = None
-    confidence: Optional[float] = None
+    time: TimePoint | None = field(default=None, compare=False)
+    source: Key | None = None
+    confidence: float | None = None
     metadata: dict[str, Any] = field(default_factory=dict, compare=False)
-    explanation: Optional[str] = field(default=None, compare=False)
+    explanation: str | None = field(default=None, compare=False)
 
     _key: Key = field(
         init=False,
@@ -94,7 +94,7 @@ class VariableRecord:
         # Defensive immutability
         object.__setattr__(self, "metadata", dict(self.metadata))
 
-        from ...key_authority import KeyAuthority
+        from ..key_authority import KeyAuthority
 
         """Assign a unique identity key issued by KeyAuthority."""
         object.__setattr__(self, "_key", KeyAuthority.issue(self))

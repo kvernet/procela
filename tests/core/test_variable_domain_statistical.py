@@ -5,14 +5,15 @@ from typing import Any
 import pytest
 
 from procela.core.assessment import StatisticsResult
-from procela.core.variable import HistoryStatistics, StatisticalDomain
+from procela.core.memory import MemoryStatistics
+from procela.core.variable import StatisticalDomain
 from procela.symbols import Key
 
 
 class TestStatisticalDomain:
     """Test cases for StatisticalDomain class."""
 
-    def build_history_statistics(
+    def build_memory_statistics(
         self,
         count: int = 1,
         sum: float | None = None,
@@ -24,7 +25,7 @@ class TestStatisticalDomain:
         ewma: float | None = None,
         sources: frozenset[Key] = frozenset(),
     ):
-        return HistoryStatistics(
+        return MemoryStatistics(
             count=count,
             sum=sum,
             sumsq=sumsq,
@@ -80,18 +81,18 @@ class TestStatisticalDomain:
     def test_validate_with_complete_stats_inside_bounds(self):
         """Test validation with complete stats, value inside bounds."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(count=2, sum=200.0, sumsq=20200.0)
-        assert domain.validate(95, stats.stats()) is True
-        assert domain.validate(105, stats.stats()) is True
-        assert domain.validate(80, stats.stats()) is True  # Lower bound inclusive
-        assert domain.validate(120, stats.stats()) is True  # Upper bound inclusive
+        stats = self.build_memory_statistics(count=2, sum=200.0, sumsq=20200.0)
+        assert domain.validate(95, stats.result()) is True
+        assert domain.validate(105, stats.result()) is True
+        assert domain.validate(80, stats.result()) is True  # Lower bound inclusive
+        assert domain.validate(120, stats.result()) is True  # Upper bound inclusive
 
     def test_validate_with_complete_stats_outside_bounds(self):
         """Test validation with complete stats, value outside bounds."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(count=2, sum=200.0, sumsq=20200.0)
-        assert domain.validate(79, stats.stats()) is False  # Below lower bound
-        assert domain.validate(121, stats.stats()) is False  # Above upper bound
+        stats = self.build_memory_statistics(count=2, sum=200.0, sumsq=20200.0)
+        assert domain.validate(79, stats.result()) is False  # Below lower bound
+        assert domain.validate(121, stats.result()) is False  # Above upper bound
 
     def test_validate_without_stats(self):
         """Test validation without stats (should pass) for numeric values."""
@@ -109,17 +110,17 @@ class TestStatisticalDomain:
         """Test validation with stats missing mean."""
         domain = StatisticalDomain(k=2.0)
         # Missing mean
-        stats = self.build_history_statistics(sumsq=10.0)
-        assert domain.validate(50, stats.stats()) is True
+        stats = self.build_memory_statistics(sumsq=10.0)
+        assert domain.validate(50, stats.result()) is True
 
     def test_validate_with_incomplete_stats_missing_std(self):
         """Test validation with stats missing std."""
         domain = StatisticalDomain(k=2.0)
         # Missing std
-        stats = self.build_history_statistics(
+        stats = self.build_memory_statistics(
             sum=100.0,
         )
-        assert domain.validate(50, stats.stats()) is True
+        assert domain.validate(50, stats.result()) is True
 
     def test_validate_with_empty_stats(self):
         """Test validation with empty stats dict."""
@@ -128,154 +129,158 @@ class TestStatisticalDomain:
 
     def test_validate_with_different_k_values(self):
         """Test validation with different k values."""
-        stats = self.build_history_statistics(count=2, sum=200.0, sumsq=20200.0)
+        stats = self.build_memory_statistics(count=2, sum=200.0, sumsq=20200.0)
 
         # k=1.0: bounds 90-110
         domain1 = StatisticalDomain(k=1.0)
-        assert domain1.validate(95, stats.stats()) is True
-        assert domain1.validate(85, stats.stats()) is False
+        assert domain1.validate(95, stats.result()) is True
+        assert domain1.validate(85, stats.result()) is False
 
         # k=2.0: bounds 80-120
         domain2 = StatisticalDomain(k=2.0)
-        assert domain2.validate(85, stats.stats()) is True
-        assert domain2.validate(75, stats.stats()) is False
+        assert domain2.validate(85, stats.result()) is True
+        assert domain2.validate(75, stats.result()) is False
 
         # k=3.0: bounds 70-130
         domain3 = StatisticalDomain(k=3.0)
-        assert domain3.validate(75, stats.stats()) is True
-        assert domain3.validate(65, stats.stats()) is False
+        assert domain3.validate(75, stats.result()) is True
+        assert domain3.validate(65, stats.result()) is False
 
     def test_validate_non_numeric_value_raises_error(self):
         """Test that non-numeric value raises TypeError during comparison."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(sum=100.0, sumsq=10.0)
+        stats = self.build_memory_statistics(sum=100.0, sumsq=10.0)
 
-        assert not domain.validate("not_a_number", stats.stats())
+        assert not domain.validate("not_a_number", stats.result())
 
     def test_validate_with_zero_std(self):
         """Test validation with zero standard deviation."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(count=2, sum=100.0, sumsq=5000.0)
-        assert domain.validate(50, stats.stats()) is True
-        assert domain.validate(50.0, stats.stats()) is True
-        assert domain.validate(51, stats.stats()) is False
-        assert domain.validate(49, stats.stats()) is False
+        stats = self.build_memory_statistics(count=2, sum=100.0, sumsq=5000.0)
+        assert domain.validate(50, stats.result()) is True
+        assert domain.validate(50.0, stats.result()) is True
+        assert domain.validate(51, stats.result()) is False
+        assert domain.validate(49, stats.result()) is False
 
     def test_explain_with_complete_stats(self):
         """Test explanation with complete stats."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(count=2, sum=200.0, sumsq=20200.0)
+        stats = self.build_memory_statistics(count=2, sum=200.0, sumsq=20200.0)
 
-        explanation = domain.explain(95, stats.stats())
+        explanation = domain.explain(95, stats.result())
         assert "Value 95 is within [80.0, 120.0]." == explanation
 
         # Different value, same bounds
-        explanation2 = domain.explain(125, stats.stats())
+        explanation2 = domain.explain(125, stats.result())
         assert "Value 125 is not within [80.0, 120.0]." == explanation2
 
     def test_explain_without_stats(self):
         """Test explanation without stats."""
         domain = StatisticalDomain(k=2.0)
         explanation = domain.explain(50)
-        assert explanation == "Insufficient history for statistical validation."
+        assert explanation == "Insufficient memory for statistical validation."
 
     def test_explain_with_none_stats(self):
         """Test explanation with None stats."""
         domain = StatisticalDomain(k=2.0)
         explanation = domain.explain(50, None)
-        assert explanation == "Insufficient history for statistical validation."
+        assert explanation == "Insufficient memory for statistical validation."
 
     def test_explain_with_incomplete_stats(self):
         """Test explanation with stats missing mean."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(count=1, sum=2.0, sumsq=10.0)
-        explanation = domain.explain(50, stats.stats())
-        assert explanation == "Insufficient history for statistical validation."
+        stats = self.build_memory_statistics(count=1, sum=2.0, sumsq=10.0)
+        explanation = domain.explain(50, stats.result())
+        assert explanation == "Insufficient memory for statistical validation."
 
     def test_explain_with_incomplete_stats_missing_std(self):
         """Test explanation with stats missing std."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(
+        stats = self.build_memory_statistics(
             sum=100.0,
         )
-        explanation = domain.explain(50, stats.stats())
-        assert explanation == "Insufficient history for statistical validation."
+        explanation = domain.explain(50, stats.result())
+        assert explanation == "Insufficient memory for statistical validation."
 
     def test_explain_with_empty_stats(self):
         """Test explanation with empty stats dict."""
         domain = StatisticalDomain(k=2.0)
         explanation = domain.explain(50, {})
-        assert explanation == "Insufficient history for statistical validation."
+        assert explanation == "Insufficient memory for statistical validation."
 
     def test_explain_with_different_k_values(self):
         """Test explanation with different k values."""
-        stats = self.build_history_statistics(count=2, sum=200.0, sumsq=20200.0)
+        stats = self.build_memory_statistics(count=2, sum=200.0, sumsq=20200.0)
 
         domain1 = StatisticalDomain(k=1.0)
-        exp1 = domain1.explain(95, stats.stats())
+        exp1 = domain1.explain(95, stats.result())
         assert exp1 == "Value 95 is within [90.0, 110.0]."
 
         domain2 = StatisticalDomain(k=2.0)
-        exp2 = domain2.explain(95, stats.stats())
+        exp2 = domain2.explain(95, stats.result())
         assert exp2 == "Value 95 is within [80.0, 120.0]."
 
         domain3 = StatisticalDomain(k=3.0)
-        exp3 = domain3.explain(95, stats.stats())
+        exp3 = domain3.explain(95, stats.result())
         assert exp3 == "Value 95 is within [70.0, 130.0]."
 
     def test_explain_with_k_zero(self):
         """Test explanation with k=0."""
         domain = StatisticalDomain(k=0.0)
-        stats = self.build_history_statistics(count=2, sum=100.0, sumsq=5000.0)
-        explanation = domain.explain(50, stats.stats())
+        stats = self.build_memory_statistics(count=2, sum=100.0, sumsq=5000.0)
+        explanation = domain.explain(50, stats.result())
         assert explanation == "Value 50 is within [50.0, 50.0]."
 
     def test_explain_with_zero_std(self):
         """Test explanation with zero standard deviation."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(count=2, sum=100.0, sumsq=5000.0)
-        explanation = domain.explain(50, stats.stats())
+        stats = self.build_memory_statistics(count=2, sum=100.0, sumsq=5000.0)
+        explanation = domain.explain(50, stats.result())
         assert explanation == "Value 50 is within [50.0, 50.0]."
 
     def test_explain_with_float_precision(self):
         """Test explanation with floating point precision."""
         domain = StatisticalDomain(k=1.5)
-        stats = self.build_history_statistics(count=3, sum=150.5, sumsq=20987.5)
-        explanation = domain.explain(52.0, stats.stats())
+        stats = self.build_memory_statistics(count=3, sum=150.5, sumsq=20987.5)
+        explanation = domain.explain(52.0, stats.result())
 
         assert "Value 52.0 is within" in explanation
 
     def test_explain_with_negative_mean(self):
         """Test explanation with negative mean."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(count=2, sum=-200.0, sumsq=40020.0)
-        explanation = domain.explain(-95, stats.stats())
+        stats = self.build_memory_statistics(count=2, sum=-200.0, sumsq=40020.0)
+        explanation = domain.explain(-95, stats.result())
         assert "Value -95 is within" in explanation
 
     def test_explain_with_non_numeric(self):
         """Test explanation with non numeric values."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(sum=-100.0, sumsq=10.0)
+        stats = self.build_memory_statistics(sum=-100.0, sumsq=10.0)
         explanation = domain.explain("not_a_number", stats)
         assert explanation == "Value must be numeric."
 
     def test_trend_threshold(self):
         """Test trend threshold."""
         domain = StatisticalDomain(k=2.0)
-        stats = self.build_history_statistics(count=25, sum=4750.0, sumsq=902900.0)
+        stats = self.build_memory_statistics(count=25, sum=4750.0, sumsq=902900.0)
         with pytest.raises(ValueError, match="Provide either absolute or std_factor."):
-            domain.trend_threshold(stats=stats.stats(), absolute=None, std_factor=None)
+            domain.trend_threshold(stats=stats.result(), absolute=None, std_factor=None)
 
         res = domain.trend_threshold(
-            stats=stats.stats(), absolute=0.58, std_factor=None
+            stats=stats.result(), absolute=0.58, std_factor=None
         )
         assert res == 0.58
 
-        res = domain.trend_threshold(stats=stats.stats(), absolute=None, std_factor=1.0)
+        res = domain.trend_threshold(
+            stats=stats.result(), absolute=None, std_factor=1.0
+        )
         assert res == 4.0
 
-        stats = self.build_history_statistics(sum=4750.0, sumsq=902900.0)
-        res = domain.trend_threshold(stats=stats.stats(), absolute=None, std_factor=1.0)
+        stats = self.build_memory_statistics(sum=4750.0, sumsq=902900.0)
+        res = domain.trend_threshold(
+            stats=stats.result(), absolute=None, std_factor=1.0
+        )
         assert res is None
 
     def test_type_annotations(self):
@@ -308,7 +313,7 @@ class TestStatisticalDomain:
         domain = StatisticalDomain(k=2.0)
 
         # NaN in sum
-        stats1 = HistoryStatistics(
+        stats1 = MemoryStatistics(
             3,
             float("nan"),
             409,
@@ -320,20 +325,20 @@ class TestStatisticalDomain:
             frozenset(),
         )
         # Comparison with NaN always returns False
-        assert domain.validate(50, stats1.stats()) is False
+        assert domain.validate(50, stats1.result()) is False
 
         # NaN in sumsq
-        stats2 = HistoryStatistics(
+        stats2 = MemoryStatistics(
             3, 300, float("nan"), None, None, None, 1.0, None, frozenset()
         )
-        assert domain.validate(50, stats2.stats()) is False
+        assert domain.validate(50, stats2.result()) is False
 
     def test_edge_case_infinity_in_stats(self):
         """Test edge case with infinity in stats."""
         domain = StatisticalDomain(k=2.0)
 
         # Infinity in sum
-        stats1 = HistoryStatistics(
+        stats1 = MemoryStatistics(
             3,
             float("inf"),
             float("inf"),
@@ -344,12 +349,12 @@ class TestStatisticalDomain:
             None,
             frozenset(),
         )
-        assert domain.validate(float("inf"), stats1.stats()) is False
+        assert domain.validate(float("inf"), stats1.result()) is False
 
         # Infinity in sumsq
-        stats2 = HistoryStatistics(
+        stats2 = MemoryStatistics(
             3, 39, float("inf"), None, None, None, 1.0, None, frozenset()
         )
-        assert domain.validate(50, stats2.stats()) is True
-        assert domain.validate(float("inf"), stats2.stats()) is True
-        assert domain.validate(float("-inf"), stats2.stats()) is True
+        assert domain.validate(50, stats2.result()) is True
+        assert domain.validate(float("inf"), stats2.result()) is True
+        assert domain.validate(float("-inf"), stats2.result()) is True

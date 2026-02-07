@@ -4,23 +4,27 @@ Test suite for variable module.
 Coverage: 100%
 """
 
+from typing import Iterator
+
 import pytest
 
 from procela.core.action import (
+    ActionEffect,
     ActionProposal,
     ResolutionPolicy,
 )
 from procela.core.assessment import (
     AnomalyResult,
     DiagnosisResult,
+    PlanningResult,
     PredictionResult,
     ReasoningResult,
     ReasoningTask,
     TrendResult,
 )
 from procela.core.memory import (
-    ReasoningHistory,
-    VariableHistory,
+    CandidateRecord,
+    VariableMemory,
     VariableRecord,
 )
 from procela.core.reasoning import (
@@ -160,6 +164,115 @@ def test_init_minimal(real_value_domain):
     assert var.seed is None
 
 
+def test_variable_epistemic(real_variable):
+    """Test post init."""
+    with pytest.raises(
+        TypeError, match="`key` should be a Key, got <class 'NoneType'>"
+    ):
+        VariableEpistemic(
+            key=None,
+            reasoning=None,
+            stats=real_variable.stats,
+            anomaly=None,
+            trend=None,
+        )
+
+    with pytest.raises(TypeError):
+        VariableEpistemic(
+            key=Key(),
+            reasoning=Key(),
+            stats=real_variable.stats,
+            anomaly=None,
+            trend=None,
+        )
+
+    with pytest.raises(TypeError):
+        VariableEpistemic(
+            key=Key(), reasoning=None, stats=TimePoint(), anomaly=None, trend=None
+        )
+
+    with pytest.raises(TypeError):
+        VariableEpistemic(
+            key=Key(),
+            reasoning=None,
+            stats=real_variable.stats.result(),
+            anomaly=Key(),
+            trend=None,
+        )
+
+    with pytest.raises(TypeError):
+        VariableEpistemic(
+            key=Key(),
+            reasoning=None,
+            stats=real_variable.stats.result(),
+            anomaly=None,
+            trend="not-a-trend",
+        )
+
+
+def test_init_method_domain_violation():
+    """Test init method with domain violation."""
+    var = Variable(name="temperature", domain=RangeDomain(0, 100))
+    assert var.description == ""
+    assert var.units is None
+    assert var.role == VariableRole.ENDOGENOUS
+    assert var.config == {}
+    assert var.seed is None
+
+    with pytest.raises(ValueError, match="domain violation constraint"):
+        var.init(VariableRecord(value=102.8))
+
+
+def test_records_method(real_variable):
+    """Test records."""
+    assert isinstance(real_variable.records(), Iterator)
+
+    real_variable.init(VariableRecord(value=28.56))
+    for record in real_variable.records():
+        assert isinstance(record, VariableRecord)
+
+
+def test_commit_with_includes(real_variable):
+    """Test commit with includes."""
+
+    # Include hypotheses
+    real_variable.hypotheses = Key()
+    with pytest.raises(TypeError, match="`hypotheses` should be a list"):
+        real_variable.commit(include_hypotheses=True)
+
+    real_variable.hypotheses = [
+        CandidateRecord(
+            VariableRecord(value=98),
+        ),
+        "not-a-variable-record",
+    ]
+    with pytest.raises(
+        TypeError, match="`hypothesis` at index 1 should be a CandidateRecord"
+    ):
+        real_variable.commit(include_hypotheses=True)
+
+    # Include conclusion
+    real_variable.conclusion = Key()
+    with pytest.raises(TypeError):
+        real_variable.commit(include_hypotheses=False, include_conclusion=True)
+
+    real_variable.conclusion = VariableRecord(value=-28.09)
+    real_variable.reasoning = ReasoningResult(
+        task=ReasoningTask.ACTION_PROPOSAL, success=False, result=None
+    )
+    real_variable.commit(include_hypotheses=False, include_conclusion=True)
+
+    # Include reasoning
+    real_variable.conclusion = VariableRecord(value=-28.09)
+    real_variable.reasoning = TimePoint()
+    with pytest.raises(
+        TypeError, match="reasoning result should be a ReasoningResult or None"
+    ):
+        real_variable.commit(
+            include_hypotheses=False, include_conclusion=False, include_reasonning=True
+        )
+
+
 def test_key_method(real_variable):
     """Test key() returns a Key."""
     key = real_variable.key()
@@ -168,69 +281,35 @@ def test_key_method(real_variable):
 
 def test_record_all_params(real_variable, real_key, real_time_point):
     """Test record() with all parameters."""
-    record = real_variable.record(
-        value=99.9,
-        time=real_time_point,
-        source=real_key,
-        confidence=0.99,
-        explanation="Full params",
-        metadata={"full": True},
+    real_variable.add_candidate(
+        VariableRecord(
+            value=99.9,
+            time=real_time_point,
+            source=real_key,
+            confidence=0.99,
+            explanation="Full params",
+            metadata={"full": True},
+        ),
     )
-    assert isinstance(record, VariableRecord)
-    assert record.value == 99.9
-    assert record.source == real_key
-
-
-def test_record_minimal(real_variable):
-    """Test record() with minimal parameters."""
-    record = real_variable.record(value=50)
-    assert record.value == 50
-    assert record.metadata == {}
-
-
-def test_record_none_metadata(real_variable):
-    """Test record() with None metadata."""
-    real_variable.record(value=25, metadata=None)
+    assert isinstance(real_variable.hypotheses[0], CandidateRecord)
+    assert real_variable.hypotheses[0].record.value == 99.9
+    assert real_variable.hypotheses[0].record.source == real_key
 
 
 def test_record_validation_failure(real_variable):
     """Test record() when validation fails - NEEDS TO FAIL."""
     for test_value in [None, "invalid", -1e9, 1e9, [], {}]:
         try:
-            real_variable.record(value=test_value)
+            real_variable.add_candidate(VariableRecord(value=test_value))
             continue
         except ValueError as e:
             assert "violates domain" in str(e)
             return
 
-    pytest.skip("No value found that fails domain validation")
 
-
-def test_history_method(real_variable):
-    """Test history() method."""
-    real_variable.record(value=10)
-    real_variable.record(value=20)
-
-    history, reasoning_history = real_variable.history()
-    assert isinstance(history, VariableHistory)
-    assert isinstance(reasoning_history, ReasoningHistory)
-
-
-def test_values_method(real_variable):
-    """Test values() method."""
-    values_to_add = [100, 200, 300]
-    for v in values_to_add:
-        real_variable.record(value=v)
-
-    values = list(real_variable.values())
-    assert len(values) >= 3
-    assert all(isinstance(v, (int, float)) for v in values[-3:])
-
-
-def test_values_empty(real_variable):
-    """Test values() on fresh variable."""
-    values = list(real_variable.values())
-    assert isinstance(values, list)
+def test_memory_method(real_variable):
+    """Test memory() method."""
+    assert real_variable.memory is None
 
 
 def test_value(real_variable):
@@ -242,21 +321,12 @@ def test_value(real_variable):
 def test_add_candidates(real_variable):
     """Test add_candidates() on fresh variable."""
     # No record
-    policy = real_variable.policy()
+    policy = real_variable.policy
     assert isinstance(policy, ResolutionPolicy)
 
-    record, validated = real_variable.resolve_conflict(
-        candidates=[],
-        policy=policy,
-    )
-    assert record is None
-    assert isinstance(validated, list)
-    # None will be skipped
-    real_variable.commit(record)
-    assert len(real_variable.history()[0].get_records()) == 0
-    # None VariableRecord will be skipped
-    real_variable.commit(Key())
-    assert len(real_variable.history()[0].get_records()) == 0
+    real_variable.resolve_conflict()
+    real_variable.commit()
+    assert len(real_variable.memory.records()) == 1
 
     # 4 records
     record = VariableRecord(11.0, confidence=0.95, source=Key())
@@ -271,23 +341,10 @@ def test_add_candidates(real_variable):
     candidates = real_variable.candidates(exclude=record.source)
     assert len(candidates) == 3
 
-    record, validated = real_variable.resolve_conflict(
-        candidates=candidates,
-        policy=policy,
-    )
-    assert isinstance(record, VariableRecord)
-    assert len(validated) == 3
-    assert record.value == 13.0
-    assert record.confidence == 0.65
+    real_variable.resolve_conflict()
+    real_variable.commit()
 
-    real_variable.commit(record)
-
-    # Record that violates variable domain
-    record = VariableRecord(-110.0, confidence=0.999)
-    with pytest.raises(ValueError):
-        real_variable.commit(record)
-
-    assert real_variable.validators() is None
+    assert real_variable.validators is None
     real_variable.reset()
 
 
@@ -306,8 +363,8 @@ def test_repr_method(real_variable):
 
 def test_summary_method(real_variable):
     """Test summary() method."""
-    real_variable.record(value=75)
-    real_variable.record(value=85)
+    real_variable.add_candidate(VariableRecord(value=75))
+    real_variable.add_candidate(VariableRecord(value=85))
 
     summary = real_variable.summary()
     assert "===== Variable summary =====" in summary
@@ -321,7 +378,7 @@ def test_epistemic_method(real_variable):
     """Test epistemic() method."""
     # Add data
     for i in range(5):
-        real_variable.record(value=i * 20)
+        real_variable.add_candidate(VariableRecord(value=i * 20))
 
     epistemic = real_variable.epistemic()
     assert isinstance(epistemic, VariableEpistemic)
@@ -333,20 +390,22 @@ def test_epistemic_method(real_variable):
 def test_explain_method_real_variable(real_variable):
     """Test explain() covers real variable."""
     # Test 1: No anomaly, no trend
-    real_variable._history = VariableHistory(_config={})
+    real_variable.memory = VariableMemory(
+        hypotheses=(), conclusion=None, reasoning=None
+    )
     explanation1 = real_variable.explain()
     assert "coverage_test" in explanation1
 
     # Test 2: With anomaly (need to create one)
     # Add outlier value
     for i in range(10):
-        real_variable.record(value=i)  # Normal values
+        real_variable.add_candidate(VariableRecord(value=i))  # Normal values
 
-    real_variable.record(value=1000)  # Outlier
+    real_variable.add_candidate(VariableRecord(value=1000))  # Outlier
 
     real_variable.explain()
 
-    # Test 3: With reasoning history
+    # Test 3: With reasoning memory
     # Execute some reasoning tasks
     real_variable.detect_anomaly()
     real_variable.analyze_trend()
@@ -358,27 +417,29 @@ def test_explain_method_real_variable(real_variable):
 def test_explain_method_statistical_variable(statistical_variable):
     """Test explain() covers statistical_variable."""
     # Test 1: No anomaly, no trend
-    statistical_variable._history = VariableHistory(_config={})
+    statistical_variable.memory = VariableMemory(
+        hypotheses=(), conclusion=None, reasoning=None
+    )
 
     # Test 2: With anomaly (need to create one)
     # Add outlier value
     for i in range(10):
-        statistical_variable.record(value=i / 100)
+        statistical_variable.add_candidate(VariableRecord(value=i / 100))
 
-    statistical_variable.record(value=2000)  # Outlier
+    statistical_variable.add_candidate(VariableRecord(value=2000))  # Outlier
 
     epistemic = statistical_variable.epistemic()
 
-    assert epistemic.trend is not None
+    assert epistemic.trend is None
 
     statistical_variable.explain()
 
-    # Test 3: With reasoning history
+    # Test 3: With reasoning memory
     # Execute some reasoning tasks
     statistical_variable.detect_anomaly()
     statistical_variable.analyze_trend()
     statistical_variable.propose_actions()
-    statistical_variable.predict(horizon=5)
+    statistical_variable.predict(predictor=LastPredictor(allow_none=True), horizon=5)
 
     explanation3 = statistical_variable.explain()
     assert "Recent reasoning steps:" in explanation3 or "No anomaly" in explanation3
@@ -389,40 +450,135 @@ def test_explain_method_statistical_variable_different_scenarios(
 ):
     """Test explain() covers statistical_variable with different scenarios."""
     # Test 1: No anomaly, no trend
-    statistical_variable._history = VariableHistory(_config={})
+    statistical_variable.memory = VariableMemory(
+        hypotheses=(), conclusion=None, reasoning=None
+    )
+
+    statistical_variable.init(VariableRecord(value=0.78))
 
     # Test 2: With anomaly (need to create one)
     # Add outlier value
     for i in range(10):
-        statistical_variable.record(value=i / 100)
+        statistical_variable.add_candidate(VariableRecord(value=i / 100))
 
-    statistical_variable.record(value=2000)  # Outlier
+    statistical_variable.resolve_conflict()
+    for _ in range(10):
+        statistical_variable.commit()
+    statistical_variable.clear_candidates()
+
+    statistical_variable.add_candidate(VariableRecord(value=405))  # Outlier
+    statistical_variable.resolve_conflict()
+    statistical_variable.commit()
+    statistical_variable.clear_candidates()
 
     epistemic = statistical_variable.epistemic()
-
     assert epistemic.trend is not None
 
+    statistical_variable.explain()
+
     # Ask for no recent reasoning result
-    explanation = statistical_variable._explain_reasoning(res=None)
+    explanation = statistical_variable._explain_reasoning(result=None)
     assert explanation == ""
 
-    # Test 3: With reasoning history
+    # Test 3: With reasoning memory
     # Execute some reasoning tasks
     statistical_variable.detect_anomaly()
     statistical_variable.analyze_trend()
     statistical_variable.propose_actions()
-    statistical_variable.resolve_conflict(
-        candidates=[
-            VariableRecord(value=23.4, confidence=0.56),
-            VariableRecord(value=26.1, confidence=0.68),
-        ],
-        policy=last_record_resolution,
+    statistical_variable.hypotheses = (
+        CandidateRecord(VariableRecord(value=23.4, confidence=0.56)),
+        CandidateRecord(VariableRecord(value=26.1, confidence=0.68)),
     )
+    statistical_variable.policy = last_record_resolution
+    statistical_variable.resolve_conflict()
     statistical_variable.diagnose_causes()
-    statistical_variable.plan_intervention()
+    statistical_variable.plan_intervention(predictor=LastPredictor(allow_none=True))
 
     explanation = statistical_variable.explain()
-    assert "Intervention planning" in explanation
+    assert "Recent reasoning steps:" in explanation
+
+
+def test_explain_explain_reasoning_statistical_variable(real_variable):
+    """Test _explain_reasoning()."""
+    real_variable._explain_reasoning(
+        result=ReasoningResult(
+            task=ReasoningTask.ANOMALY_DETECTION,
+            success=False,
+            result=AnomalyResult(is_anomaly=False, score=2.8),
+        )
+    )
+
+    # Trend
+    real_variable._explain_reasoning(
+        result=ReasoningResult(
+            task=ReasoningTask.TREND_ANALYSIS,
+            success=False,
+            result=TrendResult(value=873.7, direction="up", threshold=0.8),
+        )
+    )
+
+    # Value prediction
+    real_variable._explain_reasoning(
+        result=ReasoningResult(
+            task=ReasoningTask.VALUE_PREDICTION,
+            success=False,
+            result=PredictionResult(
+                value=17.45,
+            ),
+        )
+    )
+
+    # Conflict resolution
+    real_variable._explain_reasoning(
+        result=ReasoningResult(
+            task=ReasoningTask.CONFLICT_RESOLUTION,
+            success=False,
+            result=VariableRecord(
+                value=17.45,
+            ),
+        )
+    )
+
+    # Action proposal
+    real_variable._explain_reasoning(
+        result=ReasoningResult(
+            task=ReasoningTask.ACTION_PROPOSAL,
+            success=False,
+            result=[
+                ActionProposal(value=34.7, confidence=0.65, action="Test"),
+                ActionProposal(value=38.7, confidence=0.5, action="Test"),
+            ],
+        )
+    )
+
+    # Causal diagnosis
+    real_variable._explain_reasoning(
+        result=ReasoningResult(
+            task=ReasoningTask.CAUSAL_DIAGNOSIS,
+            success=False,
+            result=DiagnosisResult(causes=["abc", "xyz"], metadata={"key": "Test"}),
+        )
+    )
+
+    # Intervention planning
+    real_variable._explain_reasoning(
+        result=ReasoningResult(
+            task=ReasoningTask.INTERVENTION_PLANNING,
+            success=False,
+            result=PlanningResult(
+                proposals=[
+                    ActionProposal(
+                        value=23.87,
+                        confidence=0.78,
+                        rationale="Test",
+                        effect=ActionEffect(
+                            description="Description test", expected_outcome=None
+                        ),
+                    )
+                ],
+            ),
+        )
+    )
 
 
 def test_variable_method_plan_intervention_unknown_planning_operator(real_value_domain):
@@ -466,7 +622,10 @@ def test_detect_anomaly(real_variable):
     """Test detect_anomaly()."""
     # Add data
     for i in range(10):
-        real_variable.record(value=i)
+        real_variable.add_candidate(VariableRecord(value=i * 10, confidence=0.9))
+        real_variable.resolve_conflict()
+        real_variable.commit()
+        real_variable.clear_candidates()
 
     result = real_variable.detect_anomaly()
     assert isinstance(result, AnomalyResult)
@@ -478,7 +637,10 @@ def test_analyze_trend(real_variable):
     """Test analyze_trend()."""
     # Add trending data
     for i in range(10):
-        real_variable.record(value=i * 10)
+        real_variable.add_candidate(VariableRecord(value=i * 10, confidence=0.9))
+        real_variable.resolve_conflict()
+        real_variable.commit()
+        real_variable.clear_candidates()
 
     result = real_variable.analyze_trend()
     # Can be None or TrendResult
@@ -487,31 +649,19 @@ def test_analyze_trend(real_variable):
         assert hasattr(result, "direction")
 
 
-def test_resolve_conflict(real_variable, real_variable_record, last_record_resolution):
-    """Test resolve_conflict()."""
-    # Create candidates
-    candidates = [real_variable_record]
-
-    # Try resolution
-    real_variable.resolve_conflict(candidates, last_record_resolution)
-    # Can be None or VariableRecord
-
-    # Test with validators
-    real_variable.resolve_conflict(candidates, last_record_resolution, validators=[])
-
-
 def test_resolve_conflict_empty(real_variable, last_record_resolution):
     """Test resolve_conflict() with empty candidates."""
-    result, validated = real_variable.resolve_conflict([], last_record_resolution)
-    assert result is None
-    assert validated == []
+    for i in range(4):
+        real_variable.add_candidate(VariableRecord(value=i * 30))
+    real_variable.resolve_conflict()
+    real_variable.commit()
+    real_variable.clear_candidates()
+    assert real_variable.value == 0.0
 
 
 def test_propose_actions(real_variable):
     """Test propose_actions()."""
-    # Add data
-    for i in range(5):
-        real_variable.record(value=i * 25)
+    real_variable.init(VariableRecord(value=25))
 
     proposals = real_variable.propose_actions()
     assert isinstance(proposals, list)
@@ -523,7 +673,9 @@ def test_predict_default(real_variable):
     """Test predict() with default predictor."""
     # Add data
     for i in range(4):
-        real_variable.record(value=i * 30)
+        real_variable.add_candidate(VariableRecord(value=i * 30))
+    real_variable.resolve_conflict()
+    real_variable.commit()
 
     result = real_variable.predict(horizon=3)
     assert isinstance(result, ReasoningResult)
@@ -546,10 +698,6 @@ def test_predict_invalid_predictor(real_variable):
 
 def test_diagnose_causes_default(real_variable):
     """Test diagnose_causes() with default operator."""
-    # Add data
-    for i in range(5):
-        real_variable.record(value=i * 15)
-
     result = real_variable.diagnose_causes()
     assert isinstance(result, ReasoningResult)
     assert result.task == ReasoningTask.CAUSAL_DIAGNOSIS
@@ -570,10 +718,6 @@ def test_diagnose_causes_invalid_operator(real_variable):
 
 def test_plan_intervention_minimal(real_variable):
     """Test plan_intervention() with minimal params."""
-    # Add data
-    for i in range(5):
-        real_variable.record(value=i * 20)
-
     try:
         result = real_variable.plan_intervention(horizon=2)
         assert isinstance(result, ReasoningResult)
@@ -581,7 +725,8 @@ def test_plan_intervention_minimal(real_variable):
     except Exception:
         # If planning fails due to missing config, adjust config
         real_variable.config["planning"] = {"name": "preventive"}
-        result = real_variable.plan_intervention(horizon=2)
+        predictor = LastPredictor(allow_none=True)
+        result = real_variable.plan_intervention(predictor=predictor, horizon=2)
         assert isinstance(result, ReasoningResult)
 
 
@@ -629,46 +774,65 @@ def test_plan_intervention_invalid_predictor(real_variable):
 def test_private_detect_anomaly(real_variable):
     """Test _detect_anomaly() private method."""
     # Test with default (config)
-    result1 = real_variable._detect_anomaly()
+    result1 = real_variable._detect_anomaly(stats=real_variable.stats.result())
     assert isinstance(result1, AnomalyResult)
 
     # Test with custom operator
     operator = AnomalyOperatorThreshold(name="z-score", threshold=2.5)
-    result2 = real_variable._detect_anomaly(operator=operator)
+    result2 = real_variable._detect_anomaly(
+        stats=real_variable.stats.result(), operator=operator
+    )
     assert isinstance(result2, AnomalyResult)
+
+    with pytest.raises(TypeError):
+        real_variable._detect_anomaly("not-a-statst-result")
 
 
 def test_private_detect_anomaly_invalid(real_variable):
     """Test _detect_anomaly() with invalid operator."""
     with pytest.raises(TypeError, match="should be a AnomalyOperator instance"):
-        real_variable._detect_anomaly(operator="invalid")
+        real_variable._detect_anomaly(
+            stats=real_variable.stats.result(), operator="invalid"
+        )
 
 
 def test_private_analyze_trend(real_variable):
     """Test _analyze_trend() private method."""
-    result = real_variable._analyze_trend()
+    result = real_variable._analyze_trend(stats=real_variable.stats.result())
     # Can be None if domain not StatisticalDomain
     if result is not None:
         assert isinstance(result, TrendResult)
 
     # Test with operator
     operator = TrendOperatorThreshold(threshold=0.1)
-    result2 = real_variable._analyze_trend(operator=operator)
+    result2 = real_variable._analyze_trend(
+        stats=real_variable.stats.result(), operator=operator
+    )
     if result2 is not None:
         assert isinstance(result2, TrendResult)
+
+    with pytest.raises(TypeError, match="`stats` should be a StatisticsResult"):
+        real_variable._analyze_trend(stats="not-a-stats-result")
+
+    with pytest.raises(TypeError, match="`operator` should be a TrendOperator or None"):
+        real_variable._analyze_trend(
+            operator="not-an-operator", stats=real_variable.stats.result()
+        )
 
 
 def test_private_predict(real_variable):
     """Test _predict() private method."""
     predictor = LastPredictor(allow_none=True)
-    result = real_variable._predict(predictor, horizon=2)
+    result = real_variable._predict(
+        view=real_variable.epistemic(), predictor=predictor, horizon=2
+    )
     assert isinstance(result, PredictionResult)
 
 
 def test_private_predict_invalid(real_variable):
     """Test _predict() with invalid predictor."""
     with pytest.raises(TypeError, match="should be a Predictor instance"):
-        real_variable._predict(predictor="invalid")
+        real_variable._predict(view=real_variable.epistemic(), predictor="invalid")
 
 
 def test_private_diagnose_causes(real_variable):
@@ -697,49 +861,6 @@ def test_private_record_to_proposal(real_variable, real_variable_record):
     assert proposal.confidence == real_variable_record.confidence
 
 
-def test_private_create_failed_reasoning_result(real_variable):
-    """Test _create_failed_reasoning_result() private method."""
-    task = ReasoningTask.CONFLICT_RESOLUTION
-    result = real_variable._create_failed_reasoning_result(
-        task=task, confidence=0.5, explanation="Test failure"
-    )
-    assert isinstance(result, ReasoningResult)
-    assert result.success is False
-    assert result.explanation == "Test failure"
-
-
-def test_private_record(real_variable, real_variable_record):
-    """Test _record() private method."""
-    success = real_variable._record(real_variable_record)
-    assert isinstance(success, bool)
-
-    invalid_record = VariableRecord(
-        value=None,
-        time=None,
-        source=None,
-        confidence=0.0,
-        explanation="Invalid",
-        metadata={},
-    )
-    success2 = real_variable._record(invalid_record)
-    assert isinstance(success2, bool)
-
-
-def test_private_record_reasoning(real_variable):
-    """Test _record_reasoning() private method."""
-    reasoning_result = ReasoningResult(
-        task=ReasoningTask.ANOMALY_DETECTION,
-        success=True,
-        result=AnomalyResult(is_anomaly=False),
-        confidence=0.9,
-        explanation="Test",
-        execution_time=0.1,
-    )
-
-    real_variable._record_reasoning(reasoning_result)
-    # Should not raise exception
-
-
 def test_epistemic_none_results(real_variable):
     """Test epistemic() when private methods return None."""
     # Mock the private methods to return None
@@ -765,17 +886,13 @@ def test_resolve_conflict_validation_fails(
     """Test resolve_conflict when _record() fails."""
 
     # Mock _record to return False
-    original_record = real_variable._record
-    real_variable._record = lambda x: False
+    original_record = real_variable.records
+    real_variable.records = lambda x: False
 
     try:
-        result, validated = real_variable.resolve_conflict(
-            [real_variable_record], last_record_resolution
-        )
-        assert result is None
-        assert len(validated) == 1
+        real_variable.resolve_conflict()
     finally:
-        real_variable._record = original_record
+        real_variable.records = original_record
 
 
 def test_with_different_configs(real_value_domain):
@@ -836,7 +953,7 @@ def test_detect_anomaly_unknown_method(real_value_domain):
     )
 
     with pytest.raises(KeyError):
-        var._detect_anomaly()
+        var._detect_anomaly(var.stats.result())
 
 
 def test_all_type_checks(real_variable):

@@ -67,6 +67,12 @@ class TestKeyAuthorityBasics:
         resolved = KeyAuthority.resolve(key)
         assert resolved == owner
 
+    def test_resolve_no_key(self):
+        """Test resolve() with no Key."""
+        source = None
+        resolved = KeyAuthority.resolve(source)
+        assert resolved is None
+
     def test_resolve_nonexistent_key(self):
         """Test resolve() returns None for unregistered Key."""
         unregistered_key = Key()

@@ -18,7 +18,7 @@ from __future__ import annotations
 
 from typing import Sequence
 
-from ..memory.variable.record import VariableRecord
+from ..memory.record import VariableRecord
 from ..variable.variable import Variable
 from .base import Mechanism
 
@@ -122,7 +122,7 @@ class HomeostasisMechanism(Mechanism):
         competition_factor = 1.0 / (1.0 + len(competitor_count))
 
         # Lower variance → stronger confidence
-        stats = variable.history()[0].stats().stats()
+        stats = variable.stats.result()
         std = stats.std
         if std is not None:
             stability_factor = 1.0 / (1.0 + std)

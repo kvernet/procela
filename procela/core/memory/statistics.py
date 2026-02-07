@@ -1,10 +1,10 @@
 """
-Statistics for variable histories in Procela memory tracking.
+Statistics for variable in Procela memory tracking.
 
-This module defines immutable, incremental statistics associated with
-a variable's history in Procela's memory subsystem. These statistics
-include count, sum, sum of squares, min, max, last value, confidence
-sum, exponentially weighted moving average (EWMA), and set of sources.
+This module defines immutable, incremental statistics computed on
+a variable's memory in Procela. These statistics include count, sum,
+sum of squares, min, max, last value, confidence sum, exponentially
+weighted moving average (EWMA), and set of sources.
 
 Semantics Reference
 -------------------
@@ -20,15 +20,15 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
-from ....symbols.key import Key
-from ...assessment.statistics import StatisticsResult
+from ...symbols.key import Key
+from ..assessment.statistics import StatisticsResult
 from .record import VariableRecord
 
 
 @dataclass(frozen=True)
-class HistoryStatistics:
+class MemoryStatistics:
     """
-    Incremental, immutable statistics associated with a VariableHistory.
+    Incremental, immutable statistics computed on a VariableMemory.
 
     This object is semantically authoritative and fully derived from
     a sequence of `VariableRecord` instances. It is frozen (immutable)
@@ -48,7 +48,7 @@ class HistoryStatistics:
     max : float | None
         Maximum of the observed values, or `None` if no values.
     last_value : float | None
-        Most recent numeric value observed, or `None` if no values.
+        Most recent value observed, or `None` if no values.
     confidence_sum : float
         Accumulated confidence from records.
     ewma : float | None
@@ -59,8 +59,8 @@ class HistoryStatistics:
     """
 
     count: int = 0
-    sum: float = 0.0
-    sumsq: float = 0.0
+    sum: float | None = None
+    sumsq: float | None = None
     min: float | None = None
     max: float | None = None
     last_value: float | None = None
@@ -69,7 +69,7 @@ class HistoryStatistics:
     sources: frozenset[Key] = frozenset()
 
     @classmethod
-    def empty(cls) -> HistoryStatistics:
+    def empty(cls) -> MemoryStatistics:
         """
         Create an empty statistics state.
 
@@ -77,13 +77,13 @@ class HistoryStatistics:
 
         Returns
         -------
-        HistoryStatistics
+        MemoryStatistics
             A statistics instance with zero count and no values.
         """
         return cls(
             count=0,
-            sum=0.0,
-            sumsq=0.0,
+            sum=None,
+            sumsq=None,
             min=None,
             max=None,
             last_value=None,
@@ -92,13 +92,15 @@ class HistoryStatistics:
             sources=frozenset(),
         )
 
-    def update(self, record: VariableRecord, alpha: float = 0.3) -> HistoryStatistics:
+    def update(
+        self, record: VariableRecord | None, alpha: float = 0.3
+    ) -> MemoryStatistics:
         """
-        Return a new statistics state updated with a record.
+        Return a new statistics instance updated with a record.
 
         Only numeric `record.value` (int or float) contributes to the
-        statistics. Non-numeric values are ignored and return the current
-        state.
+        numeric computations. Non-numeric values are ignored and return
+        the current state with count + 1.
 
         Parameters
         ----------
@@ -110,39 +112,62 @@ class HistoryStatistics:
 
         Returns
         -------
-        HistoryStatistics
-            A fresh statistics instance reflecting the updated state.
+        MemoryStatistics
+            A new statistics instance reflecting the updated state.
 
         Raises
         ------
         ValueError
             If `alpha` is negative.
         """
-        value = record.value
-        if not isinstance(value, int | float):
-            return self
-
         if alpha < 0:
             raise ValueError("alpha should be non-negative")
 
-        new_min = value if self.min is None else min(self.min, value)
-        new_max = value if self.max is None else max(self.max, value)
+        count = self.count if self.count is not None else 0
+        if record is None:
+            new_value = self.last_value
+            new_sum = self.sum
+            new_sumsq = self.sumsq
+            new_min = self.min
+            new_max = self.max
+            new_confidence_sum = self.confidence_sum
+            new_ewma = self.ewma
+            new_sources = self.sources
+        else:
+            new_value = record.value
+            if not isinstance(new_value, int | float):
+                new_sum = self.sum
+                new_sumsq = self.sumsq
+                new_min = self.min
+                new_max = self.max
+                new_ewma = self.ewma
+            else:
+                new_value = float(new_value)
+                valuesq = new_value**2
+                new_sum = self.sum + new_value if self.sum is not None else new_value
+                new_sumsq = self.sumsq + valuesq if self.sumsq is not None else valuesq
+                new_min = new_value if self.min is None else min(self.min, new_value)
+                new_max = new_value if self.max is None else max(self.max, new_value)
+                new_ewma = (
+                    new_value
+                    if self.ewma is None
+                    else alpha * new_value + (1 - alpha) * self.ewma
+                )
 
-        ewma = value if self.ewma is None else alpha * value + (1 - alpha) * self.ewma
+            new_sources = self.sources
+            if record.source is not None:
+                new_sources = self.sources | {record.source}
+            new_confidence_sum = self.confidence_sum + (record.confidence or 0.0)
 
-        new_sources = self.sources
-        if record.source is not None:
-            new_sources = self.sources | {record.source}
-
-        return HistoryStatistics(
-            count=self.count + 1,
-            sum=self.sum + float(value),
-            sumsq=self.sumsq + float(value) ** 2,
+        return MemoryStatistics(
+            count=count + 1,
+            sum=new_sum,
+            sumsq=new_sumsq,
             min=new_min,
             max=new_max,
-            last_value=value,
-            confidence_sum=self.confidence_sum + (record.confidence or 0.0),
-            ewma=ewma,
+            last_value=new_value,
+            confidence_sum=new_confidence_sum,
+            ewma=new_ewma,
             sources=new_sources,
         )
 
@@ -170,10 +195,11 @@ class HistoryStatistics:
         float | None
             Standard deviation of the observations or `None`.
         """
+        sumsq = self.sumsq
         mean = self.mean()
-        if self.count < 2 or mean is None:
+        if self.count < 2 or mean is None or sumsq is None:
             return None
-        variance = (self.sumsq / self.count) - mean**2
+        variance = (sumsq / self.count) - mean**2
         variance = max(variance, 0.0)
         return math.sqrt(variance)
 
@@ -192,7 +218,7 @@ class HistoryStatistics:
 
     def __repr__(self) -> str:
         """
-        Human-readable representation of a HistoryStatistics.
+        Human-readable representation of a MemoryStatistics.
 
         Returns
         -------
@@ -200,7 +226,7 @@ class HistoryStatistics:
             Human-readable representation.
         """
         return (
-            f"HistoryStatistics("
+            f"MemoryStatistics("
             f"count={self.count}, "
             f"mean={self.mean()}, "
             f"std={self.std()}, "
@@ -212,9 +238,9 @@ class HistoryStatistics:
             f")"
         )
 
-    def stats(self) -> StatisticsResult:
+    def result(self) -> StatisticsResult:
         """
-        Return the statistics result from the history.
+        Return the statistics result from the memory.
 
         Returns
         -------

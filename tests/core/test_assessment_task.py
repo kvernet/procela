@@ -24,6 +24,7 @@ class TestReasoningTask:
     def test_all_members_present(self) -> None:
         """Test that all expected reasoning tasks are defined."""
         expected_members = [
+            "NONE",
             "ANOMALY_DETECTION",
             "CONFLICT_RESOLUTION",
             "ACTION_PROPOSAL",
@@ -45,7 +46,7 @@ class TestReasoningTask:
 
     def test_member_count(self) -> None:
         """Test that exactly 11 reasoning tasks are defined."""
-        assert len(list(ReasoningTask)) == 11
+        assert len(list(ReasoningTask)) == 12
 
     # --- Test Member Values and Properties ---
     def test_auto_values_assigned(self) -> None:
@@ -57,10 +58,10 @@ class TestReasoningTask:
 
     def test_member_names_and_values(self) -> None:
         """Test specific member names and their corresponding values."""
-        assert ReasoningTask.ANOMALY_DETECTION.value == 1
+        assert ReasoningTask.ANOMALY_DETECTION.value == 2
         assert ReasoningTask.ANOMALY_DETECTION.name == "ANOMALY_DETECTION"
 
-        assert ReasoningTask.INTERVENTION_PLANNING.value == 10
+        assert ReasoningTask.INTERVENTION_PLANNING.value == 11
         assert ReasoningTask.INTERVENTION_PLANNING.name == "INTERVENTION_PLANNING"
 
     # --- Test Custom __str__ Method ---
@@ -107,8 +108,8 @@ class TestReasoningTask:
     def test_iteration(self) -> None:
         """Test that the enum can be iterated in definition order."""
         tasks = list(ReasoningTask)
-        assert len(tasks) == 11
-        assert tasks[0] is ReasoningTask.ANOMALY_DETECTION
+        assert len(tasks) == 12
+        assert tasks[1] is ReasoningTask.ANOMALY_DETECTION
         assert tasks[-1] is ReasoningTask.CAUSAL_DIAGNOSIS
         assert all(isinstance(task, ReasoningTask) for task in tasks)
 
@@ -160,13 +161,13 @@ class TestReasoningTask:
         task = ReasoningTask.ANOMALY_DETECTION
         repr_str = repr(task)
         assert "ANOMALY_DETECTION" in repr_str
-        assert "1" in repr_str  # Should contain the value
+        assert "2" in repr_str  # Should contain the value
 
     def test_name_and_value_properties(self) -> None:
         """Test the .name and .value properties."""
         task = ReasoningTask.CAUSAL_DIAGNOSIS
         assert task.name == "CAUSAL_DIAGNOSIS"
-        assert task.value == 11
+        assert task.value == 12
 
 
 # --- Integration and Smoke Tests ---

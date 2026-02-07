@@ -28,6 +28,9 @@ class ReasoningTask(Enum):
     diagnostic).
     """
 
+    # No reasoning. Useful in resetting memory.
+    NONE = auto()
+
     # Monitoring & Detection Tasks
     ANOMALY_DETECTION = auto()
     CONSTRAINT_CHECKING = auto()
@@ -80,6 +83,7 @@ class ReasoningTask(Enum):
 
 
 _DESCRIPTIONS = {
+    ReasoningTask.NONE: ("No reasoning. Useful in resetting memory."),
     ReasoningTask.ANOMALY_DETECTION: (
         "Identifies deviations from expected behavior or statistical norms."
     ),
