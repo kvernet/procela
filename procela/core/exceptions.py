@@ -38,15 +38,6 @@ class SemanticViolation(ProcelaException):
     """
 
 
-class ResourceExhausted(ProcelaException):
-    """
-    Raised when a resource limit is exceeded.
-
-    This includes computational resources, memory, or framework-defined
-    limits such as maximum recursion depth in reasoning cycles.
-    """
-
-
 class ConstraintViolation(ProcelaException):
     """
     Raised when a system constraint cannot be satisfied.

@@ -24,6 +24,7 @@ from __future__ import annotations
 from typing import Protocol, runtime_checkable
 
 from ..assessment.anomaly import AnomalyResult
+from ..assessment.reasoning import ReasoningResult
 from ..assessment.statistics import StatisticsResult
 from ..assessment.trend import TrendResult
 from .base import EpistemicView
@@ -39,6 +40,8 @@ class VariableView(EpistemicView, Protocol):
 
     Attributes
     ----------
+    reasoning : ReasoningResult | None
+        Variable's latest reasoning result.
     stats : StatisticsResult
         Aggregated historical statistics for the variable.
     anomaly : AnomalyResult or None
@@ -52,6 +55,10 @@ class VariableView(EpistemicView, Protocol):
     - Use VariableView to inspect variable state safely without mutation.
     - Typically obtained via variable.epistemic() or similar accessor.
     """
+
+    @property
+    def reasoning(self) -> ReasoningResult | None:
+        """Access the variable's latest reasoning result."""
 
     @property
     def stats(self) -> StatisticsResult:

@@ -84,7 +84,7 @@ class HomeostasisMechanism(Mechanism):
 
         confidence = self._compute_confidence(variable)
 
-        variable.add_candidate(
+        variable.add_hypothesis(
             VariableRecord(
                 value=proposed_value,
                 source=self.key(),
@@ -118,7 +118,7 @@ class HomeostasisMechanism(Mechanism):
         confidence = self.base_confidence
 
         # Fewer competitors → stronger structural dominance
-        competitor_count = variable.candidates(exclude=self.key())
+        competitor_count = variable.hypotheses
         competition_factor = 1.0 / (1.0 + len(competitor_count))
 
         # Lower variance → stronger confidence

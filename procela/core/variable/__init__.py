@@ -14,7 +14,6 @@ Examples Reference
 https://procela.org/docs/examples/core/variable/
 """
 
-from ..memory.statistics import MemoryStatistics
 from .domain import (
     BooleanDomain,
     CategoricalDomain,
@@ -36,8 +35,6 @@ __all__ = [
     "RealDomain",
     "StatisticalDomain",
     "ValueDomain",
-    # MemoryStatistics
-    "MemoryStatistics",
     # Role
     "VariableRole",
     # Variable

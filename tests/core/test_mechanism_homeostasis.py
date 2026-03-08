@@ -3,7 +3,7 @@
 import pytest
 
 from procela.core.mechanism import HomeostasisMechanism
-from procela.core.memory import CandidateRecord, VariableRecord
+from procela.core.memory import HypothesisRecord, VariableRecord
 from procela.core.variable import RealDomain, Variable
 from procela.symbols.key import Key
 
@@ -64,7 +64,7 @@ class TestHomeostasisMechanism:
         mechanism.transform()
 
         # Should return early without adding candidates
-        assert len(variable_fixture.candidates()) == 0
+        assert len(variable_fixture.hypotheses) == 0
 
     def test_transform_with_records_no_competitors(self):
         """Test transform() when variable has records but no std in stats."""
@@ -79,10 +79,10 @@ class TestHomeostasisMechanism:
             mechanism.transform()
 
             variable.commit()
-            variable.clear_candidates()
+            variable.clear_hypotheses()
 
         # Should add one candidate
-        candidates = variable.candidates()
+        candidates = variable.hypotheses
         assert len(candidates) == 0
 
     def test_compute_confidence_edge_cases(self, variable_fixture):
@@ -108,7 +108,7 @@ class TestHomeostasisMechanism:
         source2 = Key()
         # Add 4 competitors
         variable_fixture.hypotheses = [
-            CandidateRecord(
+            HypothesisRecord(
                 VariableRecord(
                     value=0.25,
                     source=source1,
@@ -117,7 +117,7 @@ class TestHomeostasisMechanism:
                     explanation="",
                 )
             ),
-            CandidateRecord(
+            HypothesisRecord(
                 VariableRecord(
                     value=0.28,
                     source=source1,
@@ -126,7 +126,7 @@ class TestHomeostasisMechanism:
                     explanation="",
                 )
             ),
-            CandidateRecord(
+            HypothesisRecord(
                 VariableRecord(
                     value=0.32,
                     source=source2,
@@ -135,7 +135,7 @@ class TestHomeostasisMechanism:
                     explanation="",
                 )
             ),
-            CandidateRecord(
+            HypothesisRecord(
                 VariableRecord(
                     value=0.29,
                     source=source2,
@@ -149,7 +149,7 @@ class TestHomeostasisMechanism:
         mechanism = HomeostasisMechanism(reads=reads, writes=writes)
         mechanism.transform()
 
-        candidates = variable_fixture.candidates(exclude=source2)
-        assert len(candidates) == 2
+        candidates = variable_fixture.hypotheses
+        assert len(candidates) == 4
 
         assert pytest.approx(candidates[0].record.confidence, 0.001) == 0.5

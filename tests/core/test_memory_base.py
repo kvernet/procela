@@ -1,7 +1,7 @@
 import pytest
 
 from procela.core.assessment import ReasoningResult, ReasoningTask
-from procela.core.memory import CandidateRecord, VariableMemory, VariableRecord
+from procela.core.memory import HypothesisRecord, VariableMemory, VariableRecord
 from procela.core.variable import Variable
 from procela.symbols.key import Key
 
@@ -9,7 +9,7 @@ from procela.symbols.key import Key
 @pytest.fixture
 def sample_candidate_record() -> VariableRecord:
     """Sample candidate record"""
-    return CandidateRecord(VariableRecord(value=18.67, confidence=0.74))
+    return HypothesisRecord(VariableRecord(value=18.67, confidence=0.74))
 
 
 @pytest.fixture
@@ -296,9 +296,9 @@ class TestVariableMemory:
 
     def test_hypothesis_element_validation(self):
         """Test validation of individual hypothesis elements."""
-        # Test with a non-CandidateRecord in hypotheses
+        # Test with a non-HypothesisRecord in hypotheses
         with pytest.raises(
-            TypeError, match="`hypothesis` at index 0 should be a CandidateRecord"
+            TypeError, match="`hypothesis` at index 0 should be a HypothesisRecord"
         ):
             VariableMemory(
                 hypotheses=("not_a_candidate_record",),  # Wrong type

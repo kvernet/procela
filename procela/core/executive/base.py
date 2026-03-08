@@ -18,7 +18,10 @@ https://procela.org/docs/examples/core/executive/base.html
 
 from __future__ import annotations
 
+import random
 from typing import Callable, Sequence
+
+import numpy as np
 
 from ...symbols.key import Key
 from ..exceptions import ExecutionError
@@ -73,6 +76,7 @@ class Executive:
         self._variables: set[Variable] = set()
         self._prepared: bool = False
         self._invariants: list[SystemInvariant] = []
+        self.rng: random.Random | np.random.Generator | None = None
         self._step_index: int = 0
         self.prepare()
 
@@ -138,6 +142,17 @@ class Executive:
         self._mechanisms = [mech for mech in self._mechanisms if mech != mechanism]
         self.prepare()
 
+    def set_rng(self, rng: random.Random | np.random.Generator) -> None:
+        """
+        Set the pseudo random number generator.
+
+        Parameters
+        ----------
+        rng : random.Random | np.random.Generator
+            The RNG to use.
+        """
+        self.rng = rng
+
     def prepare(self) -> None:
         """
         Prepare the executive for execution.
@@ -164,17 +179,13 @@ class Executive:
         """
         Execute one step.
 
-        Execution consists of three strictly ordered phases:
+        Execution consists of five strictly ordered phases:
 
-        1. Process execution where conflicts are collected
-        2. Conflict resolution and commitment
-        3. Check runtime invariants
-
-        Warnings
-        --------
-        - Only runtime invariants are checked.
-        - To check pre/post invariants, they should be called.
-        - Alternatively, use run(). It forces pre/post invariants.
+        1. Call pre-phase invariants before collecting hypotheses
+        2. Process execution where conflicts are collected
+        3. Call runtime-phase invariants before resolution
+        4. Ask writable variables to resolve their conflicts
+        5. Call post-phase invariants after resolution
 
         Notes
         -----
@@ -184,16 +195,22 @@ class Executive:
         if not self._prepared:
             raise ExecutionError("Executive must be prepared before execution.")
 
+        # Phase 1: call pre-phase invariants
+        self._check_invariants(InvariantPhase.PRE)
+
         # Increment step index
         self._step_index += 1
 
-        # Phase 1: execute processes and mechanisms
+        # Phase 2: execute processes and mechanisms
         for process in self._processes:
             process.step()
         for mechanism in self._mechanisms:
             mechanism.run()
 
-        # Phase 2: resolve conflicts per writable variable
+        # Phase 3: call runtime-phase invariants
+        self._check_invariants(InvariantPhase.RUNTIME)
+
+        # Phase 4: ask writable variables to resolve their conflicts
         for variable in self.writable():
             if not isinstance(variable, Variable):
                 raise TypeError(f"Expected `Variable`, got {type(variable)}")
@@ -205,10 +222,10 @@ class Executive:
             variable.commit()
 
             # Clear candidates
-            variable.clear_candidates()
+            variable.clear_hypotheses()
 
-        # Check invariants
-        self._check_invariants(InvariantPhase.RUNTIME)
+        # Phase 5: call post-phase invariants
+        self._check_invariants(InvariantPhase.POST)
 
     def run(
         self,
@@ -217,31 +234,22 @@ class Executive:
         post_step: Callable[[Executive, int], None] | None = None,
     ) -> None:
         """
-        Execute all the steps by allowing an optional callable at each step.
+        Execute all the steps by calling optional callable hooks at each step.
 
-        Execution consists of five strictly ordered phases:
+        Execution consists of three strictly ordered phases:
 
-        1. Check pre invariants before stepping
-        2. Call pre_step event
-        3. Process execution where conflicts are collected
+        1. Call pre_step event
+        2. Process execution where conflicts are collected
            then resolution policy applied
-        4. Call post_step event
-        5. Check post invariants after stepping
+        3. Call post_step event
 
         Raises
         ------
         RuntimeError
             If the executive has not been prepared.
-
-        Notes
-        -----
-        - All processes are executed before any conflict resolution.
-        - Each variable is resolved and committed at most once.
         """
         if not self._prepared:
             raise ExecutionError("Executive must be prepared before execution.")
-
-        self._check_invariants(InvariantPhase.PRE)
 
         for i in range(steps):
             if pre_step is not None:
@@ -249,8 +257,6 @@ class Executive:
             self.step()
             if post_step is not None:
                 post_step(self, i)
-
-        self._check_invariants(InvariantPhase.POST)
 
     def key(self) -> Key:
         """
@@ -307,6 +313,17 @@ class Executive:
         """
         return self._variables
 
+    def step_index(self) -> int:
+        """
+        Return current step index.
+
+        Returns
+        -------
+        int
+            The current step index.
+        """
+        return self._step_index
+
     def reset(self) -> None:
         """
         Reset the world state.
@@ -342,7 +359,7 @@ class Executive:
             An immutable snapshot of the variables at the current step.
         """
         return VariableSnapshot.from_views(
-            views=[v.epistemic() for v in self.variables()]
+            self._step_index, views=[v.epistemic() for v in self.variables()]
         )
 
     def add_invariant(self, invariant: SystemInvariant) -> None:
@@ -427,3 +444,14 @@ class Executive:
                     raise ExecutionError(
                         "Invariant raised an unexpected error:"
                     ) from exec
+
+    def random(self) -> float:
+        """
+        Get a pseudo random number between 0 and 1.
+
+        Returns
+        -------
+            A pseudo random number between 0 and 1.
+        """
+        u = self.rng.random() if self.rng else np.random.default_rng().random()
+        return float(u)

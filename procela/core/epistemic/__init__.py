@@ -17,12 +17,10 @@ https://procela.org/docs/examples/core/epistemic/
 
 from .base import EpistemicView
 from .executive import ExecutiveView
-from .planning import PlanningView
 from .variable import VariableView
 
 __all__ = [
     "EpistemicView",
     "VariableView",
-    "PlanningView",
     "ExecutiveView",
 ]

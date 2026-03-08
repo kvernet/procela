@@ -118,9 +118,6 @@ class TestVariableRecordValidation:
         with pytest.raises(TypeError, match="confidence must be a float"):
             VariableRecord(value=1, confidence="high")  # type: ignore
 
-        with pytest.raises(TypeError, match="confidence must be a float"):
-            VariableRecord(value=1, confidence=1)  # int, not float
-
     def test_time_type_validation(self):
         """Test time must be TimePoint or None."""
         # Valid: TimePoint instance

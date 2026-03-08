@@ -4,7 +4,8 @@ from typing import Any, Optional
 
 import pytest
 
-from procela.core.variable import MemoryStatistics, ValueDomain
+from procela.core.memory import MemoryStatistics
+from procela.core.variable import ValueDomain
 
 
 # Concrete implementation for testing

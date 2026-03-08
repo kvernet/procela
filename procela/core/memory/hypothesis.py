@@ -1,16 +1,13 @@
 """
-Candidate abstraction of a Variable record in Procela.
-
-Captures a Variable candidate during resolution context, including
-the candidate state and variable record.
+Hypothesis abstraction of a Variable record in Procela.
 
 Semantics Reference
 -------------------
-https://procela.org/docs/semantics/core/memory/variable/candidate.html
+https://procela.org/docs/semantics/core/memory/variable/hypothesis.html
 
 Examples Reference
 ------------------
-https://procela.org/docs/examples/core/memory/variable/candidate.html
+https://procela.org/docs/examples/core/memory/variable/hypothesis.html
 """
 
 from __future__ import annotations
@@ -22,22 +19,22 @@ from ...symbols.key import Key
 from .record import VariableRecord
 
 
-class CandidateState(Enum):
+class HypothesisState(Enum):
     """
-    Enum representing the state of a candidate record.
+    Enum representing the state of a hypothesis record.
 
-    This enumeration defines the possible lifecycle states for candidate
+    This enumeration defines the possible lifecycle states for hypothesis
     records within the variable resolution process.
 
     Attributes
     ----------
-    PROPOSED : CandidateState
-        Initial state indicating the candidate has been proposed but not
+    PROPOSED : HypothesisState
+        Initial state indicating the hypothesis has been proposed but not
         yet validated.
-    VALIDATED : CandidateState
-        State indicating the candidate has passed validation checks.
-    REJECTED : CandidateState
-        State indicating the candidate has been rejected during validation.
+    VALIDATED : HypothesisState
+        State indicating the hypothesis has passed validation checks.
+    REJECTED : HypothesisState
+        State indicating the hypothesis has been rejected during validation.
 
     Notes
     -----
@@ -46,55 +43,55 @@ class CandidateState(Enum):
     """
 
     PROPOSED = auto()
-    """Initial state indicating the candidate has been proposed."""
+    """Initial state indicating the hypothesis has been proposed."""
 
     VALIDATED = auto()
-    """State indicating the candidate has passed validation checks."""
+    """State indicating the hypothesis has passed validation checks."""
 
     REJECTED = auto()
-    """State indicating the candidate has been rejected during validation."""
+    """State indicating the hypothesis has been rejected during validation."""
 
 
 @dataclass
-class CandidateRecord:
+class HypothesisRecord:
     """
-    Record representing a candidate with its current state.
+    Record representing a hypothesis with its current state.
 
-    A candidate record associates a VariableRecord with a CandidateState,
+    A hypothesis record associates a VariableRecord with a HypothesisState,
     tracking its progress through the resolution pipeline.
 
     Parameters
     ----------
     record : VariableRecord or None
         The associated variable record. Can be None for placeholder or
-        rejected candidates.
-    state : CandidateState
-        The current state of the candidate in the resolution process.
+        rejected hypotheses.
+    state : HypothesisState
+        The current state of the hypothesis in the resolution process.
 
     Attributes
     ----------
     record : VariableRecord | None
         The associated variable record (read-only).
-    state : CandidateState
-        The current state of the candidate.
+    state : HypothesisState
+        The current state of the hypothesis.
     _key : Key
         Unique identifier issued by KeyAuthority (auto-generated, read-only).
 
     Raises
     ------
     TypeError
-        If `state` is not a CandidateState instance.
+        If `state` is not a HypothesisState instance.
         If `record` is not a VariableRecord instance or None.
     """
 
     record: VariableRecord | None
-    state: CandidateState = CandidateState.PROPOSED
+    state: HypothesisState = HypothesisState.PROPOSED
 
     _key: Key = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
         """
-        Validate the candidate record after initialization.
+        Validate the hypothesis record after initialization.
 
         Performs type checking on the `state` and `record` attributes
         and generates a unique key for the instance.
@@ -102,11 +99,11 @@ class CandidateRecord:
         Raises
         ------
         TypeError
-            If `state` is not a CandidateState instance.
+            If `state` is not a HypothesisState instance.
             If `record` is not a VariableRecord instance or None.
         """
-        if not isinstance(self.state, CandidateState):
-            raise TypeError(f"`state` should be a CandidateState, got {self.state}")
+        if not isinstance(self.state, HypothesisState):
+            raise TypeError(f"`state` should be a HypothesisState, got {self.state}")
 
         if not isinstance(self.record, VariableRecord | None):
             raise TypeError(
@@ -118,5 +115,5 @@ class CandidateRecord:
         self._key = KeyAuthority.issue(self)
 
     def key(self) -> Key:
-        """Return the identity key of this candidate record."""
+        """Return the identity key of this hypothesis record."""
         return self._key

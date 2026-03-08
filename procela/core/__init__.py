@@ -1,52 +1,40 @@
 """
-Mechanistic framework with epistemic governance and full auditability.
+Procela core framework.
 
 Semantics Reference
 -------------------
-https://procela.org/docs/semantics/
+https://procela.org/docs/semantics/core/
 
 Examples Reference
 ------------------
-https://procela.org/docs/examples/
+https://procela.org/docs/examples/core/
 """
 
-__version__ = "0.1.0"
-
-__author__ = "Kinson Vernet"
-__email__ = "kinson.vernet@gmail.com"
-__license__ = "Apache-2.0"
-__copyright__ = "Copyright 2026"
-
-from .core import (
-    _ANOMALY_DETECTORS,
-    _DIAGNOSER_REGISTRY,
-    _PREDICTOR_REGISTRY,
-    AnomalyDetector,
-    AnomalyDiagnoser,
-    AnomalyOperator,
-    AnomalyOperatorThreshold,
+from .assessment import (
     AnomalyResult,
-    BooleanDomain,
-    CategoricalDomain,
-    Compose,
-    CompositeDomain,
+    DiagnosisResult,
+    PredictionResult,
+    ReasoningResult,
+    ReasoningTask,
+    StatisticsResult,
+    TrendResult,
+)
+from .epistemic import (
+    EpistemicView,
+    ExecutiveView,
+    VariableView,
+)
+from .exceptions import (
     ConfigurationError,
     ConstraintViolation,
-    Diagnoser,
-    DiagnosisOperator,
-    DiagnosisOperatorThreshold,
-    DiagnosisResult,
-    EpistemicView,
-    EWMADetector,
-    EWMAPredictor,
     ExecutionError,
-    Executive,
-    ExecutiveView,
-    HighestConfidencePolicy,
-    HomeostasisMechanism,
-    HypothesisRecord,
-    HypothesisState,
     InconsistentState,
+    ProcelaException,
+    SemanticViolation,
+    TimeoutError,
+)
+from .executive import Executive
+from .invariant import (
     InvariantCategory,
     InvariantPhase,
     InvariantSeverity,
@@ -56,45 +44,52 @@ from .core import (
     InvariantViolationFatal,
     InvariantViolationInfo,
     InvariantViolationWarning,
-    KeyAuthority,
-    LastPredictor,
-    MeanPredictor,
+    SystemInvariant,
+    VariableSnapshot,
+)
+from .key_authority import KeyAuthority
+from .mechanism import (
+    HomeostasisMechanism,
     Mechanism,
     MechanismTemplate,
+)
+from .memory import (
+    HypothesisRecord,
+    HypothesisState,
     MemoryStatistics,
-    PredictionOperator,
-    PredictionResult,
-    Predictor,
-    ProcelaException,
-    Process,
-    RangeDomain,
-    RealDomain,
-    ReasoningResult,
-    ReasoningTask,
+    VariableMemory,
+    VariableRecord,
+)
+from .policy import (
+    HighestConfidencePolicy,
     ResolutionPolicy,
     ResolverPolicy,
-    SemanticViolation,
+    WeightedConfidencePolicy,
+    WeightedVotingPolicy,
+)
+from .process import Compose, Process
+from .reasoning import (
+    _ANOMALY_DETECTORS,
+    _DIAGNOSER_REGISTRY,
+    _PREDICTOR_REGISTRY,
+    AnomalyDetector,
+    AnomalyDiagnoser,
+    AnomalyOperator,
+    AnomalyOperatorThreshold,
+    Diagnoser,
+    DiagnosisOperator,
+    DiagnosisOperatorThreshold,
+    EWMADetector,
+    EWMAPredictor,
+    LastPredictor,
+    MeanPredictor,
+    PredictionOperator,
+    Predictor,
     StatisticalDiagnoser,
-    StatisticalDomain,
-    StatisticsResult,
-    SystemInvariant,
-    TimeoutError,
-    Timer,
     TrendDiagnoser,
     TrendOperator,
     TrendOperatorThreshold,
     TrendPredictor,
-    TrendResult,
-    ValueDomain,
-    Variable,
-    VariableEpistemic,
-    VariableMemory,
-    VariableRecord,
-    VariableRole,
-    VariableSnapshot,
-    VariableView,
-    WeightedConfidencePolicy,
-    WeightedVotingPolicy,
     ZScoreDetector,
     available_detectors,
     available_diagnosers,
@@ -118,16 +113,22 @@ from .core import (
     unregister_diagnoser,
     unregister_predictor,
 )
-from .math import ProcessAlgebra
-from .symbols import (
-    Key,
-    TimePoint,
-    create_timepoint,
-    generate_key,
+from .timer import Timer
+from .variable import (
+    BooleanDomain,
+    CategoricalDomain,
+    CompositeDomain,
+    RangeDomain,
+    RealDomain,
+    StatisticalDomain,
+    ValueDomain,
+    Variable,
+    VariableEpistemic,
+    VariableRole,
 )
 
 __all__ = [
-    # Core
+    # Assessment
     "AnomalyResult",
     "DiagnosisResult",
     "PredictionResult",
@@ -135,10 +136,13 @@ __all__ = [
     "ReasoningTask",
     "StatisticsResult",
     "TrendResult",
+    # Epistemic
     "EpistemicView",
     "VariableView",
     "ExecutiveView",
+    # Executive
     "Executive",
+    # Execptions
     "ProcelaException",
     "SemanticViolation",
     "ConstraintViolation",
@@ -146,6 +150,7 @@ __all__ = [
     "ConfigurationError",
     "TimeoutError",
     "ExecutionError",
+    # Invariant
     "InvariantCategory",
     "InvariantViolation",
     "InvariantViolationInfo",
@@ -157,22 +162,28 @@ __all__ = [
     "VariableSnapshot",
     "InvariantSoftness",
     "SystemInvariant",
+    # Key authority
     "KeyAuthority",
+    # Mechanism
     "Mechanism",
     "HomeostasisMechanism",
     "MechanismTemplate",
+    # Memory
     "HypothesisState",
     "HypothesisRecord",
     "VariableMemory",
     "VariableRecord",
     "MemoryStatistics",
+    # Policy
     "ResolutionPolicy",
     "HighestConfidencePolicy",
     "WeightedConfidencePolicy",
     "ResolverPolicy",
     "WeightedVotingPolicy",
+    # Process
     "Process",
     "Compose",
+    # Reasoning
     "AnomalyDetector",
     "EWMADetector",
     "AnomalyOperator",
@@ -217,6 +228,7 @@ __all__ = [
     "has_predictor",
     "_PREDICTOR_REGISTRY",
     "Timer",
+    # Variable
     "BooleanDomain",
     "CategoricalDomain",
     "CompositeDomain",
@@ -224,15 +236,7 @@ __all__ = [
     "RealDomain",
     "StatisticalDomain",
     "ValueDomain",
-    "MemoryStatistics",
     "VariableRole",
     "Variable",
     "VariableEpistemic",
-    # Math
-    "ProcessAlgebra",
-    # Symbols
-    "Key",
-    "generate_key",
-    "TimePoint",
-    "create_timepoint",
 ]

@@ -25,7 +25,7 @@ class TestVariableSnapshot:
         class MockVariableView:
             pass
 
-        snapshot = VariableSnapshot(views=(MockVariableView(),))
+        snapshot = VariableSnapshot(step=1, views=(MockVariableView(),))
 
         # Should not be able to modify attributes
         with pytest.raises(FrozenInstanceError):
@@ -46,20 +46,20 @@ class TestVariableSnapshot:
         view2 = MockVariableView("view2")
 
         # Initialize with list
-        snapshot = VariableSnapshot(views=[view1, view2])
+        snapshot = VariableSnapshot(step=1, views=[view1, view2])
         assert len(snapshot.views) == 2
         assert snapshot.views[0] is view1
         assert snapshot.views[1] is view2
 
         # Initialize with tuple
-        snapshot = VariableSnapshot(views=(view1, view2))
+        snapshot = VariableSnapshot(step=1, views=(view1, view2))
         assert len(snapshot.views) == 2
         assert snapshot.views[0] is view1
         assert snapshot.views[1] is view2
 
     def test_empty_views(self) -> None:
         """Test initialization with empty views."""
-        snapshot = VariableSnapshot(views=[])
+        snapshot = VariableSnapshot(step=1, views=[])
         assert len(snapshot.views) == 0
         assert isinstance(snapshot.views, Sequence)
 
@@ -71,7 +71,7 @@ class TestVariableSnapshot:
             pass
 
         view = MockVariableView()
-        snapshot = VariableSnapshot(views=[view])
+        snapshot = VariableSnapshot(step=1, views=[view])
 
         assert isinstance(snapshot.views, Sequence)
         assert hasattr(snapshot.views, "__len__")
@@ -90,7 +90,7 @@ class TestVariableSnapshot:
         view3 = MockVariableView("view3")
 
         # Test with list
-        snapshot = VariableSnapshot.from_views([view1, view2, view3])
+        snapshot = VariableSnapshot.from_views(1, [view1, view2, view3])
         assert isinstance(snapshot, VariableSnapshot)
         assert len(snapshot.views) == 3
         assert snapshot.views[0] is view1
@@ -98,13 +98,13 @@ class TestVariableSnapshot:
         assert snapshot.views[2] is view3
 
         # Test with tuple
-        snapshot = VariableSnapshot.from_views((view1, view2))
+        snapshot = VariableSnapshot.from_views(1, (view1, view2))
         assert isinstance(snapshot, VariableSnapshot)
         assert len(snapshot.views) == 2
 
     def test_from_views_empty(self) -> None:
         """Test from_views with empty sequence."""
-        snapshot = VariableSnapshot.from_views([])
+        snapshot = VariableSnapshot.from_views(1, [])
         assert isinstance(snapshot, VariableSnapshot)
         assert len(snapshot.views) == 0
 
@@ -116,7 +116,7 @@ class TestVariableSnapshot:
             pass
 
         views_list = [MockVariableView(), MockVariableView()]
-        snapshot = VariableSnapshot.from_views(views_list)
+        snapshot = VariableSnapshot.from_views(1, views_list)
 
         # Views should be stored as a tuple (as per dataclass frozen behavior)
         assert isinstance(snapshot.views, tuple)
@@ -136,10 +136,10 @@ class TestVariableSnapshot:
         view1 = MockVariableView(1)
         view2 = MockVariableView(2)
 
-        snapshot1 = VariableSnapshot(views=[view1, view2])
-        snapshot2 = VariableSnapshot(views=[view1, view2])
-        snapshot3 = VariableSnapshot(views=[view1])
-        snapshot4 = VariableSnapshot(views=[view2, view1])  # Different order
+        snapshot1 = VariableSnapshot(step=1, views=[view1, view2])
+        snapshot2 = VariableSnapshot(step=1, views=[view1, view2])
+        snapshot3 = VariableSnapshot(step=1, views=[view1])
+        snapshot4 = VariableSnapshot(step=1, views=[view2, view1])  # Different order
 
         # Same views, same order should be equal
         assert snapshot1 == snapshot2
@@ -158,7 +158,7 @@ class TestVariableSnapshot:
             pass
 
         view = MockVariableView()
-        snapshot = VariableSnapshot(views=(view,))
+        snapshot = VariableSnapshot(step=1, views=(view,))
 
         # The views sequence should be immutable (tuple)
         assert isinstance(snapshot.views, tuple)
@@ -184,7 +184,7 @@ class TestVariableSnapshot:
         view1 = MockVariableView("A")
         view2 = MockVariableView("B")
 
-        snapshot = VariableSnapshot(views=[view1, view2])
+        snapshot = VariableSnapshot(step=1, views=[view1, view2])
         repr_str = repr(snapshot)
 
         assert "VariableSnapshot" in repr_str
@@ -203,7 +203,7 @@ class TestVariableSnapshot:
         view1 = MockVariableView("original")
         view2 = MockVariableView("new")
 
-        original = VariableSnapshot(views=[view1])
+        original = VariableSnapshot(step=1, views=[view1])
 
         # Use replace to create a new instance with different views
         # Note: replace is from dataclasses module
@@ -227,13 +227,13 @@ class TestVariableSnapshotTypeSafety:
             pass
 
         # These should work (are Sequences)
-        VariableSnapshot(views=[])
-        VariableSnapshot(views=())
-        VariableSnapshot(views=[MockVariableView()])
+        VariableSnapshot(step=1, views=[])
+        VariableSnapshot(step=1, views=())
+        VariableSnapshot(step=1, views=[MockVariableView()])
 
     def test_none_views_not_allowed(self) -> None:
         """Test that views cannot be None."""
-        snapshot = VariableSnapshot(views=None)
+        snapshot = VariableSnapshot(step=1, views=None)
         assert snapshot.views is None
 
 
@@ -254,8 +254,8 @@ class TestVariableSnapshotIntegration:
 
         # Test integration
         evaluator = InvariantEvaluator()
-        empty_snapshot = VariableSnapshot(views=[])
-        populated_snapshot = VariableSnapshot(views=[MockVariableView()])
+        empty_snapshot = VariableSnapshot(step=1, views=[])
+        populated_snapshot = VariableSnapshot(step=1, views=[MockVariableView()])
 
         assert evaluator.evaluate(empty_snapshot) is False
         assert evaluator.evaluate(populated_snapshot) is True
@@ -269,7 +269,7 @@ class TestVariableSnapshotIntegration:
                 self.value = value
 
         views = [MockVariableView(1), MockVariableView(2), MockVariableView(3)]
-        snapshot = VariableSnapshot(views=views)
+        snapshot = VariableSnapshot(step=1, views=views)
 
         # Test iteration
         values = [view.value for view in snapshot.views]
@@ -281,22 +281,3 @@ class TestVariableSnapshotIntegration:
             assert isinstance(view, MockVariableView)
             count += 1
         assert count == 3
-
-
-# Minimal mock for VariableView if needed in conftest.py
-"""
-# conftest.py
-import pytest
-from typing import Protocol
-
-class VariableView(Protocol):
-    '''Protocol for VariableView to use in tests.'''
-    pass
-
-@pytest.fixture
-def mock_variable_view():
-    class MockVariableView:
-        def __init__(self, name: str = "default"):
-            self.name = name
-    return MockVariableView
-"""

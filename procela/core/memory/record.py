@@ -80,7 +80,7 @@ class VariableRecord:
 
         # --- Confidence ---
         if self.confidence is not None:
-            if not isinstance(self.confidence, float):
+            if not isinstance(self.confidence, int | float):
                 raise TypeError("confidence must be a float")
             if not 0.0 <= self.confidence <= 1.0:
                 raise ValueError(

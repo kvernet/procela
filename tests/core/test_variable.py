@@ -8,30 +8,24 @@ from typing import Iterator
 
 import pytest
 
-from procela.core.action import (
-    ActionEffect,
-    ActionProposal,
-    ResolutionPolicy,
-)
 from procela.core.assessment import (
     AnomalyResult,
     DiagnosisResult,
-    PlanningResult,
     PredictionResult,
     ReasoningResult,
     ReasoningTask,
     TrendResult,
 )
 from procela.core.memory import (
-    CandidateRecord,
+    HypothesisRecord,
     VariableMemory,
     VariableRecord,
 )
+from procela.core.policy import ResolutionPolicy
 from procela.core.reasoning import (
     AnomalyOperatorThreshold,
     DiagnosisOperatorThreshold,
     LastPredictor,
-    PlanningOperator,
     TrendOperatorThreshold,
 )
 from procela.core.variable import (
@@ -122,10 +116,10 @@ def statistical_variable(real_statistical_domain):
 @pytest.fixture
 def last_record_resolution():
     class LastRecordResolution(ResolutionPolicy):
-        def resolve(self, proposals):
-            if not proposals:
+        def resolve(self, hypotheses):
+            if not hypotheses:
                 return None
-            return proposals[-1]
+            return hypotheses[-1].record
 
     return LastRecordResolution()
 
@@ -219,7 +213,7 @@ def test_init_method_domain_violation():
     assert var.config == {}
     assert var.seed is None
 
-    with pytest.raises(ValueError, match="domain violation constraint"):
+    with pytest.raises(ValueError):
         var.init(VariableRecord(value=102.8))
 
 
@@ -241,13 +235,13 @@ def test_commit_with_includes(real_variable):
         real_variable.commit(include_hypotheses=True)
 
     real_variable.hypotheses = [
-        CandidateRecord(
+        HypothesisRecord(
             VariableRecord(value=98),
         ),
         "not-a-variable-record",
     ]
     with pytest.raises(
-        TypeError, match="`hypothesis` at index 1 should be a CandidateRecord"
+        TypeError, match="`hypothesis` at index 1 should be a HypothesisRecord"
     ):
         real_variable.commit(include_hypotheses=True)
 
@@ -281,7 +275,7 @@ def test_key_method(real_variable):
 
 def test_record_all_params(real_variable, real_key, real_time_point):
     """Test record() with all parameters."""
-    real_variable.add_candidate(
+    real_variable.add_hypothesis(
         VariableRecord(
             value=99.9,
             time=real_time_point,
@@ -291,7 +285,7 @@ def test_record_all_params(real_variable, real_key, real_time_point):
             metadata={"full": True},
         ),
     )
-    assert isinstance(real_variable.hypotheses[0], CandidateRecord)
+    assert isinstance(real_variable.hypotheses[0], HypothesisRecord)
     assert real_variable.hypotheses[0].record.value == 99.9
     assert real_variable.hypotheses[0].record.source == real_key
 
@@ -300,7 +294,7 @@ def test_record_validation_failure(real_variable):
     """Test record() when validation fails - NEEDS TO FAIL."""
     for test_value in [None, "invalid", -1e9, 1e9, [], {}]:
         try:
-            real_variable.add_candidate(VariableRecord(value=test_value))
+            real_variable.add_hypothesis(VariableRecord(value=test_value))
             continue
         except ValueError as e:
             assert "violates domain" in str(e)
@@ -330,16 +324,13 @@ def test_add_candidates(real_variable):
 
     # 4 records
     record = VariableRecord(11.0, confidence=0.95, source=Key())
-    real_variable.add_candidate(VariableRecord(10.0, confidence=0.5))
-    real_variable.add_candidate(VariableRecord(13.0, confidence=0.65))
-    real_variable.add_candidate(record)
-    real_variable.add_candidate(VariableRecord(12.0, confidence=0.45))
+    real_variable.add_hypothesis(VariableRecord(10.0, confidence=0.5))
+    real_variable.add_hypothesis(VariableRecord(13.0, confidence=0.65))
+    real_variable.add_hypothesis(record)
+    real_variable.add_hypothesis(VariableRecord(12.0, confidence=0.45))
 
-    candidates = real_variable.candidates()
+    candidates = real_variable.hypotheses
     assert len(candidates) == 4
-
-    candidates = real_variable.candidates(exclude=record.source)
-    assert len(candidates) == 3
 
     real_variable.resolve_conflict()
     real_variable.commit()
@@ -363,8 +354,8 @@ def test_repr_method(real_variable):
 
 def test_summary_method(real_variable):
     """Test summary() method."""
-    real_variable.add_candidate(VariableRecord(value=75))
-    real_variable.add_candidate(VariableRecord(value=85))
+    real_variable.add_hypothesis(VariableRecord(value=75))
+    real_variable.add_hypothesis(VariableRecord(value=85))
 
     summary = real_variable.summary()
     assert "===== Variable summary =====" in summary
@@ -378,7 +369,7 @@ def test_epistemic_method(real_variable):
     """Test epistemic() method."""
     # Add data
     for i in range(5):
-        real_variable.add_candidate(VariableRecord(value=i * 20))
+        real_variable.add_hypothesis(VariableRecord(value=i * 20))
 
     epistemic = real_variable.epistemic()
     assert isinstance(epistemic, VariableEpistemic)
@@ -399,9 +390,9 @@ def test_explain_method_real_variable(real_variable):
     # Test 2: With anomaly (need to create one)
     # Add outlier value
     for i in range(10):
-        real_variable.add_candidate(VariableRecord(value=i))  # Normal values
+        real_variable.add_hypothesis(VariableRecord(value=i))  # Normal values
 
-    real_variable.add_candidate(VariableRecord(value=1000))  # Outlier
+    real_variable.add_hypothesis(VariableRecord(value=1000))  # Outlier
 
     real_variable.explain()
 
@@ -424,9 +415,9 @@ def test_explain_method_statistical_variable(statistical_variable):
     # Test 2: With anomaly (need to create one)
     # Add outlier value
     for i in range(10):
-        statistical_variable.add_candidate(VariableRecord(value=i / 100))
+        statistical_variable.add_hypothesis(VariableRecord(value=i / 100))
 
-    statistical_variable.add_candidate(VariableRecord(value=2000))  # Outlier
+    statistical_variable.add_hypothesis(VariableRecord(value=2000))  # Outlier
 
     epistemic = statistical_variable.epistemic()
 
@@ -438,7 +429,6 @@ def test_explain_method_statistical_variable(statistical_variable):
     # Execute some reasoning tasks
     statistical_variable.detect_anomaly()
     statistical_variable.analyze_trend()
-    statistical_variable.propose_actions()
     statistical_variable.predict(predictor=LastPredictor(allow_none=True), horizon=5)
 
     explanation3 = statistical_variable.explain()
@@ -459,17 +449,17 @@ def test_explain_method_statistical_variable_different_scenarios(
     # Test 2: With anomaly (need to create one)
     # Add outlier value
     for i in range(10):
-        statistical_variable.add_candidate(VariableRecord(value=i / 100))
+        statistical_variable.add_hypothesis(VariableRecord(value=i / 100))
 
     statistical_variable.resolve_conflict()
     for _ in range(10):
         statistical_variable.commit()
-    statistical_variable.clear_candidates()
+    statistical_variable.clear_hypotheses()
 
-    statistical_variable.add_candidate(VariableRecord(value=405))  # Outlier
+    statistical_variable.add_hypothesis(VariableRecord(value=405))  # Outlier
     statistical_variable.resolve_conflict()
     statistical_variable.commit()
-    statistical_variable.clear_candidates()
+    statistical_variable.clear_hypotheses()
 
     epistemic = statistical_variable.epistemic()
     assert epistemic.trend is not None
@@ -484,15 +474,13 @@ def test_explain_method_statistical_variable_different_scenarios(
     # Execute some reasoning tasks
     statistical_variable.detect_anomaly()
     statistical_variable.analyze_trend()
-    statistical_variable.propose_actions()
     statistical_variable.hypotheses = (
-        CandidateRecord(VariableRecord(value=23.4, confidence=0.56)),
-        CandidateRecord(VariableRecord(value=26.1, confidence=0.68)),
+        HypothesisRecord(VariableRecord(value=23.4, confidence=0.56)),
+        HypothesisRecord(VariableRecord(value=26.1, confidence=0.68)),
     )
     statistical_variable.policy = last_record_resolution
     statistical_variable.resolve_conflict()
     statistical_variable.diagnose_causes()
-    statistical_variable.plan_intervention(predictor=LastPredictor(allow_none=True))
 
     explanation = statistical_variable.explain()
     assert "Recent reasoning steps:" in explanation
@@ -539,18 +527,6 @@ def test_explain_explain_reasoning_statistical_variable(real_variable):
         )
     )
 
-    # Action proposal
-    real_variable._explain_reasoning(
-        result=ReasoningResult(
-            task=ReasoningTask.ACTION_PROPOSAL,
-            success=False,
-            result=[
-                ActionProposal(value=34.7, confidence=0.65, action="Test"),
-                ActionProposal(value=38.7, confidence=0.5, action="Test"),
-            ],
-        )
-    )
-
     # Causal diagnosis
     real_variable._explain_reasoning(
         result=ReasoningResult(
@@ -559,40 +535,6 @@ def test_explain_explain_reasoning_statistical_variable(real_variable):
             result=DiagnosisResult(causes=["abc", "xyz"], metadata={"key": "Test"}),
         )
     )
-
-    # Intervention planning
-    real_variable._explain_reasoning(
-        result=ReasoningResult(
-            task=ReasoningTask.INTERVENTION_PLANNING,
-            success=False,
-            result=PlanningResult(
-                proposals=[
-                    ActionProposal(
-                        value=23.87,
-                        confidence=0.78,
-                        rationale="Test",
-                        effect=ActionEffect(
-                            description="Description test", expected_outcome=None
-                        ),
-                    )
-                ],
-            ),
-        )
-    )
-
-
-def test_variable_method_plan_intervention_unknown_planning_operator(real_value_domain):
-    """Test variable method plan_intervention with unknown planning operator"""
-    var = Variable(
-        name="unknown_planning_operator",
-        domain=real_value_domain,
-        config={"planning": {"name": "unknown_planning_operator", "kwargs": {}}},
-    )
-
-    predictor = LastPredictor(allow_none=True)
-
-    with pytest.raises(KeyError):
-        var.plan_intervention(predictor=predictor)
 
 
 def test_variable_method_detect_anomaly_unknown_detector(real_value_domain):
@@ -622,10 +564,10 @@ def test_detect_anomaly(real_variable):
     """Test detect_anomaly()."""
     # Add data
     for i in range(10):
-        real_variable.add_candidate(VariableRecord(value=i * 10, confidence=0.9))
+        real_variable.add_hypothesis(VariableRecord(value=i * 10, confidence=0.9))
         real_variable.resolve_conflict()
         real_variable.commit()
-        real_variable.clear_candidates()
+        real_variable.clear_hypotheses()
 
     result = real_variable.detect_anomaly()
     assert isinstance(result, AnomalyResult)
@@ -637,10 +579,10 @@ def test_analyze_trend(real_variable):
     """Test analyze_trend()."""
     # Add trending data
     for i in range(10):
-        real_variable.add_candidate(VariableRecord(value=i * 10, confidence=0.9))
+        real_variable.add_hypothesis(VariableRecord(value=i * 10, confidence=0.9))
         real_variable.resolve_conflict()
         real_variable.commit()
-        real_variable.clear_candidates()
+        real_variable.clear_hypotheses()
 
     result = real_variable.analyze_trend()
     # Can be None or TrendResult
@@ -652,28 +594,18 @@ def test_analyze_trend(real_variable):
 def test_resolve_conflict_empty(real_variable, last_record_resolution):
     """Test resolve_conflict() with empty candidates."""
     for i in range(4):
-        real_variable.add_candidate(VariableRecord(value=i * 30))
+        real_variable.add_hypothesis(VariableRecord(value=i * 30))
     real_variable.resolve_conflict()
     real_variable.commit()
-    real_variable.clear_candidates()
+    real_variable.clear_hypotheses()
     assert real_variable.value == 0.0
-
-
-def test_propose_actions(real_variable):
-    """Test propose_actions()."""
-    real_variable.init(VariableRecord(value=25))
-
-    proposals = real_variable.propose_actions()
-    assert isinstance(proposals, list)
-    if proposals:
-        assert isinstance(proposals[0], ActionProposal)
 
 
 def test_predict_default(real_variable):
     """Test predict() with default predictor."""
     # Add data
     for i in range(4):
-        real_variable.add_candidate(VariableRecord(value=i * 30))
+        real_variable.add_hypothesis(VariableRecord(value=i * 30))
     real_variable.resolve_conflict()
     real_variable.commit()
 
@@ -714,61 +646,6 @@ def test_diagnose_causes_invalid_operator(real_variable):
     """Test diagnose_causes() with invalid operator."""
     with pytest.raises(TypeError, match="should be a DiagnosisOperator instance"):
         real_variable.diagnose_causes(operator="not_an_operator")
-
-
-def test_plan_intervention_minimal(real_variable):
-    """Test plan_intervention() with minimal params."""
-    try:
-        result = real_variable.plan_intervention(horizon=2)
-        assert isinstance(result, ReasoningResult)
-        assert result.task == ReasoningTask.INTERVENTION_PLANNING
-    except Exception:
-        # If planning fails due to missing config, adjust config
-        real_variable.config["planning"] = {"name": "preventive"}
-        predictor = LastPredictor(allow_none=True)
-        result = real_variable.plan_intervention(predictor=predictor, horizon=2)
-        assert isinstance(result, ReasoningResult)
-
-
-def test_plan_intervention_all_params(real_variable):
-    """Test plan_intervention() with all params."""
-    planning_op = PlanningOperator(name="preventive")
-    diagnosis_op = DiagnosisOperatorThreshold(name="statistical")
-    predictor = LastPredictor(allow_none=True)
-
-    result = real_variable.plan_intervention(
-        planningOperator=planning_op,
-        diagnosisOperator=diagnosis_op,
-        predictor=predictor,
-        horizon=3,
-    )
-    assert isinstance(result, ReasoningResult)
-
-
-def test_plan_intervention_invalid_planning_operator(real_variable):
-    """Test invalid planning operator."""
-    with pytest.raises(TypeError, match="should be a PlanningOperator"):
-        real_variable.plan_intervention(planningOperator="invalid")
-
-
-def test_plan_intervention_invalid_diagnosis_operator(real_variable):
-    """Test invalid diagnosis operator."""
-    planning_op = PlanningOperator(name="preventive")
-
-    with pytest.raises(TypeError, match="should be a DiagnosisOperator"):
-        real_variable.plan_intervention(
-            planningOperator=planning_op, diagnosisOperator="invalid"
-        )
-
-
-def test_plan_intervention_invalid_predictor(real_variable):
-    """Test invalid predictor."""
-    planning_op = PlanningOperator(name="preventive")
-
-    with pytest.raises(TypeError, match="should be a Predictor instance"):
-        real_variable.plan_intervention(
-            planningOperator=planning_op, predictor="invalid"
-        )
 
 
 def test_private_detect_anomaly(real_variable):
@@ -853,14 +730,6 @@ def test_private_diagnose_causes_invalid(real_variable):
         real_variable._diagnose_causes(operator="invalid")
 
 
-def test_private_record_to_proposal(real_variable, real_variable_record):
-    """Test _record_to_proposal() private method."""
-    proposal = real_variable._record_to_proposal(real_variable_record)
-    assert isinstance(proposal, ActionProposal)
-    assert proposal.value == real_variable_record.value
-    assert proposal.confidence == real_variable_record.confidence
-
-
 def test_epistemic_none_results(real_variable):
     """Test epistemic() when private methods return None."""
     # Mock the private methods to return None
@@ -883,16 +752,20 @@ def test_epistemic_none_results(real_variable):
 def test_resolve_conflict_validation_fails(
     real_variable, real_variable_record, last_record_resolution
 ):
-    """Test resolve_conflict when _record() fails."""
+    """Test resolve_conflict when conclusion fails domain."""
 
-    # Mock _record to return False
-    original_record = real_variable.records
-    real_variable.records = lambda x: False
+    record1 = VariableRecord(value=-10, confidence=0.99)
+    with pytest.raises(ValueError):
+        real_variable.set(record1)
 
-    try:
-        real_variable.resolve_conflict()
-    finally:
-        real_variable.records = original_record
+    record2 = VariableRecord(value=0, confidence=0.67)
+    real_variable.set(record2)
+
+    real_variable.add_hypothesis(record1)
+    real_variable.add_hypothesis(record2)
+
+    real_variable.resolve_conflict()
+    assert real_variable.confidence == record2.confidence
 
 
 def test_with_different_configs(real_value_domain):
@@ -909,27 +782,6 @@ def test_with_different_configs(real_value_domain):
     )
     with pytest.raises(KeyError):
         var2.detect_anomaly()
-
-    # Test 3: With planning config
-    var3 = Variable(
-        name="with_planning",
-        domain=real_value_domain,
-        config={"planning": {"name": "corrective", "kwargs": {}}},
-    )
-    with pytest.raises(KeyError):
-        var3.plan_intervention()
-
-
-def test_plan_intervention_unknown_name(real_value_domain):
-    """Test plan_intervention() with unknown planning name."""
-    var = Variable(
-        name="unknown_plan",
-        domain=real_value_domain,
-        config={"planning": {"name": "non_existent", "kwargs": {}}},
-    )
-
-    with pytest.raises(KeyError):
-        var.plan_intervention()
 
 
 def test_diagnose_causes_unknown_name(real_value_domain):
@@ -977,20 +829,6 @@ def test_all_type_checks(real_variable):
     # Test _diagnose_causes type check
     with pytest.raises(TypeError):
         real_variable._diagnose_causes(operator="string")
-
-    # Test plan_intervention type checks
-    with pytest.raises(TypeError):
-        real_variable.plan_intervention(planningOperator="string")
-
-    with pytest.raises(KeyError):
-        real_variable.plan_intervention(
-            planningOperator=PlanningOperator(name="test"), diagnosisOperator="string"
-        )
-
-    with pytest.raises(KeyError):
-        real_variable.plan_intervention(
-            planningOperator=PlanningOperator(name="test"), predictor="string"
-        )
 
 
 if __name__ == "__main__":

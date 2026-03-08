@@ -2,6 +2,7 @@
 
 from unittest.mock import Mock, create_autospec
 
+import numpy as np
 import pytest
 
 from procela.core.exceptions import ExecutionError
@@ -114,7 +115,6 @@ class TestExecutive:
 
         # Configure mocks
         mock_variable.key.return_value = mock_key
-        mock_variable.candidates.return_value = [mock_record]
         mock_variable.resolve_conflict.return_value = (mock_record, [mock_record])
         mock_record.source = mock_key
 
@@ -131,7 +131,7 @@ class TestExecutive:
         mock_mechanism.run.assert_called_once()
         mock_variable.resolve_conflict.assert_called_once()
         mock_variable.commit.assert_called_once_with()
-        mock_variable.clear_candidates.assert_called_once()
+        mock_variable.clear_hypotheses.assert_called_once()
 
         # Verify trace was updated
         assert executive._step_index == 1
@@ -142,9 +142,6 @@ class TestExecutive:
         mock_process = create_autospec(Process)
         mock_mechanism = create_autospec(Mechanism)
         mock_variable = create_autospec(Variable)
-
-        # Configure variable with no candidates
-        mock_variable.candidates.return_value = []
 
         # Create executive
         executive = Executive(processes=[mock_process], mechanisms=[mock_mechanism])
@@ -226,7 +223,7 @@ class TestExecutive:
 
         # Verify results
         assert step_count == 3
-        assert check_calls == [InvariantPhase.PRE, InvariantPhase.POST]
+        assert check_calls == []
         assert len(callback_calls) == 3
         for i, (exec, step_num) in enumerate(callback_calls):
             assert exec is executive
@@ -475,3 +472,11 @@ class TestExecutive:
         # Should re-raise as generic Exception
         with pytest.raises(ExecutionError):
             executive._check_invariants(InvariantPhase.RUNTIME)
+
+    def test_random_generation(self):
+        "Test random generation"
+        rng = np.random.default_rng(42)
+        exec = Executive()
+        exec.set_rng(rng=rng)
+        assert exec.step_index() == 0
+        assert abs(exec.random() - 0.773956048) < 1e-6

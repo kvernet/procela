@@ -19,26 +19,23 @@ https://procela.org/docs/examples/core/variable/variable.html
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Iterable
+from typing import Any, Callable, Iterable
 
 from ...symbols.key import Key
-from ..action.policy import HighestConfidencePolicy, ResolutionPolicy
-from ..action.proposal import ActionProposal
-from ..action.proposer import ActionProposer
-from ..action.resolver import ConflictResolver
-from ..action.validator import ProposalValidator
 from ..assessment.anomaly import AnomalyResult
 from ..assessment.diagnosis import DiagnosisResult
-from ..assessment.planning import PlanningResult
 from ..assessment.prediction import PredictionResult
 from ..assessment.reasoning import ReasoningResult
 from ..assessment.statistics import StatisticsResult
 from ..assessment.task import ReasoningTask
 from ..assessment.trend import TrendResult
 from ..memory.base import VariableMemory
-from ..memory.candidate import CandidateRecord
+from ..memory.hypothesis import HypothesisRecord
 from ..memory.record import VariableRecord
 from ..memory.statistics import MemoryStatistics
+from ..policy.resolution.base import ResolutionPolicy
+from ..policy.resolution.confidence import HighestConfidencePolicy
+from ..policy.resolution.resolver import ResolverPolicy
 from ..reasoning.anomaly.operator import AnomalyOperator, AnomalyOperatorThreshold
 from ..reasoning.diagnosis.operator import (
     DiagnosisOperator,
@@ -46,7 +43,6 @@ from ..reasoning.diagnosis.operator import (
     TrendOperator,
     TrendOperatorThreshold,
 )
-from ..reasoning.planning.operator import PlanningOperator
 from ..reasoning.prediction.base import Predictor
 from ..reasoning.prediction.last import LastPredictor
 from ..timer import Timer
@@ -145,7 +141,7 @@ class Variable:
         config: dict[str, Any] | None = None,
         seed: int | None = None,
         policy: ResolutionPolicy | None = None,
-        validators: Iterable[ProposalValidator] | None = None,
+        validators: Iterable[Callable[[HypothesisRecord], bool]] | None = None,
     ):
         """
         Instantiate a variable with identity and configuration.
@@ -169,8 +165,9 @@ class Variable:
         policy : ResolutionPolicy | None
             The resolution policy used to resolve conflicts between hypotheses.
             Default is None.
-        validators : Iterable[ProposalValidator] | None
-            The iterable ProposalValidators to filter hypotheses before resolution.
+        validators: Iterable[Callable[[HypothesisRecord], bool]] | None
+            The iterable validators to filter hypotheses before resolution.
+            Default is None.
 
         Notes
         -----
@@ -192,7 +189,7 @@ class Variable:
         self._key = KeyAuthority.issue(self)
 
         # Used during commits
-        self.hypotheses: list[CandidateRecord] = []
+        self.hypotheses: list[HypothesisRecord] = []
         self.conclusion: VariableRecord | None = None
         self.reasoning: ReasoningResult | None = None
 
@@ -218,20 +215,56 @@ class Variable:
         ----------
         record : VariableRecord
             The record to be initialized the variable with.
+
+        Warnings
+        --------
+            This method resets the variable memory.
+            Use with caution. See set() method as alternatives.
         """
         if not self.validate(record):
-            why = self.domain.explain(record)
+            why = self.domain.explain(record.value)
             raise ValueError(
-                "The variable initialization fails "
-                f"domain violation constraint: {why}"
+                f"The variable [{self.name}] set() method fails "
+                f"domain constraint in init(): {why}"
             )
         self.memory = None
-        self.clear_candidates()
+        self.clear_hypotheses()
         self.stats = MemoryStatistics.empty()
-        self.hypotheses.append(CandidateRecord(record=record))
+        self.hypotheses.append(HypothesisRecord(record=record))
         self.conclusion = record
         self.reasoning = ReasoningResult.empty()
         self.commit()
+        self.clear_hypotheses()
+
+    def set(
+        self, record: VariableRecord, reasoning: ReasoningResult | None = None
+    ) -> None:
+        """
+        Set a variable with a record.
+
+        Parameters
+        ----------
+        record : VariableRecord
+            The record to set the variable with.
+
+        Notes
+        -----
+            This method doesn't reset variable memory but modifies
+            the variable value. It's useful for interventions during
+            a simulation. See init() method as alternatives.
+        """
+        if not self.validate(record):
+            why = self.domain.explain(record.value)
+            raise ValueError(
+                f"The variable [{self.name}] method fails "
+                f"domain constraint in set(): {why}"
+            )
+        self.clear_hypotheses()
+        self.hypotheses.append(HypothesisRecord(record=record))
+        self.conclusion = record
+        self.reasoning = reasoning
+        self.commit()
+        self.clear_hypotheses()
 
     @property
     def value(self) -> Any:
@@ -244,6 +277,18 @@ class Variable:
             The last value of the variable
         """
         return self.stats.last_value
+
+    @property
+    def confidence(self) -> Any:
+        """
+        Get the confidence of a variable.
+
+        Returns
+        -------
+        Any
+            The confidence of the variable
+        """
+        return self.stats.confidence()
 
     def has_records(self) -> bool:
         """
@@ -293,39 +338,16 @@ class Variable:
             return iter(())
         return (record for _, record, _ in self.memory.iter())
 
-    def add_candidate(self, record: VariableRecord) -> None:
+    def add_hypothesis(self, record: VariableRecord) -> None:
         """
-        Add candidate produced by some mechanims.
+        Add hypothesis produced by some mechanims.
 
         Parameters
         ----------
         record : VariableRecord
-            The candidate record produced by some mechanism.
+            The hypothesis record produced by some mechanism.
         """
-        self.hypotheses.append(CandidateRecord(record))
-
-    def candidates(self, exclude: Key | None = None) -> list[CandidateRecord]:
-        """
-        Get all current candidates of the variable by excluding a specific one.
-
-        Parameters
-        ----------
-        exclude : Key | None
-            The key to be excluded from candidates. Default is None.
-
-        Returns
-        -------
-        list[CandidateRecord]
-            The candidates of the variable excluded the identified one.
-        """
-        if exclude is None:
-            return self.hypotheses
-
-        return [
-            candidate
-            for candidate in self.hypotheses
-            if candidate.record is not None and candidate.record.source != exclude
-        ]
+        self.hypotheses.append(HypothesisRecord(record))
 
     def commit(
         self,
@@ -339,9 +361,9 @@ class Variable:
         Parameters
         ----------
         include_hypotheses : bool
-            If proposed candidates should be included in the commit.
+            If proposed hypotheses should be included in the commit.
         include_conclusion : bool
-            If resolved candidate should be included in the commit.
+            If resolved hypothesis should be included in the commit.
         include_reasonning : bool
             If reasonning result should be included in the commit.
 
@@ -355,9 +377,9 @@ class Variable:
                     f"`hypotheses` should be a list, got {type(self.hypotheses)}"
                 )
             for i, hypothesis in enumerate(self.hypotheses):
-                if not isinstance(hypothesis, CandidateRecord):
+                if not isinstance(hypothesis, HypothesisRecord):
                     raise TypeError(
-                        f"`hypothesis` at index {i} should be a CandidateRecord, "
+                        f"`hypothesis` at index {i} should be a HypothesisRecord, "
                         f"got {hypothesis}"
                     )
 
@@ -409,8 +431,8 @@ class Variable:
                 alpha=alpha,
             )
 
-    def clear_candidates(self) -> None:
-        """Clear the list of candidates."""
+    def clear_hypotheses(self) -> None:
+        """Clear the list of hypotheses."""
         self.hypotheses.clear()
         self.conclusion = None
         self.reasoning = None
@@ -420,7 +442,7 @@ class Variable:
         Reset the complete epistemic memory of the variable.
 
         This method clears all records in the memory, and pending
-        candidate records while preserving the variable identity, key,
+        hypothesis records while preserving the variable identity, key,
         configuration, domain, and policies.
 
         Calling this method defines a boundary between simulation worlds. The
@@ -434,7 +456,7 @@ class Variable:
         -----
         - Variable identity and configuration are preserved.
         - Observation and reasoning are fully reset.
-        - All pending candidates are cleared.
+        - All pending hypotheses are cleared.
 
         Warnings
         --------
@@ -442,7 +464,7 @@ class Variable:
         Calling reset during execution results in undefined behavior.
         """
         self.memory = None
-        self.clear_candidates()
+        self.clear_hypotheses()
         self.stats = MemoryStatistics.empty()
 
     def __repr__(self) -> str:
@@ -507,9 +529,6 @@ class Variable:
             Epistemic projection associated with this variable.
         """
         reasoning: ReasoningResult | None = None
-
-        if self.memory is not None:
-            _, _, reasoning = self.memory.latest()
 
         stats = self.stats.result()
         anomaly = self._detect_anomaly(stats)
@@ -648,15 +667,15 @@ class Variable:
 
     def resolve_conflict(self) -> VariableRecord | None:
         """
-        Resolve competing candidates into a single authoritative record.
+        Resolve competing hypotheses into a single authoritative conclusion.
 
         Returns
         -------
         VariableRecord | None
-            The resolved record.
+            The resolved conclusion.
         """
-        self.conclusion, self.reasoning = ConflictResolver().resolve(
-            candidates=self.hypotheses,
+        self.conclusion, self.reasoning = ResolverPolicy().resolve(
+            hypotheses=self.hypotheses,
             policy=self.policy,
             validators=self.validators,
         )
@@ -671,29 +690,6 @@ class Variable:
             )
 
         return self.conclusion
-
-    def propose_actions(self) -> list[ActionProposal]:
-        """
-        Generate action proposals and record the corresponding reasoning result.
-
-        Returns
-        -------
-        list[ActionProposal]
-            List of proposed actions.
-        """
-        with Timer() as t:
-            view = self.epistemic()
-            proposals = ActionProposer().propose(view=view)
-
-        # Ephemeral reasoning
-        self.reasoning = ReasoningResult(
-            task=ReasoningTask.ACTION_PROPOSAL,
-            success=bool(proposals),
-            result=proposals,
-            execution_time=t.elapsed,
-        )
-
-        return proposals
 
     def predict(
         self,
@@ -770,87 +766,6 @@ class Variable:
         self.reasoning = ReasoningResult(
             task=ReasoningTask.CAUSAL_DIAGNOSIS,
             success=True,
-            result=result,
-            confidence=None,
-            execution_time=t.elapsed,
-        )
-
-        return self.reasoning
-
-    def plan_intervention(
-        self,
-        planningOperator: PlanningOperator | None = None,
-        diagnosisOperator: DiagnosisOperator | None = None,
-        predictor: Predictor | None = None,
-        *,
-        horizon: int | None = None,
-    ) -> ReasoningResult:
-        """
-        Plan interventions for this variable and record the reasoning result.
-
-        Parameters
-        ----------
-        planningOperator : PlanningOperator | None, optional
-            Operator for planning strategy.
-        diagnosisOperator : DiagnosisOperator | None, optional
-            Operator for diagnosis strategy.
-        predictor : Predictor | None, optional
-            Predictor for prediction strategy.
-        horizon : int | None, optional
-            Prediction horizon.
-
-        Returns
-        -------
-        ReasoningResult
-            Reasoning result containing the intervention plan.
-        """
-        with Timer() as t:
-            if planningOperator is not None and not isinstance(
-                planningOperator, PlanningOperator
-            ):
-                raise TypeError(
-                    "`planningOperator` should be a PlanningOperator, "
-                    f"got {planningOperator}"
-                )
-
-            if diagnosisOperator is not None and not isinstance(
-                diagnosisOperator, DiagnosisOperator
-            ):
-                raise TypeError(
-                    "`diagnosisOperator` should be a DiagnosisOperator, "
-                    f"got {planningOperator}"
-                )
-
-            if predictor is not None and not isinstance(predictor, Predictor):
-                raise TypeError(
-                    f"`predictor` should be a Predictor instance, got {predictor}"
-                )
-
-            predictor = predictor or LastPredictor()
-
-            if planningOperator is None:
-                planning_cfg = self.config.get("planning", {})
-                name = planning_cfg.get("name", "preventive")
-                kwargs = planning_cfg.get("kwargs", {})
-                planningOperator = PlanningOperator(name=name, **kwargs)
-
-            # Define the planning view
-            epistemic = self.epistemic()
-            stats = epistemic.stats
-            diagnosis_result = self._diagnose_causes(diagnosisOperator)
-            prediction = self._predict(epistemic, predictor, horizon=horizon)
-
-            class View:
-                diagnosis = diagnosis_result
-                predictions = [prediction]
-                current_value = stats.value
-
-            result = planningOperator.plan(View())
-
-        # Ephemeral reasoning
-        self.reasoning = ReasoningResult(
-            task=ReasoningTask.INTERVENTION_PLANNING,
-            success=len(result.proposals) > 0,
             result=result,
             confidence=None,
             execution_time=t.elapsed,
@@ -1007,12 +922,6 @@ class Variable:
             lines.append(f"\tconfidence: {result.result.confidence}")
             lines.append(f"\tsources   : {len(from_keys)}")
             lines.append(f"\tpolicy    : {policy}")
-        elif result.task == ReasoningTask.ACTION_PROPOSAL and isinstance(
-            result.result, list
-        ):
-            for proposal in result.result:
-                action_name = proposal.action.replace("_", " ").capitalize()
-                lines.append(f"\tAction    : {action_name}")
         elif result.task == ReasoningTask.CAUSAL_DIAGNOSIS and isinstance(
             result.result, DiagnosisResult
         ):
@@ -1022,19 +931,6 @@ class Variable:
             for key, value in result.result.metadata.items():
                 key_text = key.replace("_", " ").capitalize()
                 lines.append(f"\t{key_text:22}: {value}")
-        if result.task == ReasoningTask.INTERVENTION_PLANNING and isinstance(
-            result.result, PlanningResult
-        ):
-            for proposal in result.result.proposals:
-                strategy = (
-                    result.result.strategy.capitalize()
-                    if result.result.strategy is not None
-                    else None
-                )
-                lines.append(f"\tRationale: {proposal.rationale}")
-                lines.append(f"\tEffect   : {proposal.effect.description}")
-                lines.append(f"\tOutcome  : {proposal.effect.expected_outcome}")
-                lines.append(f"\tStrategy : {strategy}")
 
         return "\n".join(lines)
 
@@ -1098,27 +994,3 @@ class Variable:
         view = self.epistemic()
 
         return operator.diagnose(view=view)
-
-    def _record_to_proposal(self, record: VariableRecord) -> ActionProposal:
-        """
-        Convert a VariableRecord into an ActionProposal.
-
-        Parameters
-        ----------
-        record : VariableRecord
-            The record of the variable to be saved.
-
-        Returns
-        -------
-        ActionProposal
-            The action proposal result.
-        """
-        return ActionProposal(
-            value=record.value,
-            confidence=record.confidence or 0.0,
-            source=record.source,
-            metadata={
-                "record_key": record.key(),
-                "time": record.time,
-            },
-        )

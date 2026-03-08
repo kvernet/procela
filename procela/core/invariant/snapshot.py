@@ -25,19 +25,24 @@ class VariableSnapshot:
 
     Parameters
     ----------
+    step : int
+        The executive current step.
     views : tuple[VariableView]
         Epistemic views over variables available for invariant evaluation.
     """
 
+    step: int
     views: tuple[VariableView, ...]
 
     @classmethod
-    def from_views(cls, views: Sequence[VariableView]) -> VariableSnapshot:
+    def from_views(cls, step: int, views: Sequence[VariableView]) -> VariableSnapshot:
         """
         Create a VariableSnapshot instance from a sequence of variables views.
 
         Parameters
         ----------
+        step : int
+            The executive current step.
         views: Sequence[VariableView]
             The views over variables.
 
@@ -46,4 +51,4 @@ class VariableSnapshot:
         VariableSnapshot
             The VariableSnapshot instance created from views.
         """
-        return cls(tuple(views))
+        return cls(step, tuple(views))

@@ -15,16 +15,14 @@ https://procela.org/docs/examples/core/memory/
 """
 
 from .base import VariableMemory
-from .candidate import CandidateRecord, CandidateState
-from .context import ResolutionContext
+from .hypothesis import HypothesisRecord, HypothesisState
 from .record import VariableRecord
 from .statistics import MemoryStatistics
 
 __all__ = [
-    "CandidateState",
-    "CandidateRecord",
+    "HypothesisState",
+    "HypothesisRecord",
     "VariableMemory",
-    "ResolutionContext",
     "VariableRecord",
     "MemoryStatistics",
 ]

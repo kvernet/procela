@@ -12,7 +12,6 @@ https://procela.org/docs/examples/core/assessment/index.html
 
 from .anomaly import AnomalyResult
 from .diagnosis import DiagnosisResult
-from .planning import PlanningResult
 from .prediction import PredictionResult
 from .reasoning import ReasoningResult
 from .statistics import StatisticsResult
@@ -27,5 +26,4 @@ __all__ = [
     "StatisticsResult",
     "ReasoningTask",
     "TrendResult",
-    "PlanningResult",
 ]

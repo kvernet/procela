@@ -26,7 +26,7 @@ from typing import Any, Iterable
 from ...symbols.key import Key
 from ..assessment.reasoning import ReasoningResult, ReasoningTask
 from ..key_authority import KeyAuthority
-from .candidate import CandidateRecord
+from .hypothesis import HypothesisRecord
 from .record import VariableRecord
 
 
@@ -41,7 +41,7 @@ class VariableMemory:
 
     Parameters
     ----------
-    hypotheses : tuple[CandidateRecord, ...]
+    hypotheses : tuple[HypothesisRecord, ...]
         Hypotheses retained at commit time.
     conclusion : VariableRecord | None
         Final resolved value at commit time.
@@ -58,7 +58,7 @@ class VariableMemory:
     not execution artifacts.
     """
 
-    hypotheses: tuple[CandidateRecord, ...]
+    hypotheses: tuple[HypothesisRecord, ...]
     conclusion: VariableRecord | None
     reasoning: ReasoningResult | None
     config: dict[str, Any] = field(default_factory=dict, repr=False)
@@ -76,7 +76,7 @@ class VariableMemory:
         Raises
         ------
         TypeError
-            If `hypotheses` is not a tuple of CandidateRecord.
+            If `hypotheses` is not a tuple of HypothesisRecord.
             If `conclusion` is not a VariableRecord instance or None.
             If `reasoning` is not a ReasoningResult or None.
             If `previous` is not a Key or None.
@@ -102,7 +102,7 @@ class VariableMemory:
 
     def new(
         self,
-        hypotheses: tuple[CandidateRecord, ...],
+        hypotheses: tuple[HypothesisRecord, ...],
         conclusion: VariableRecord | None,
         reasoning: ReasoningResult | None,
     ) -> VariableMemory:
@@ -111,7 +111,7 @@ class VariableMemory:
 
         Parameters
         ----------
-        hypotheses : tuple[CandidateRecord, ...]
+        hypotheses : tuple[HypothesisRecord, ...]
             The hypotheses of the new node.
         conclusion : VariableRecord | None
             The conclusion of the new node.
@@ -164,7 +164,7 @@ class VariableMemory:
         success: bool | None = None,
     ) -> Iterable[
         tuple[
-            tuple[CandidateRecord, ...],
+            tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
         ]
@@ -184,7 +184,7 @@ class VariableMemory:
         Yields
         ------
         tuple[
-            tuple[CandidateRecord, ...],
+            tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
         ]
@@ -232,7 +232,7 @@ class VariableMemory:
         success: bool | None = None,
     ) -> list[
         tuple[
-            tuple[CandidateRecord, ...],
+            tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
         ]
@@ -253,7 +253,7 @@ class VariableMemory:
         -------
         list[
             tuple[
-                tuple[CandidateRecord, ...],
+                tuple[HypothesisRecord, ...],
                 VariableRecord | None,
                 ReasoningResult | None,
             ]
@@ -267,7 +267,7 @@ class VariableMemory:
     def latest(
         self,
     ) -> tuple[
-        tuple[CandidateRecord, ...],
+        tuple[HypothesisRecord, ...],
         VariableRecord | None,
         ReasoningResult | None,
     ]:
@@ -277,7 +277,7 @@ class VariableMemory:
         Returns
         -------
         tuple[
-            tuple[CandidateRecord, ...],
+            tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
         ]
@@ -314,7 +314,7 @@ class VariableMemory:
 
     def _validate(
         self,
-        hypotheses: tuple[CandidateRecord, ...],
+        hypotheses: tuple[HypothesisRecord, ...],
         conclusion: VariableRecord | None,
         reasoning: ReasoningResult | None,
     ) -> None:
@@ -323,7 +323,7 @@ class VariableMemory:
 
         Parameters
         ----------
-        hypotheses : tuple[CandidateRecord, ...]
+        hypotheses : tuple[HypothesisRecord, ...]
             The hypotheses to validate.
         conclusion : VariableRecord | None
             The conclusion to validate
@@ -333,7 +333,7 @@ class VariableMemory:
         Raises
         ------
         TypeError
-            If `hypotheses` is not a tuple of CandidateRecord.
+            If `hypotheses` is not a tuple of HypothesisRecord.
             If `conclusion` is not a VariableRecord instance or None.
             If `reasoning` is not a ReasoningResult or None.
         """
@@ -341,9 +341,9 @@ class VariableMemory:
             raise TypeError(f"`hypotheses` should be a tuple, got {type(hypotheses)}")
 
         for i, hypothesis in enumerate(hypotheses):
-            if not isinstance(hypothesis, CandidateRecord):
+            if not isinstance(hypothesis, HypothesisRecord):
                 raise TypeError(
-                    f"`hypothesis` at index {i} should be a CandidateRecord, "
+                    f"`hypothesis` at index {i} should be a HypothesisRecord, "
                     f"got {type(hypothesis)}"
                 )
 
