@@ -52,6 +52,41 @@ def get_diagnoser(name: str, **kwargs: Any) -> Diagnoser:
         If the requested diagnoser name is not found in the registry.
     TypeError
         If the diagnoser instantiation fails due to invalid arguments.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     get_diagnoser
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> diagnoser = get_diagnoser(name="anomaly")
+    >>>
+    >>> result = diagnoser.diagnose(view=view)
+    >>>
+    >>> print(result.causes)
+    ['Unidentified system anomaly detected']
+    >>> print(result.confidence)
+    0.3
+    >>>
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:22}: {value}")
+    diagnoser             : AnomalyDiagnoser
+    severity_threshold    : 2.0
+    anomaly_present       : False
+    anomaly_score         : None
+    met_severity_threshold: False
+    causes_identified     : 1
+    confidence            : 0.3
+    generic_causes_used   : False
     """
     if name not in _DIAGNOSER_REGISTRY:
         available = ", ".join(sorted(_DIAGNOSER_REGISTRY.keys()))

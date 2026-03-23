@@ -6,6 +6,23 @@ a variable's memory in Procela. These statistics include count, sum,
 sum of squares, min, max, last value, confidence sum, exponentially
 weighted moving average (EWMA), and set of sources.
 
+Examples
+--------
+>>> from procela import MemoryStatistics, VariableRecord
+>>>
+>>> stats = MemoryStatistics.empty()
+>>> print(stats)
+MemoryStatistics(count=0, mean=None, std=None, min=None, max=None, ...)
+>>> stats = stats.update(VariableRecord(3, confidence=0.99))
+>>> print(stats.count)
+1
+>>> stats = MemoryStatistics(count=2, sum=20, sumsq=208)
+>>> print(stats.mean(), stats.std(), stats.confidence())
+10.0 2.0 0.0
+>>> stats = stats.update(VariableRecord(3, confidence=0.99))
+>>> print(stats.result().ewma)
+3.0
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/memory/variable/statistics.html
@@ -56,6 +73,23 @@ class MemoryStatistics:
         `None` if no values.
     sources : frozenset[Key]
         Frozen set of associated source keys encountered.
+
+    Examples
+    --------
+    >>> from procela import MemoryStatistics, VariableRecord
+    >>>
+    >>> stats = MemoryStatistics.empty()
+    >>> print(stats)
+    MemoryStatistics(count=0, mean=None, std=None, min=None, max=None, ...)
+    >>> stats = stats.update(VariableRecord(3, confidence=0.99))
+    >>> print(stats.count)
+    1
+    >>> stats = MemoryStatistics(count=2, sum=20, sumsq=208)
+    >>> print(stats.mean(), stats.std(), stats.confidence())
+    10.0 2.0 0.0
+    >>> stats = stats.update(VariableRecord(3, confidence=0.99))
+    >>> print(stats.result().ewma)
+    3.0
     """
 
     count: int = 0

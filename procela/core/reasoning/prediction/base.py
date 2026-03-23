@@ -6,6 +6,67 @@ within the Procela framework. Predictors are specialized components responsible
 for forecasting future states and values of system variables based on
 epistemic data and active reasoning.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     Predictor,
+...     VariableView,
+...     PredictionResult
+... )
+>>>
+>>> class HalfValuePredictor(Predictor):
+...     def predict(self, view, horizon = None):
+...         if not isinstance(view, VariableView):
+...             raise TypeError(f"view must be VariableView, got {type(view).__name__}")
+...
+...         if not view.stats:
+...             raise TypeError("view.stats must be provided")
+...
+...         if horizon is None:
+...             horizon = 1
+...         elif horizon < 1:
+...             raise ValueError(f"horizon must be >= 1, got {horizon}")
+...
+...         last_value = 0.5*view.stats.value
+...
+...         if last_value is None:
+...             if self.allow_none:
+...                 # Use zeros when last_value is None and allow_none is True
+...                 predictions = [0.0] * horizon
+...             else:
+...                 raise ValueError(
+...                     "last_value is None. Set allow_none=True to use zeros."
+...                 )
+...         else:
+...             # Use the last_value for all predictions
+...             predictions = [float(last_value)] * horizon
+...
+...         return PredictionResult(
+...             value=predictions,
+...             horizon=horizon,
+...             confidence=None,
+...             metadata={"n_predictions": len(predictions), "horizon": horizon},
+...         )
+...
+... var = Variable("var", StatisticalDomain())
+... var.set(VariableRecord(value=12, confidence=0.98))
+... var.set(VariableRecord(value=13, confidence=0.94))
+... var.set(VariableRecord(value=11, confidence=0.90))
+... view = var.epistemic()
+>>>
+>>> predictor = HalfValuePredictor()
+>>>
+>>> result = predictor.predict(
+>>>     view=view, horizon=3
+>>> )
+>>> print(result.value)
+[5.5, 5.5, 5.5]
+>>> print(result.horizon)
+3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/prediction/base.html
@@ -57,6 +118,69 @@ class Predictor(ABC):
         If `view` is not an instance of `VariableView`.
     NotImplementedError
         If a concrete subclass does not implement the `predict` method.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     Predictor,
+    ...     VariableView,
+    ...     PredictionResult
+    ... )
+    >>>
+    >>> class HalfValuePredictor(Predictor):
+    ...     def predict(self, view, horizon = None):
+    ...         if not isinstance(view, VariableView):
+    ...             raise TypeError(
+    ...                 f"view must be VariableView, got {type(view).__name__}"
+    ...             )
+    ...
+    ...         if not view.stats:
+    ...             raise TypeError("view.stats must be provided")
+    ...
+    ...         if horizon is None:
+    ...             horizon = 1
+    ...         elif horizon < 1:
+    ...             raise ValueError(f"horizon must be >= 1, got {horizon}")
+    ...
+    ...         last_value = 0.5*view.stats.value
+    ...
+    ...         if last_value is None:
+    ...             if self.allow_none:
+    ...                 # Use zeros when last_value is None and allow_none is True
+    ...                 predictions = [0.0] * horizon
+    ...             else:
+    ...                 raise ValueError(
+    ...                     "last_value is None. Set allow_none=True to use zeros."
+    ...                 )
+    ...         else:
+    ...             # Use the last_value for all predictions
+    ...             predictions = [float(last_value)] * horizon
+    ...
+    ...         return PredictionResult(
+    ...             value=predictions,
+    ...             horizon=horizon,
+    ...             confidence=None,
+    ...             metadata={"n_predictions": len(predictions), "horizon": horizon},
+    ...         )
+    ...
+    ... var = Variable("var", StatisticalDomain())
+    ... var.set(VariableRecord(value=12, confidence=0.98))
+    ... var.set(VariableRecord(value=13, confidence=0.94))
+    ... var.set(VariableRecord(value=11, confidence=0.90))
+    ... view = var.epistemic()
+    >>>
+    >>> predictor = HalfValuePredictor()
+    >>>
+    >>> result = predictor.predict(
+    >>>     view=view, horizon=3
+    >>> )
+    >>> print(result.value)
+    [5.5, 5.5, 5.5]
+    >>> print(result.horizon)
+    3
 
     Notes
     -----

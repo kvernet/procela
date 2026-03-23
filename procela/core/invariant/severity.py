@@ -1,6 +1,19 @@
 """
 Severity level of an invariant violation.
 
+Examples
+--------
+>>> from procela import InvariantSeverity
+>>>
+>>> print(InvariantSeverity.FATAL)
+InvariantSeverity.FATAL
+>>> for severity in InvariantSeverity:
+...     print(severity.name, severity.value)
+INFO 1
+WARNING 2
+CRITICAL 3
+FATAL 4
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/invariant/severity.html
@@ -16,7 +29,22 @@ from enum import Enum, auto
 
 
 class InvariantSeverity(Enum):
-    """Severity level of an invariant violation."""
+    """
+    Severity level of an invariant violation.
+
+    Examples
+    --------
+    >>> from procela import InvariantSeverity
+    >>>
+    >>> print(InvariantSeverity.FATAL)
+    InvariantSeverity.FATAL
+    >>> for severity in InvariantSeverity:
+    ...     print(severity.name, severity.value)
+    INFO 1
+    WARNING 2
+    CRITICAL 3
+    FATAL 4
+    """
 
     INFO = auto()
     """Violation is informative; no corrective action required."""

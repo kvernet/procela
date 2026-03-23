@@ -24,7 +24,6 @@ REQUIRED_SECTION: str = "semantics reference"
 
 FORBIDDEN_SECTIONS: set[str] = {
     "usage",
-    "examples",
     "how to use",
 }
 

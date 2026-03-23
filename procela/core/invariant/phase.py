@@ -4,6 +4,18 @@ Phase of execution at which an invariant is evaluated.
 Invariants may be checked at different moments of the system lifecycle
 to enforce different kinds of guarantees.
 
+Examples
+--------
+>>> from procela import InvariantPhase
+>>>
+>>> print(InvariantPhase.RUNTIME)
+InvariantPhase.RUNTIME
+>>> for phase in InvariantPhase:
+...     print(phase.name, phase.value)
+PRE 1
+RUNTIME 2
+POST 3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/invariant/phase.html
@@ -19,7 +31,21 @@ from enum import Enum, auto
 
 
 class InvariantPhase(Enum):
-    """Phase of execution at which an invariant is evaluated."""
+    """
+    Phase of execution at which an invariant is evaluated.
+
+    Examples
+    --------
+    >>> from procela import InvariantPhase
+    >>>
+    >>> print(InvariantPhase.RUNTIME)
+    InvariantPhase.RUNTIME
+    >>> for phase in InvariantPhase:
+    ...     print(phase.name, phase.value)
+    PRE 1
+    RUNTIME 2
+    POST 3
+    """
 
     PRE = auto()
     """

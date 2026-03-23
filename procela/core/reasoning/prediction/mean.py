@@ -5,6 +5,31 @@ This module implements a predictor that forecasts future values based on the
 historical arithmetic mean of the observed data. It is a simple baseline model
 that assumes the central tendency of past behavior will continue into the future.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     MeanPredictor
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> predictor = MeanPredictor()
+>>>
+>>> result = predictor.predict(
+...     view=view, horizon=3
+... )
+>>> print(result.value)
+12.0
+>>> print(result.horizon)
+3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/prediction/mean.html
@@ -39,6 +64,31 @@ class MeanPredictor(Predictor):
     ----------
     None
         This predictor does not have instance attributes.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     MeanPredictor
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> predictor = MeanPredictor()
+    >>>
+    >>> result = predictor.predict(
+    ...     view=view, horizon=3
+    ... )
+    >>> print(result.value)
+    12.0
+    >>> print(result.horizon)
+    3
     """
 
     def predict(
@@ -76,6 +126,31 @@ class MeanPredictor(Predictor):
         AttributeError
             If the `view` does not provide the required `stats.mean()`
             interface.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     MeanPredictor
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> predictor = MeanPredictor()
+        >>>
+        >>> result = predictor.predict(
+        ...     view=view, horizon=3
+        ... )
+        >>> print(result.value)
+        12.0
+        >>> print(result.horizon)
+        3
 
         Notes
         -----

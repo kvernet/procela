@@ -5,6 +5,31 @@ Proposes a weak, persistent correction of a variable toward a
 configurable baseline attractor when no acute destabilizing
 mechanisms are active.
 
+Examples
+--------
+>>> from procela import (
+...     HomeostasisMechanism,
+...     Variable,
+...     RangeDomain,
+...     VariableRecord
+... )
+>>>
+>>> X = Variable("X", RangeDomain(0., 50.))
+>>> Y = Variable("Y", RangeDomain(-50., 50.))
+>>>
+>>> mech = HomeostasisMechanism(reads=[X, Y], writes=[Y])
+>>>
+# Init variables
+>>> X.init(VariableRecord(6, confidence=1.0))
+>>> Y.init(VariableRecord(2.1, confidence=1.0))
+>>>
+>>> mech.transform()
+>>>
+>>> print(len(X.hypotheses))
+0
+>>> print(len(Y.hypotheses))
+1
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/mechanism/homeostasis.html
@@ -30,6 +55,31 @@ class HomeostasisMechanism(Mechanism):
     Proposes a weak, persistent correction of a variable toward a
     configurable baseline attractor when no acute destabilizing
     mechanisms are active.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     HomeostasisMechanism,
+    ...     Variable,
+    ...     RangeDomain,
+    ...     VariableRecord
+    ... )
+    >>>
+    >>> X = Variable("X", RangeDomain(0., 50.))
+    >>> Y = Variable("Y", RangeDomain(-50., 50.))
+    >>>
+    >>> mech = HomeostasisMechanism(reads=[X, Y], writes=[Y])
+    >>>
+    # Init variables
+    >>> X.init(VariableRecord(6, confidence=1.0))
+    >>> Y.init(VariableRecord(2.1, confidence=1.0))
+    >>>
+    >>> mech.transform()
+    >>>
+    >>> print(len(X.hypotheses))
+    0
+    >>> print(len(Y.hypotheses))
+    1
     """
 
     def __init__(
@@ -58,6 +108,31 @@ class HomeostasisMechanism(Mechanism):
             The alpha parameters. Default is 0.08.
         base_confidence : float
             The base confidence. Default if 0.5.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     HomeostasisMechanism,
+        ...     Variable,
+        ...     RangeDomain,
+        ...     VariableRecord
+        ... )
+        >>>
+        >>> X = Variable("X", RangeDomain(0., 50.))
+        >>> Y = Variable("Y", RangeDomain(-50., 50.))
+        >>>
+        >>> mech = HomeostasisMechanism(reads=[X, Y], writes=[Y])
+        >>>
+        # Init variables
+        >>> X.init(VariableRecord(6, confidence=1.0))
+        >>> Y.init(VariableRecord(2.1, confidence=1.0))
+        >>>
+        >>> mech.transform()
+        >>>
+        >>> print(len(X.hypotheses))
+        0
+        >>> print(len(Y.hypotheses))
+        1
         """
         super().__init__(reads=reads, writes=writes)
 

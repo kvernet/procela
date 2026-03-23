@@ -32,6 +32,50 @@ class AnomalyOperator(ABC):
     Subclasses implement a specific strategy for detecting anomalies given
     a set of memory statistics. This class defines the interface that all
     anomaly operators must follow.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     AnomalyOperator,
+    ...     get_detector
+    ... )
+    >>>
+    >>> class MyAnomalyOperator(AnomalyOperator):
+    ...     def __init__(self, name, **kwargs):
+    ...         super().__init__()
+    ...         self.detector = get_detector(name, **kwargs)
+    ...     def detect(self, stats):
+    ...         return self.detector.detect(stats)
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> operator = MyAnomalyOperator(name="ewma")
+    >>>
+    >>> result = operator.detect(stats=view.stats)
+    >>>
+    >>> print(result.is_anomaly)
+    False
+    >>> print(result.confidence())
+    None
+    >>> print(result.method)
+    EWMADetector
+    >>> print(result.score)
+    1.114517832966354
+    >>> print(result.threshold)
+    3.0
+    >>> for key, value in result.metadata.items():
+    ...    print(f"{key:10}: {value}")
+    value     : 11.0
+    ewma      : 11.91
+    std       : 0.8164965809277203
+    difference: -0.9100000000000001
     """
 
     @abstractmethod
@@ -64,6 +108,46 @@ class AnomalyOperatorThreshold(AnomalyOperator):
     This operator delegates detection to a named detector obtained from
     the anomaly detector registry. The detector is configured using the
     provided parameters.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     AnomalyOperatorThreshold
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> operator = AnomalyOperatorThreshold(name="z-score")
+    >>>
+    >>> result = operator.detect(stats=view.stats)
+    >>>
+    >>> print(result.is_anomaly)
+    False
+    >>> print(result.confidence())
+    None
+    >>> print(result.method)
+    ZScoreDetector
+    >>> print(result.score)
+    1.2247448713915976
+    >>> print(result.threshold)
+    3.0
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:10}: {value}")
+    mean      : 12.0
+    std       : 0.8164965809277203
+    value     : 11.0
+    count     : 3
+    z_score   : 1.2247448713915976
+    threshold : 3.0
+    deviation : -1.0
+    absolute_deviation: 1.0
     """
 
     def __init__(self, name: str, **kwargs: Any) -> None:
@@ -76,6 +160,46 @@ class AnomalyOperatorThreshold(AnomalyOperator):
             Identifier of the anomaly detector implementation to use.
         **kwargs
             Keyword arguments passed to the detector factory.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     AnomalyOperatorThreshold
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> operator = AnomalyOperatorThreshold(name="z-score")
+        >>>
+        >>> result = operator.detect(stats=view.stats)
+        >>>
+        >>> print(result.is_anomaly)
+        False
+        >>> print(result.confidence())
+        None
+        >>> print(result.method)
+        ZScoreDetector
+        >>> print(result.score)
+        1.2247448713915976
+        >>> print(result.threshold)
+        3.0
+        >>> for key, value in result.metadata.items():
+        ...     print(f"{key:10}: {value}")
+        mean      : 12.0
+        std       : 0.8164965809277203
+        value     : 11.0
+        count     : 3
+        z_score   : 1.2247448713915976
+        threshold : 3.0
+        deviation : -1.0
+        absolute_deviation: 1.0
 
         Notes
         -----

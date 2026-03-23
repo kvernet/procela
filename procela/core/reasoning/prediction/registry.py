@@ -7,6 +7,62 @@ and management of predictor implementations while maintaining type safety and
 proper error handling. The registry follows the factory pattern to decouple
 predictor creation from usage.
 
+Examples
+--------
+>>> from procela import Variable, StatisticalDomain, VariableRecord, get_predictor
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+# TrendPredictor
+>>> predictor = get_predictor(name="trend")
+>>> print(predictor.extrapolation_factor, predictor.use_confidence)
+1.0 True
+>>> result = predictor.predict(
+>>> ...     view=view, horizon=3
+>>> ... )
+>>> print(result.value)
+[11.0, 11.0, 11.0]
+>>> print(result.horizon)
+3
+>>>
+# MeanPredictor
+>>> predictor = get_predictor(name="mean")
+>>> result = predictor.predict(
+>>> ...     view=view, horizon=3
+>>> ... )
+>>> print(result.value)
+12.0
+>>> print(result.horizon)
+3
+>>>
+# LastPredictor
+>>> predictor = get_predictor(name="last")
+>>> print(predictor.allow_none)
+False
+>>> result = predictor.predict(
+>>> ...     view=view, horizon=3
+>>> ... )
+>>> print(result.value)
+[11.0, 11.0, 11.0]
+>>> print(result.horizon)
+3
+>>>
+# EWMAPredictor
+>>> predictor = get_predictor(name="ewma")
+>>> print(predictor.alpha)
+0.3
+>>> result = predictor.predict(
+>>> ...     view=view, horizon=3
+>>> ... )
+>>> print(result.value)
+[11.91, 11.91, 11.91]
+>>> print(result.horizon)
+3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/prediction/registry.html
@@ -56,6 +112,62 @@ def get_predictor(name: str, **kwargs: Any) -> Predictor:
         If the requested predictor name is not found in the registry.
     TypeError
         If the predictor instantiation fails due to invalid arguments.
+
+    Examples
+    --------
+    >>> from procela import Variable, StatisticalDomain, VariableRecord, get_predictor
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    # TrendPredictor
+    >>> predictor = get_predictor(name="trend")
+    >>> print(predictor.extrapolation_factor, predictor.use_confidence)
+    1.0 True
+    >>> result = predictor.predict(
+    >>> ...     view=view, horizon=3
+    >>> ... )
+    >>> print(result.value)
+    [11.0, 11.0, 11.0]
+    >>> print(result.horizon)
+    3
+    >>>
+    # MeanPredictor
+    >>> predictor = get_predictor(name="mean")
+    >>> result = predictor.predict(
+    >>> ...     view=view, horizon=3
+    >>> ... )
+    >>> print(result.value)
+    12.0
+    >>> print(result.horizon)
+    3
+    >>>
+    # LastPredictor
+    >>> predictor = get_predictor(name="last")
+    >>> print(predictor.allow_none)
+    False
+    >>> result = predictor.predict(
+    >>> ...     view=view, horizon=3
+    >>> ... )
+    >>> print(result.value)
+    [11.0, 11.0, 11.0]
+    >>> print(result.horizon)
+    3
+    >>>
+    # EWMAPredictor
+    >>> predictor = get_predictor(name="ewma")
+    >>> print(predictor.alpha)
+    0.3
+    >>> result = predictor.predict(
+    >>> ...     view=view, horizon=3
+    >>> ... )
+    >>> print(result.value)
+    [11.91, 11.91, 11.91]
+    >>> print(result.horizon)
+    3
     """
     if name not in _PREDICTOR_REGISTRY:
         available = ", ".join(sorted(_PREDICTOR_REGISTRY.keys()))
@@ -97,7 +209,7 @@ def register_predictor(name: str, predictor_class: Type[Predictor]) -> None:
     """
     if not isinstance(predictor_class, type):
         raise TypeError(
-            "predictor_class must be a class, " f"got {type(predictor_class).__name__}"
+            f"predictor_class must be a class, got {type(predictor_class).__name__}"
         )
 
     # Check if it's a proper Predictor subclass

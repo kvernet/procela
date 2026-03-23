@@ -3,6 +3,23 @@ Categorical value domains for Procela.
 
 This module provides domain classes for categorical values with finite sets.
 
+Examples
+--------
+>>> from procela import CategoricalDomain
+>>>
+>>> domain = CategoricalDomain(categories=[1, 2, 3, 4, 5, 6], name=None)
+>>>
+>>> print(domain.categories)
+{1, 2, 3, 4, 5, 6}
+>>> print(domain.validate(2))
+True
+>>> print(domain.explain(2))
+Value 2 is allowed in categories {1, 2, 3, 4, 5, 6}
+>>> print(domain.validate(4.2))
+False
+>>> print(domain.explain(4.2))
+Value 4.2 is not in allowed categories {1, 2, 3, 4, 5, 6}
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/categorical.html
@@ -36,6 +53,23 @@ class CategoricalDomain(ValueDomain):
     name : str
         Optional name for the domain, inherited from ValueDomain.
 
+    Examples
+    --------
+    >>> from procela import CategoricalDomain
+    >>>
+    >>> domain = CategoricalDomain(categories=[1, 2, 3, 4, 5, 6], name=None)
+    >>>
+    >>> print(domain.categories)
+    {1, 2, 3, 4, 5, 6}
+    >>> print(domain.validate(2))
+    True
+    >>> print(domain.explain(2))
+    Value 2 is allowed in categories {1, 2, 3, 4, 5, 6}
+    >>> print(domain.validate(4.2))
+    False
+    >>> print(domain.explain(4.2))
+    Value 4.2 is not in allowed categories {1, 2, 3, 4, 5, 6}
+
     Notes
     -----
     The categories are stored as a set, which means:
@@ -60,6 +94,23 @@ class CategoricalDomain(ValueDomain):
         ------
         TypeError
             If any value in categories is not hashable (e.g., list, dict).
+
+        Examples
+        --------
+        >>> from procela import CategoricalDomain
+        >>>
+        >>> domain = CategoricalDomain(categories=[1, 2, 3, 4, 5, 6], name=None)
+        >>>
+        >>> print(domain.categories)
+        {1, 2, 3, 4, 5, 6}
+        >>> print(domain.validate(2))
+        True
+        >>> print(domain.explain(2))
+        Value 2 is allowed in categories {1, 2, 3, 4, 5, 6}
+        >>> print(domain.validate(4.2))
+        False
+        >>> print(domain.explain(4.2))
+        Value 4.2 is not in allowed categories {1, 2, 3, 4, 5, 6}
         """
         super().__init__(name)
         self.categories = set(categories)
@@ -121,5 +172,5 @@ class CategoricalDomain(ValueDomain):
         Python versions and runs due to set's unordered nature.
         """
         if value in self.categories:
-            return f"Value {value} is allowed in categories {self.categories}."
-        return f"Value {value} is not in allowed categories {self.categories}."
+            return f"Value {value} is allowed in categories {self.categories}"
+        return f"Value {value} is not in allowed categories {self.categories}"

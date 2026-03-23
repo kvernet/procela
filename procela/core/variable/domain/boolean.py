@@ -3,6 +3,21 @@ Boolean value domains for Procela.
 
 This module provides a specialized domain for boolean (True/False) values.
 
+Examples
+--------
+>>> from procela import BooleanDomain
+>>>
+>>> domain = BooleanDomain()
+>>>
+>>> print(domain.categories)
+{False, True}
+>>>
+>>> print(domain.explain(value=False))
+Value False is allowed in categories {False, True}
+>>>
+>>> print(domain.explain(value=3.5))
+Value 3.5 is not in allowed categories {False, True}
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/boolean.html
@@ -32,6 +47,21 @@ class BooleanDomain(CategoricalDomain):
     name : str
         Optional name for the domain, inherited from ValueDomain.
 
+    Examples
+    --------
+    >>> from procela import BooleanDomain
+    >>>
+    >>> domain = BooleanDomain()
+    >>>
+    >>> print(domain.categories)
+    {False, True}
+    >>>
+    >>> print(domain.explain(value=False))
+    Value False is allowed in categories {False, True}
+    >>>
+    >>> print(domain.explain(value=3.5))
+    Value 3.5 is not in allowed categories {False, True}
+
     Notes
     -----
     - This is a convenience class for the common case of boolean variables
@@ -56,5 +86,20 @@ class BooleanDomain(CategoricalDomain):
         The initialization always calls the parent class constructor with
         the fixed list [True, False]. This ensures the categories set
         always contains exactly these two values.
+
+        Examples
+        --------
+        >>> from procela import BooleanDomain
+        >>>
+        >>> domain = BooleanDomain()
+        >>>
+        >>> print(domain.categories)
+        {False, True}
+        >>>
+        >>> print(domain.explain(value=False))
+        Value False is allowed in categories {False, True}
+        >>>
+        >>> print(domain.explain(value=3.5))
+        Value 3.5 is not in allowed categories {False, True}
         """
         super().__init__([True, False], name=name)

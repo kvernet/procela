@@ -72,7 +72,7 @@ class TestHighestConfidencePolicy:
         assert result.value == 100.0
         assert result.confidence == 0.8
         assert result.source == policy.key()
-        assert result.explanation == "Weighted confidence resolution"
+        assert result.explanation == "Highest confidence resolution"
 
     def test_resolve_selects_highest_confidence(self, mock_hypothesis_with_confidence):
         """Test policy selects hypothesis with highest confidence."""

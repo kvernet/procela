@@ -5,6 +5,29 @@ This module implements a trend-based predictor that forecasts future values
 using pre-computed trend statistics from the epistemic data layer. It uses
 the trend direction and magnitude to extrapolate future values.
 
+Examples
+--------
+>>> from procela import (
+...     TrendPredictor,
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> predictor = TrendPredictor()
+>>> print(predictor.extrapolation_factor, predictor.use_confidence)
+1.0 True
+>>> result = predictor.predict(view=view, horizon=3)
+>>> print(result.value)
+[11.0, 11.0, 11.0]
+>>> print(result.horizon)
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/prediction/trend.html
@@ -49,6 +72,30 @@ class TrendPredictor(Predictor):
     ------
     ValueError
         If extrapolation_factor <= 0.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     TrendPredictor,
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> predictor = TrendPredictor()
+    >>> print(predictor.extrapolation_factor, predictor.use_confidence)
+    1.0 True
+    >>> result = predictor.predict(view=view, horizon=3)
+    >>> print(result.value)
+    [11.0, 11.0, 11.0]
+    >>> print(result.horizon)
+    3
     """
 
     def __init__(
@@ -71,6 +118,30 @@ class TrendPredictor(Predictor):
         ------
         ValueError
             If extrapolation_factor <= 0.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     TrendPredictor,
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> predictor = TrendPredictor()
+        >>> print(predictor.extrapolation_factor, predictor.use_confidence)
+        1.0 True
+        >>> result = predictor.predict(view=view, horizon=3)
+        >>> print(result.value)
+        [11.0, 11.0, 11.0]
+        >>> print(result.horizon)
+        3
         """
         if extrapolation_factor <= 0:
             raise ValueError(

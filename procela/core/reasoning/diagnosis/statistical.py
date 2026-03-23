@@ -7,6 +7,34 @@ to identify potential root causes of system issues. It focuses on detecting
 issues through statistical pattern recognition rather than explicit anomaly
 flags.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     StatisticalDiagnoser
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> diagnoser = StatisticalDiagnoser()
+>>>
+>>> result = diagnoser.diagnose(view=view)
+>>>
+>>> print(result.causes)
+[]
+>>> print(result.confidence)
+0.0
+>>> print(result.metadata["causes_identified"])
+0
+>>> print(result.metadata["patterns_detected"])
+{'high_variability': False, 'significant_drift': False, ...}
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/diagnosis/statistical.html
@@ -71,6 +99,34 @@ class StatisticalDiagnoser(Diagnoser):
     skewness_threshold : float
         Threshold for skewness detection.
 
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     StatisticalDiagnoser
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> diagnoser = StatisticalDiagnoser()
+    >>>
+    >>> result = diagnoser.diagnose(view=view)
+    >>>
+    >>> print(result.causes)
+    []
+    >>> print(result.confidence)
+    0.0
+    >>> print(result.metadata["causes_identified"])
+    0
+    >>> print(result.metadata["patterns_detected"])
+    {'high_variability': False, 'significant_drift': False, ...}
+
     Notes
     -----
     This reasoner operates primarily on statistical properties rather than
@@ -113,6 +169,34 @@ class StatisticalDiagnoser(Diagnoser):
         ------
         ValueError
             If any threshold parameter is not positive.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     StatisticalDiagnoser
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> diagnoser = StatisticalDiagnoser()
+        >>>
+        >>> result = diagnoser.diagnose(view=view)
+        >>>
+        >>> print(result.causes)
+        []
+        >>> print(result.confidence)
+        0.0
+        >>> print(result.metadata["causes_identified"])
+        0
+        >>> print(result.metadata["patterns_detected"])
+        {'high_variability': False, 'significant_drift': False, ...}
         """
         if variability_threshold <= 0:
             raise ValueError(

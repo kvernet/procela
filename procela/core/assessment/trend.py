@@ -1,6 +1,17 @@
 """
 Defines the data structure for representing a quantified trend.
 
+Examples
+--------
+>>> from procela import TrendResult
+>>>
+>>> result = TrendResult(
+...     value=23.78, direction="stable", threshold=3.2,
+... )
+>>>
+>>> print(result.confidence(), result.zscore(std=3.0))
+0.0 7.926666666666667
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/assessment/trend.html
@@ -40,6 +51,17 @@ class TrendResult:
     ValueError
         If `direction` is not "up", "down", or "stable".
         If `threshold` is not positive.
+
+    Examples
+    --------
+    >>> from procela import TrendResult
+    >>>
+    >>> result = TrendResult(
+    ...     value=23.78, direction="stable", threshold=3.2,
+    ... )
+    >>>
+    >>> print(result.confidence(), result.zscore(std=3.0))
+    0.0 7.926666666666667
     """
 
     value: float

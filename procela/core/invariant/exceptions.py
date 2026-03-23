@@ -18,7 +18,31 @@ from .severity import InvariantSeverity
 
 
 class InvariantViolation(RuntimeError):
-    """Base class for all invariant violations."""
+    """
+    Base class for all invariant violations.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     InvariantViolation,
+    ...     InvariantCategory,
+    ...     InvariantSeverity,
+    ...     InvariantPhase,
+    ... )
+    >>> violation = InvariantViolation(
+    ...     name="",
+    ...     message="Invariant violation message",
+    ...     category=InvariantCategory.SAFETY,
+    ...     severity=InvariantSeverity.WARNING,
+    ...     phase=InvariantPhase.PRE
+    ... )
+    >>>
+    >>> try:
+    ...     raise(violation)
+    ... except InvariantViolation as err:
+    ...     print(err)
+    Invariant violation message
+    """
 
     def __init__(
         self,
@@ -44,6 +68,30 @@ class InvariantViolation(RuntimeError):
             The severity of invariant violation.
         phase : InvariantPhase
             The phase where the invariant violation occurs.
+
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     InvariantViolation,
+        ...     InvariantCategory,
+        ...     InvariantSeverity,
+        ...     InvariantPhase,
+        ... )
+
+        >>> violation = InvariantViolation(
+        ...     name="",
+        ...     message="Invariant violation message",
+        ...     category=InvariantCategory.SAFETY,
+        ...     severity=InvariantSeverity.WARNING,
+        ...     phase=InvariantPhase.PRE
+        ... )
+        >>>
+        >>> try:
+        ...     raise(violation)
+        ... except InvariantViolation as err:
+        ...     print(err)
+        Invariant violation message
         """
         super().__init__(message)
         self.name = name
@@ -53,7 +101,34 @@ class InvariantViolation(RuntimeError):
 
 
 class InvariantViolationInfo(InvariantViolation):
-    """Informational invariant violation."""
+    """
+    Informational invariant violation.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     InvariantViolation,
+    ...     InvariantViolationInfo,
+    ...     InvariantCategory,
+    ...     InvariantSeverity,
+    ...     InvariantPhase,
+    ... )
+    >>>
+    >>> violation = InvariantViolationInfo(
+    ...     name="",
+    ...     message="Invariant violation message",
+    ...     category=InvariantCategory.SAFETY,
+    ...     phase=InvariantPhase.PRE,
+    ... )
+    >>>
+    >>> assert violation.severity == InvariantSeverity.INFO
+    >>>
+    >>> try:
+    ...     raise(violation)
+    ... except InvariantViolation as err:
+    ...     print(err)
+    Invariant violation message
+    """
 
     def __init__(
         self,
@@ -76,6 +151,31 @@ class InvariantViolationInfo(InvariantViolation):
             The category of the invariant violation.
         phase : InvariantPhase
             The phase where the invariant violation occurs.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     InvariantViolation,
+        ...     InvariantViolationInfo,
+        ...     InvariantCategory,
+        ...     InvariantSeverity,
+        ...     InvariantPhase,
+        ... )
+        >>>
+        >>> violation = InvariantViolationInfo(
+        ...     name="",
+        ...     message="Invariant violation message",
+        ...     category=InvariantCategory.SAFETY,
+        ...     phase=InvariantPhase.PRE,
+        ... )
+        >>>
+        >>> assert violation.severity == InvariantSeverity.INFO
+        >>>
+        >>> try:
+        ...     raise(violation)
+        ... except InvariantViolation as err:
+        ...     print(err)
+        Invariant violation message
         """
         super().__init__(
             name=name,
@@ -87,7 +187,34 @@ class InvariantViolationInfo(InvariantViolation):
 
 
 class InvariantViolationWarning(InvariantViolation):
-    """Non-fatal invariant violation indicating degradation."""
+    """
+    Non-fatal invariant violation indicating degradation.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     InvariantViolation,
+    ...     InvariantViolationWarning,
+    ...     InvariantCategory,
+    ...     InvariantSeverity,
+    ...     InvariantPhase,
+    ... )
+    >>>
+    >>> violation = InvariantViolationWarning(
+    ...     name="",
+    ...     message="Invariant violation message",
+    ...     category=InvariantCategory.SAFETY,
+    ...     phase=InvariantPhase.PRE,
+    ... )
+    >>>
+    >>> assert violation.severity == InvariantSeverity.WARNING
+    >>>
+    >>> try:
+    ...     raise(violation)
+    ... except InvariantViolation as err:
+    ...     print(err)
+    Invariant violation message
+    """
 
     def __init__(
         self,
@@ -110,6 +237,31 @@ class InvariantViolationWarning(InvariantViolation):
             The category of the invariant violation.
         phase : InvariantPhase
             The phase where the invariant violation occurs.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     InvariantViolation,
+        ...     InvariantViolationWarning,
+        ...     InvariantCategory,
+        ...     InvariantSeverity,
+        ...     InvariantPhase,
+        ... )
+        >>>
+        >>> violation = InvariantViolationWarning(
+        ...     name="",
+        ...     message="Invariant violation message",
+        ...     category=InvariantCategory.SAFETY,
+        ...     phase=InvariantPhase.PRE,
+        ... )
+        >>>
+        >>> assert violation.severity == InvariantSeverity.WARNING
+        >>>
+        >>> try:
+        ...     raise(violation)
+        ... except InvariantViolation as err:
+        ...     print(err)
+        Invariant violation message
         """
         super().__init__(
             name=name,
@@ -121,7 +273,34 @@ class InvariantViolationWarning(InvariantViolation):
 
 
 class InvariantViolationCritical(InvariantViolation):
-    """Critical invariant violation requiring interruption."""
+    """
+    Critical invariant violation requiring interruption.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     InvariantViolation,
+    ...     InvariantViolationCritical,
+    ...     InvariantCategory,
+    ...     InvariantSeverity,
+    ...     InvariantPhase,
+    ... )
+    >>>
+    >>> violation = InvariantViolationCritical(
+    ...     name="",
+    ...     message="Invariant violation message",
+    ...     category=InvariantCategory.SAFETY,
+    ...     phase=InvariantPhase.PRE,
+    ... )
+    >>>
+    >>> assert violation.severity == InvariantSeverity.CRITICAL
+    >>>
+    >>> try:
+    ...     raise(violation)
+    ... except InvariantViolation as err:
+    ...     print(err)
+    Invariant violation message
+    """
 
     def __init__(
         self,
@@ -144,6 +323,31 @@ class InvariantViolationCritical(InvariantViolation):
             The category of the invariant violation.
         phase : InvariantPhase
             The phase where the invariant violation occurs.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     InvariantViolation,
+        ...     InvariantViolationCritical,
+        ...     InvariantCategory,
+        ...     InvariantSeverity,
+        ...     InvariantPhase,
+        ... )
+        >>>
+        >>> violation = InvariantViolationCritical(
+        ...     name="",
+        ...     message="Invariant violation message",
+        ...     category=InvariantCategory.SAFETY,
+        ...     phase=InvariantPhase.PRE,
+        ... )
+        >>>
+        >>> assert violation.severity == InvariantSeverity.CRITICAL
+        >>>
+        >>> try:
+        ...     raise(violation)
+        ... except InvariantViolation as err:
+        ...     print(err)
+        Invariant violation message
         """
         super().__init__(
             name=name,
@@ -155,7 +359,34 @@ class InvariantViolationCritical(InvariantViolation):
 
 
 class InvariantViolationFatal(InvariantViolation):
-    """Fatal invariant violation invalidating the system."""
+    """
+    Fatal invariant violation invalidating the system.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     InvariantViolation,
+    ...     InvariantViolationFatal,
+    ...     InvariantCategory,
+    ...     InvariantSeverity,
+    ...     InvariantPhase,
+    ... )
+    >>>
+    >>> violation = InvariantViolationFatal(
+    ...     name="",
+    ...     message="Invariant violation message",
+    ...     category=InvariantCategory.SAFETY,
+    ...     phase=InvariantPhase.PRE,
+    ... )
+    >>>
+    >>> assert violation.severity == InvariantSeverity.FATAL
+    >>>
+    >>> try:
+    ...     raise(violation)
+    ... except InvariantViolation as err:
+    ...     print(err)
+    Invariant violation message
+    """
 
     def __init__(
         self,
@@ -178,6 +409,31 @@ class InvariantViolationFatal(InvariantViolation):
             The category of the invariant violation.
         phase : InvariantPhase
             The phase where the invariant violation occurs.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     InvariantViolation,
+        ...     InvariantViolationFatal,
+        ...     InvariantCategory,
+        ...     InvariantSeverity,
+        ...     InvariantPhase,
+        ... )
+        >>>
+        >>> violation = InvariantViolationFatal(
+        ...     name="",
+        ...     message="Invariant violation message",
+        ...     category=InvariantCategory.SAFETY,
+        ...     phase=InvariantPhase.PRE,
+        ... )
+        >>>
+        >>> assert violation.severity == InvariantSeverity.FATAL
+        >>>
+        >>> try:
+        ...     raise(violation)
+        ... except InvariantViolation as err:
+        ...     print(err)
+        Invariant violation message
         """
         super().__init__(
             name=name,

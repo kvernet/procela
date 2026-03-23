@@ -5,6 +5,31 @@ This module implements a simple predictor that forecasts future values based
 on the last observed value from epistemic statistics. It's a persistence
 model that assumes the most recent observation will continue into the future.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     LastPredictor
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> predictor = LastPredictor()
+>>>
+>>> result = predictor.predict(
+...     view=view, horizon=3
+... )
+>>> print(result.value)
+[11.0, 11.0, 11.0]
+>>> print(result.horizon)
+3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/prediction/last.html
@@ -45,6 +70,31 @@ class LastPredictor(Predictor):
     ----------
     allow_none : bool
         Flag indicating whether to allow None last_value.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     LastPredictor
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> predictor = LastPredictor()
+    >>>
+    >>> result = predictor.predict(
+    ...     view=view, horizon=3
+    ... )
+    >>> print(result.value)
+    [11.0, 11.0, 11.0]
+    >>> print(result.horizon)
+    3
     """
 
     def __init__(self, allow_none: bool = False) -> None:
@@ -56,6 +106,31 @@ class LastPredictor(Predictor):
         allow_none : bool, optional
             Whether to allow prediction when last_value is None.
             Default is False.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     LastPredictor
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> predictor = LastPredictor()
+        >>>
+        >>> result = predictor.predict(
+        ...     view=view, horizon=3
+        ... )
+        >>> print(result.value)
+        [11.0, 11.0, 11.0]
+        >>> print(result.horizon)
+        3
         """
         self.allow_none = allow_none
 

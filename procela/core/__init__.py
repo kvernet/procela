@@ -48,6 +48,11 @@ from .invariant import (
     VariableSnapshot,
 )
 from .key_authority import KeyAuthority
+from .logger import (
+    JsonFormatter,
+    TextFormatter,
+    setup_logging,
+)
 from .mechanism import (
     HomeostasisMechanism,
     Mechanism,
@@ -164,6 +169,10 @@ __all__ = [
     "SystemInvariant",
     # Key authority
     "KeyAuthority",
+    # Logger
+    "JsonFormatter",
+    "TextFormatter",
+    "setup_logging",
     # Mechanism
     "Mechanism",
     "HomeostasisMechanism",

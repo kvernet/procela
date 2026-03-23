@@ -5,6 +5,82 @@ This module defines the Process class, which groups mechanisms into
 coherent execution units. A process represents a logical subsystem
 of a real-world model and defines execution scope without owning state.
 
+Examples
+--------
+>>> import random
+>>>
+>>> from procela import (
+...     Variable,
+...     RangeDomain,
+...     VariableRecord,
+...     Mechanism,
+...     Process
+... )
+>>>
+>>> random.seed(42)
+>>>
+>>> X = Variable("X", RangeDomain(0., 100))
+>>> Y = Variable("Y", RangeDomain(0., 100))
+>>>
+>>> class XplusYMechanism(Mechanism):
+...     def transform(self):
+...         x_val, y_val = [var.value for var in self.reads()]
+...         X.add_hypothesis(VariableRecord(
+...             x_val + y_val,
+...             confidence=random.uniform(0., 1.),
+...             source=self.key()
+...         ))
+...         Y.add_hypothesis(VariableRecord(
+...             x_val + y_val,
+...             confidence=random.uniform(0., 1.),
+...             source=self.key()
+...         ))
+>>>
+>>> class DoubleYMechanism(Mechanism):
+...     def transform(self):
+...         for var in self.writes():
+...             var.add_hypothesis(VariableRecord(
+...                 2*var.value,
+...                 confidence=random.uniform(0., 1.),
+...                 source=self.key()
+...             ))
+>>>
+# Create process
+>>> process = Process([
+...     XplusYMechanism([X, Y], [X, Y]),
+...     DoubleYMechanism([X, Y], [X, Y])
+... ])
+>>>
+>>> print(process.key())
+<Key>
+>>> mechanisms = process.mechanisms()
+>>> print(f"Process has {len(mechanisms)} mechanisms")
+Process has 2 mechanisms
+# Init variables
+>>> X.set(VariableRecord(value=0.25, confidence=0.99))
+>>> Y.set(VariableRecord(value=0.72, confidence=0.99))
+>>>
+>>>> for var in process.variables():
+...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+X 0.25 0.99 0
+Y 0.72 0.99 0
+# Execute a step
+>>> process.step()
+>>>
+>>> for var in process.variables():
+...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+X 0.25 0.99 2
+Y 0.72 0.99 2
+>>> mechanisms[0].disable()
+>>>
+# Execute a step
+>>> process.step()
+>>>
+>>> for var in process.variables():
+...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+X 0.25 0.99 3
+Y 0.72 0.99 3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/process/base.html
@@ -30,6 +106,82 @@ class Process:
 
     A process groups mechanisms that participate in a common execution
     context. Processes do not store variables, resolve conflicts.
+
+    Examples
+    --------
+    >>> import random
+    >>>
+    >>> from procela import (
+    ...     Variable,
+    ...     RangeDomain,
+    ...     VariableRecord,
+    ...     Mechanism,
+    ...     Process
+    ... )
+    >>>
+    >>> random.seed(42)
+    >>>
+    >>> X = Variable("X", RangeDomain(0., 100))
+    >>> Y = Variable("Y", RangeDomain(0., 100))
+    >>>
+    >>> class XplusYMechanism(Mechanism):
+    ...     def transform(self):
+    ...         x_val, y_val = [var.value for var in self.reads()]
+    ...         X.add_hypothesis(VariableRecord(
+    ...             x_val + y_val,
+    ...             confidence=random.uniform(0., 1.),
+    ...             source=self.key()
+    ...         ))
+    ...         Y.add_hypothesis(VariableRecord(
+    ...             x_val + y_val,
+    ...             confidence=random.uniform(0., 1.),
+    ...             source=self.key()
+    ...         ))
+    >>>
+    >>> class DoubleYMechanism(Mechanism):
+    ...     def transform(self):
+    ...         for var in self.writes():
+    ...             var.add_hypothesis(VariableRecord(
+    ...                 2*var.value,
+    ...                 confidence=random.uniform(0., 1.),
+    ...                 source=self.key()
+    ...             ))
+    >>>
+    # Create process
+    >>> process = Process([
+    ...     XplusYMechanism([X, Y], [X, Y]),
+    ...     DoubleYMechanism([X, Y], [X, Y])
+    ... ])
+    >>>
+    >>> print(process.key())
+    <Key>
+    >>> mechanisms = process.mechanisms()
+    >>> print(f"Process has {len(mechanisms)} mechanisms")
+    Process has 2 mechanisms
+    # Init variables
+    >>> X.set(VariableRecord(value=0.25, confidence=0.99))
+    >>> Y.set(VariableRecord(value=0.72, confidence=0.99))
+    >>>
+    >>>> for var in process.variables():
+    ...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+    X 0.25 0.99 0
+    Y 0.72 0.99 0
+    # Execute a step
+    >>> process.step()
+    >>>
+    >>> for var in process.variables():
+    ...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+    X 0.25 0.99 2
+    Y 0.72 0.99 2
+    >>> mechanisms[0].disable()
+    >>>
+    # Execute a step
+    >>> process.step()
+    >>>
+    >>> for var in process.variables():
+    ...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+    X 0.25 0.99 3
+    Y 0.72 0.99 3
     """
 
     def __init__(self, mechanisms: Sequence[Mechanism]) -> None:
@@ -40,6 +192,82 @@ class Process:
         ----------
         mechanisms : Sequence[Mechanism]
             Mechanisms composing the process.
+
+        Examples
+        --------
+        >>> import random
+        >>>
+        >>> from procela import (
+        ...     Variable,
+        ...     RangeDomain,
+        ...     VariableRecord,
+        ...     Mechanism,
+        ...     Process
+        ... )
+        >>>
+        >>> random.seed(42)
+        >>>
+        >>> X = Variable("X", RangeDomain(0., 100))
+        >>> Y = Variable("Y", RangeDomain(0., 100))
+        >>>
+        >>> class XplusYMechanism(Mechanism):
+        ...     def transform(self):
+        ...         x_val, y_val = [var.value for var in self.reads()]
+        ...         X.add_hypothesis(VariableRecord(
+        ...             x_val + y_val,
+        ...             confidence=random.uniform(0., 1.),
+        ...             source=self.key()
+        ...         ))
+        ...         Y.add_hypothesis(VariableRecord(
+        ...             x_val + y_val,
+        ...             confidence=random.uniform(0., 1.),
+        ...             source=self.key()
+        ...         ))
+        >>>
+        >>> class DoubleYMechanism(Mechanism):
+        ...     def transform(self):
+        ...         for var in self.writes():
+        ...             var.add_hypothesis(VariableRecord(
+        ...                 2*var.value,
+        ...                 confidence=random.uniform(0., 1.),
+        ...                 source=self.key()
+        ...             ))
+        >>>
+        # Create process
+        >>> process = Process([
+        ...     XplusYMechanism([X, Y], [X, Y]),
+        ...     DoubleYMechanism([X, Y], [X, Y])
+        ... ])
+        >>>
+        >>> print(process.key())
+        <Key>
+        >>> mechanisms = process.mechanisms()
+        >>> print(f"Process has {len(mechanisms)} mechanisms")
+        Process has 2 mechanisms
+        # Init variables
+        >>> X.set(VariableRecord(value=0.25, confidence=0.99))
+        >>> Y.set(VariableRecord(value=0.72, confidence=0.99))
+        >>>
+        >>>> for var in process.variables():
+        ...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+        X 0.25 0.99 0
+        Y 0.72 0.99 0
+        # Execute a step
+        >>> process.step()
+        >>>
+        >>> for var in process.variables():
+        ...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+        X 0.25 0.99 2
+        Y 0.72 0.99 2
+        >>> mechanisms[0].disable()
+        >>>
+        # Execute a step
+        >>> process.step()
+        >>>
+        >>> for var in process.variables():
+        ...     print(var.name, var.value, var.confidence, len(var.hypotheses))
+        X 0.25 0.99 3
+        Y 0.72 0.99 3
 
         Notes
         -----

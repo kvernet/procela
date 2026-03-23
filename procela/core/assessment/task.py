@@ -5,6 +5,27 @@ Defines the canonical reasoning tasks used by Procela's assessment
 framework, including monitoring, analytical, predictive, diagnostic,
 and decision/action tasks.
 
+Examples
+--------
+>>> from procela import ReasoningTask
+>>>
+>>> print(ReasoningTask.ANOMALY_DETECTION)
+Anomaly Detection
+>>> for task in ReasoningTask:
+...     print(task.name, task.value)
+NONE 1
+ANOMALY_DETECTION 2
+CONSTRAINT_CHECKING 3
+TREND_ANALYSIS 4
+PATTERN_RECOGNITION 5
+SENSITIVITY_ANALYSIS 6
+VALUE_PREDICTION 7
+UNCERTAINTY_QUANTIFICATION 8
+ACTION_PROPOSAL 9
+CONFLICT_RESOLUTION 10
+INTERVENTION_PLANNING 11
+CAUSAL_DIAGNOSIS 12
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/assessment/task.html
@@ -26,6 +47,27 @@ class ReasoningTask(Enum):
     Each enum member represents a discrete type of reasoning task,
     grouped by category (monitoring, analytical, predictive, decision/action,
     diagnostic).
+
+    Examples
+    --------
+    >>> from procela import ReasoningTask
+    >>>
+    >>> print(ReasoningTask.ANOMALY_DETECTION)
+    Anomaly Detection
+    >>> for task in ReasoningTask:
+    ...     print(task.name, task.value)
+    NONE 1
+    ANOMALY_DETECTION 2
+    CONSTRAINT_CHECKING 3
+    TREND_ANALYSIS 4
+    PATTERN_RECOGNITION 5
+    SENSITIVITY_ANALYSIS 6
+    VALUE_PREDICTION 7
+    UNCERTAINTY_QUANTIFICATION 8
+    ACTION_PROPOSAL 9
+    CONFLICT_RESOLUTION 10
+    INTERVENTION_PLANNING 11
+    CAUSAL_DIAGNOSIS 12
     """
 
     # No reasoning. Useful in resetting memory.

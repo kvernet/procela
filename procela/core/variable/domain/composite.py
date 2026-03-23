@@ -4,6 +4,28 @@ Composite value domains for Procela.
 This module provides domain classes that combine multiple domains using logical
 operations (AND composition).
 
+Examples
+--------
+>>> from procela import CompositeDomain, RangeDomain, CategoricalDomain
+>>>
+>>> domain = CompositeDomain(
+...     subdomains=[
+...         RangeDomain(0., 100.),
+...         CategoricalDomain(range(101))
+...     ],
+...     name="Integers in [0, 100]"
+... )
+>>>
+>>> print(domain.validate(20))
+True
+>>> print(domain.explain(20))
+Value 20 is valid in RangeDomain. | Value 20 is allowed in categories {0, ...
+>>>
+>>> print(domain.validate(20.5))
+False
+>>> print(domain.explain(20.5))
+Value 20.5 is valid in RangeDomain. | Value 20.5 is not in allowed cat...
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/composite.html
@@ -38,6 +60,28 @@ class CompositeDomain(ValueDomain):
     name : str
         Optional name for the domain, inherited from ValueDomain.
 
+    Examples
+    --------
+    >>> from procela import CompositeDomain, RangeDomain, CategoricalDomain
+    >>>
+    >>> domain = CompositeDomain(
+    ...     subdomains=[
+    ...         RangeDomain(0., 100.),
+    ...         CategoricalDomain(range(101))
+    ...     ],
+    ...     name="Integers in [0, 100]"
+    ... )
+    >>>
+    >>> print(domain.validate(20))
+    True
+    >>> print(domain.explain(20))
+    Value 20 is valid in RangeDomain. | Value 20 is allowed in categories {0, ...
+    >>>
+    >>> print(domain.validate(20.5))
+    False
+    >>> print(domain.explain(20.5))
+    Value 20.5 is valid in RangeDomain. | Value 20.5 is not in allowed cat...
+
     Notes
     -----
     - Validation uses short-circuit evaluation: stops at first failing domain
@@ -57,6 +101,28 @@ class CompositeDomain(ValueDomain):
             Can be empty, in which case the composite accepts all values.
         name : str, optional
             Name for the domain. Default is empty string.
+
+        Examples
+        --------
+        >>> from procela import CompositeDomain, RangeDomain, CategoricalDomain
+        >>>
+        >>> domain = CompositeDomain(
+        ...     subdomains=[
+        ...         RangeDomain(0., 100.),
+        ...         CategoricalDomain(range(101))
+        ...     ],
+        ...     name="Integers in [0, 100]"
+        ... )
+        >>>
+        >>> print(domain.validate(20))
+        True
+        >>> print(domain.explain(20))
+        Value 20 is valid in RangeDomain. | Value 20 is allowed in categories {0, ...
+        >>>
+        >>> print(domain.validate(20.5))
+        False
+        >>> print(domain.explain(20.5))
+        Value 20.5 is valid in RangeDomain. | Value 20.5 is not in allowed cat...
 
         Notes
         -----

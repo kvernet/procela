@@ -124,7 +124,7 @@ class TestCategoricalDomain:
         """Test explanation with empty categories."""
         domain = CategoricalDomain([])
         explanation = domain.explain("test")
-        assert explanation == "Value test is not in allowed categories set()."
+        assert explanation == "Value test is not in allowed categories set()"
 
     def test_explain_with_numeric_categories(self):
         """Test explanation with numeric categories."""

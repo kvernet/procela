@@ -1,6 +1,41 @@
 """
 Resolver policy in Procela.
 
+Examples
+--------
+>>> import random
+>>>
+>>> from procela import (
+...     HypothesisRecord,
+...     VariableRecord,
+...     HighestConfidencePolicy,
+...     ResolverPolicy
+... )
+>>>
+>>> random.seed(42)
+>>>
+>>> policy=HighestConfidencePolicy()
+>>>
+>>> hypotheses = [
+...     HypothesisRecord(
+...         VariableRecord(
+...             value=random.gauss(1.3, 0.2),
+...             confidence=random.uniform(0, 1)
+...         ),
+...     ) for _ in range(15)
+... ]
+>>> resolved, reasoning = ResolverPolicy().resolve(
+...     hypotheses=hypotheses,
+...     policy=policy,
+... )
+>>>
+>>> print(resolved.value)
+1.2744823432434227
+>>> print(resolved.confidence)
+0.8921795677048454
+>>> print(resolved.explanation)
+Highest confidence resolution
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/policy/resolution/resolver.html
@@ -28,12 +63,47 @@ class ResolverPolicy:
     This class applies resolution policies and optional validators to
     determine a single authoritative VariableRecord from multiple
     hypotheses.
+
+    Examples
+    --------
+    >>> import random
+    >>>
+    >>> from procela import (
+    ...     HypothesisRecord,
+    ...     VariableRecord,
+    ...     HighestConfidencePolicy,
+    ...     ResolverPolicy
+    ... )
+    >>>
+    >>> random.seed(42)
+    >>>
+    >>> policy=HighestConfidencePolicy()
+    >>>
+    >>> hypotheses = [
+    ...     HypothesisRecord(
+    ...         VariableRecord(
+    ...             value=random.gauss(1.3, 0.2),
+    ...             confidence=random.uniform(0, 1)
+    ...         ),
+    ...     ) for _ in range(15)
+    ... ]
+    >>> resolved, reasoning = ResolverPolicy().resolve(
+    ...     hypotheses=hypotheses,
+    ...     policy=policy,
+    ... )
+    >>>
+    >>> print(resolved.value)
+    1.2744823432434227
+    >>> print(resolved.confidence)
+    0.8921795677048454
+    >>> print(resolved.explanation)
+    Highest confidence resolution
     """
 
     def resolve(
         self,
         hypotheses: Iterable[HypothesisRecord],
-        policy: ResolutionPolicy,
+        policy: ResolutionPolicy | None,
         validators: Iterable[Callable[[HypothesisRecord], bool]] | None = None,
     ) -> tuple[VariableRecord | None, ReasoningResult]:
         """
@@ -43,7 +113,7 @@ class ResolverPolicy:
         ----------
         hypotheses : Iterable[HypothesisRecord]
             The iterable hypotheses to resolve conflicts from.
-        policy : ResolutionPolicy
+        policy : ResolutionPolicy | None
             The resolution policy to use.
         validators : Iterable[Callable[[HypothesisRecord], bool]] | None
             The optional iterable validators to filter hypotheses before

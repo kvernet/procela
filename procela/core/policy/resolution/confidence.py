@@ -33,6 +33,39 @@ class HighestConfidencePolicy(ResolutionPolicy):
     - Systems where prediction confidence strongly correlates with outcome quality
     - Rapid prototyping and initial system deployment
 
+    Examples
+    --------
+    >>> import random
+    >>>
+    >>> from procela import (
+    ...     HypothesisRecord,
+    ...     VariableRecord,
+    ...     HighestConfidencePolicy
+    ... )
+    >>>
+    >>> random.seed(42)
+    >>>
+    >>> policy=HighestConfidencePolicy()
+    >>>
+    >>> hypotheses = [
+    ...     HypothesisRecord(
+    ...         VariableRecord(
+    ...             value=random.gauss(1.3, 0.2),
+    ...             confidence=random.uniform(0, 1)
+    ...         ),
+    ...     ) for _ in range(15)
+    ... ]
+    >>> resolved = policy.resolve(
+    ...     hypotheses=hypotheses
+    ... )
+    >>>
+    >>> print(resolved.value)
+    1.2744823432434227
+    >>> print(resolved.confidence)
+    0.8921795677048454
+    >>> print(resolved.explanation)
+    Highest confidence resolution
+
     Warnings
     --------
     Using confidence alone ignores other crucial factors. It should be
@@ -91,8 +124,8 @@ class HighestConfidencePolicy(ResolutionPolicy):
                 value=record.value if record is not None else None,
                 confidence=record.confidence if record is not None else None,
                 source=self.key(),
-                explanation="Weighted confidence resolution",
-                metadata={"weighted_resolution": True},
+                explanation="Highest confidence resolution",
+                metadata={"weighted_resolution": False},
             )
         except (TypeError, AttributeError) as e:
             # Convert to ValueError for consistent error handling
@@ -102,7 +135,42 @@ class HighestConfidencePolicy(ResolutionPolicy):
 
 
 class WeightedConfidencePolicy(ResolutionPolicy):
-    """Policy that resolves competing hypotheses with weighted confidence."""
+    """
+    Policy that resolves competing hypotheses with weighted confidence.
+
+    Examples
+    --------
+    >>> import random
+    >>>
+    >>> from procela import (
+    ...     HypothesisRecord,
+    ...     VariableRecord,
+    ...     WeightedConfidencePolicy
+    ... )
+    >>>
+    >>> random.seed(42)
+    >>>
+    >>> policy=WeightedConfidencePolicy()
+    >>>
+    >>> hypotheses = [
+    ...     HypothesisRecord(
+    ...         VariableRecord(
+    ...             value=random.gauss(1.3, 0.2),
+    ...             confidence=random.uniform(0, 1)
+    ...         ),
+    ...     ) for _ in range(15)
+    ... ]
+    >>> resolved = policy.resolve(
+    ...     hypotheses=hypotheses
+    ... )
+    >>>
+    >>> print(resolved.value)
+    1.3103318616666704
+    >>> print(resolved.confidence)
+    0.38029515762103755
+    >>> print(resolved.explanation)
+    Weighted confidence resolution
+    """
 
     def resolve(self, hypotheses: Iterable[HypothesisRecord]) -> VariableRecord | None:
         """

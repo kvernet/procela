@@ -1,9 +1,40 @@
 """
-TimePoint: Pure temporal identity token for Procela.
+TimePoint: Pure temporal identity token in Procela.
 
 TimePoint is an immutable identity-based temporal token representing
 a declared position in the system's temporal space. All precedence
 relationships are managed externally.
+
+Examples
+--------
+>>> from procela import TimePoint
+>>>
+Create new temporal identities
+>>> t0 = TimePoint()
+>>> t1 = TimePoint()
+Identity equality
+>>> assert t0 != t1
+>>> t0
+TimePoint(<Key>)
+>>>
+Invalid operations (semantic violations)
+>>> t0 < t1
+Traceback (most recent call last):
+...
+procela.core.exceptions.SemanticViolation: TimePoint cannot be ordered with <
+>>> t0 + t1
+Traceback (most recent call last):
+...
+procela.core.exceptions.SemanticViolation: TimePoint cannot be added or concatenated
+>>>
+>>>
+>>> from procela import create_timepoint
+>>>
+>>> t2 = create_timepoint()
+>>> t1 | t2
+Traceback (most recent call last):
+...
+procela.core.exceptions.SemanticViolation: TimePoint cannot be unioned
 
 Semantics Reference
 -------------------
@@ -31,6 +62,28 @@ class TimePoint:
     A TimePoint is a pure wrapper around a Key that represents a
     temporal position. All precedence relationships are managed
     externally.
+
+    Examples
+    --------
+    >>> from procela import TimePoint
+    >>>
+    Create new temporal identities
+    >>> t0 = TimePoint()
+    >>> t1 = TimePoint()
+    Identity equality
+    >>> assert t0 != t1
+    >>> t0
+    TimePoint(<Key>)
+    >>>
+    Invalid operations (semantic violations)
+    >>> t0 < t1
+    Traceback (most recent call last):
+    ...
+    procela.core.exceptions.SemanticViolation: TimePoint cannot be ordered with <
+    >>> t0 + t1
+    Traceback (most recent call last):
+    ...
+    procela.core.exceptions.SemanticViolation: TimePoint cannot be added or concatenated
     """
 
     _key: Key = field(
@@ -293,5 +346,16 @@ def create_timepoint() -> TimePoint:
     -------
     TimePoint
         New temporal identity token.
+
+    Examples
+    --------
+    >>> from procela import TimePoint, create_timepoint
+    >>>
+    >>> t0 = TimePoint()
+    >>> t1 = create_timepoint()
+    >>> t0 < t1
+    Traceback (most recent call last):
+    ...
+    procela.core.exceptions.SemanticViolation: TimePoint cannot be ordered with <
     """
     return TimePoint()

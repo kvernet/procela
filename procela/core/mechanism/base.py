@@ -9,6 +9,50 @@ are coordinated by the executive.
 Mechanisms do not resolve conflicts and do not own variables. They
 produce candidate values that variables later arbitrate.
 
+Examples
+--------
+>>> from procela import (
+...     Mechanism,
+...     Variable,
+...     RangeDomain,
+...     VariableRecord
+... )
+>>>
+>>> X = Variable("X", RangeDomain(0., 50.))
+>>> Y = Variable("Y", RangeDomain(-50., 50.))
+>>>
+>>> class DoubleValueMechanism(Mechanism):
+...     def __init__(self):
+...         super().__init__(reads=[X, Y], writes=[X, Y])
+...
+...     def transform(self):
+...         for var in self.writes():
+...             var.add_hypothesis(VariableRecord(
+...                 var.value * 2, confidence=0.67
+...             ))
+>>>
+>>> mech = DoubleValueMechanism()
+>>> print(len(mech.reads()), len(mech.writes()))
+2 2
+# Init variables
+>>> X.init(VariableRecord(6, confidence=1.0))
+>>> Y.init(VariableRecord(2.1, confidence=1.0))
+>>>
+>>> mech.transform()
+>>>
+>>> print(X.hypotheses[0].record.value)
+12.0
+>>> print(Y.hypotheses[0].record.value)
+4.2
+>>> mech.disable()
+>>> mech.run()
+>>> print(len(X.hypotheses), len(Y.hypotheses))
+1 1
+>>> mech.disable()
+>>> mech.transform()
+>>> print(len(X.hypotheses), len(Y.hypotheses))
+2 2
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/mechanism/base.html
@@ -37,6 +81,50 @@ class Mechanism(ABC):
     Mechanisms are execution units with a declared structural interface.
 
     Mechanisms may be dynamically enabled or disabled during execution.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Mechanism,
+    ...     Variable,
+    ...     RangeDomain,
+    ...     VariableRecord
+    ... )
+    >>>
+    >>> X = Variable("X", RangeDomain(0., 50.))
+    >>> Y = Variable("Y", RangeDomain(-50., 50.))
+    >>>
+    >>> class DoubleValueMechanism(Mechanism):
+    ...     def __init__(self):
+    ...         super().__init__(reads=[X, Y], writes=[X, Y])
+    ...
+    ...     def transform(self):
+    ...         for var in self.writes():
+    ...             var.add_hypothesis(VariableRecord(
+    ...                 var.value * 2, confidence=0.67
+    ...             ))
+    >>>
+    >>> mech = DoubleValueMechanism()
+    >>> print(len(mech.reads()), len(mech.writes()))
+    2 2
+    # Init variables
+    >>> X.init(VariableRecord(6, confidence=1.0))
+    >>> Y.init(VariableRecord(2.1, confidence=1.0))
+    >>>
+    >>> mech.transform()
+    >>>
+    >>> print(X.hypotheses[0].record.value)
+    12.0
+    >>> print(Y.hypotheses[0].record.value)
+    4.2
+    >>> mech.disable()
+    >>> mech.run()
+    >>> print(len(X.hypotheses), len(Y.hypotheses))
+    1 1
+    >>> mech.disable()
+    >>> mech.transform()
+    >>> print(len(X.hypotheses), len(Y.hypotheses))
+    2 2
     """
 
     def __init__(self, reads: Sequence[Variable], writes: Sequence[Variable]) -> None:
@@ -49,6 +137,50 @@ class Mechanism(ABC):
             Variables read by the mechanism.
         writes : Sequence[Variable]
             Variables written by the mechanism.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Mechanism,
+        ...     Variable,
+        ...     RangeDomain,
+        ...     VariableRecord
+        ... )
+        >>>
+        >>> X = Variable("X", RangeDomain(0., 50.))
+        >>> Y = Variable("Y", RangeDomain(-50., 50.))
+        >>>
+        >>> class DoubleValueMechanism(Mechanism):
+        ...     def __init__(self):
+        ...         super().__init__(reads=[X, Y], writes=[X, Y])
+        ...
+        ...     def transform(self):
+        ...         for var in self.writes():
+        ...             var.add_hypothesis(VariableRecord(
+        ...                 var.value * 2, confidence=0.67
+        ...             ))
+        >>>
+        >>> mech = DoubleValueMechanism()
+        >>> print(len(mech.reads()), len(mech.writes()))
+        2 2
+        # Init variables
+        >>> X.init(VariableRecord(6, confidence=1.0))
+        >>> Y.init(VariableRecord(2.1, confidence=1.0))
+        >>>
+        >>> mech.transform()
+        >>>
+        >>> print(X.hypotheses[0].record.value)
+        12.0
+        >>> print(Y.hypotheses[0].record.value)
+        4.2
+        >>> mech.disable()
+        >>> mech.run()
+        >>> print(len(X.hypotheses), len(Y.hypotheses))
+        1 1
+        >>> mech.disable()
+        >>> mech.transform()
+        >>> print(len(X.hypotheses), len(Y.hypotheses))
+        2 2
 
         Notes
         -----

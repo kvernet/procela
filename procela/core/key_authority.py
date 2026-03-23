@@ -6,6 +6,16 @@ globally unique Key instances within a single Procela runtime. It serves
 as the single source of truth for Key identity resolution and ensures that
 no Key collisions occur within the current process.
 
+Examples
+--------
+>>> from procela import KeyAuthority, Key
+>>>
+>>> key = KeyAuthority.issue(None)
+>>> assert isinstance(key, Key)
+>>>
+>>> source = KeyAuthority.resolve(key)
+>>> assert source is None
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/key_authority.html
@@ -30,6 +40,16 @@ class KeyAuthority:
     Maintains a global registry of all issued Keys within a runtime context,
     ensuring Key uniqueness and providing owner resolution capabilities.
     Thread-safe by design for concurrent access across multiple mechanisms.
+
+    Examples
+    --------
+    >>> from procela import KeyAuthority, Key
+    >>>
+    >>> key = KeyAuthority.issue(None)
+    >>> assert isinstance(key, Key)
+    >>>
+    >>> source = KeyAuthority.resolve(key)
+    >>> assert source is None
     """
 
     _lock = threading.Lock()

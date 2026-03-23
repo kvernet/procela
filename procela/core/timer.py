@@ -1,9 +1,20 @@
 """
-Performance Timer for the Procela Framework.
+Performance Timer for the Procela framework.
 
 This module provides a context manager for precise performance timing
 of code execution. It uses `time.perf_counter()` for high-resolution
 measurements suitable for benchmarking and performance analysis.
+
+Examples
+--------
+>>> from procela import Timer
+>>>
+>>> with Timer() as timer:
+...     for _ in range(1_000_000):
+...         pass
+>>>
+>>> print(f"Time elapsed: {timer.elapsed:.6f} s")
+Time elapsed: 0.033913 s
 
 Semantics Reference
 -------------------
@@ -45,6 +56,17 @@ class Timer:
     elapsed : float | None
         The elapsed time in seconds between `start` and `end`.
         `None` if timer hasn't been fully executed.
+
+    Examples
+    --------
+    >>> from procela import Timer
+    >>>
+    >>> with Timer() as timer:
+    ...     for _ in range(1_000_000):
+    ...         pass
+    >>>
+    >>> print(f"Time elapsed: {timer.elapsed:.6f} s")
+    Time elapsed: 0.033913 s
     """
 
     def __enter__(self) -> Timer:

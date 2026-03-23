@@ -1,10 +1,19 @@
 """
-Compose module.
+Compose module for Processes.
 
 This module defines the `Compose` class, which allows combining multiple
 processes into a single higher-level process. The resulting process
 aggregates the mechanisms of all constituent processes and behaves
 as a single unit within an Executive-managed simulation.
+
+Examples
+--------
+>>> from procela import Compose, Process
+>>>
+# Declare processes (see Process)
+>>> proc = Compose([p1, p1, ..., pn])
+>>> assert isinstance(proc, Process)
+>>> proc.step()
 
 Semantics Reference
 -------------------
@@ -31,15 +40,24 @@ class Compose(Process):
     constituent processes are included in the composed process
     in the order provided.
 
+    Examples
+    --------
+    >>> from procela import Compose, Process
+    >>>
+    # Declare processes (see Process)
+    >>> proc = Compose([p1, p1, ..., pn])
+    >>> assert isinstance(proc, Process)
+    >>> proc.step()
+
     Notes
     -----
-    - The composed process behaves like any other `Process` in
-      execution but internally represents multiple sub-processes.
-    - Mechanism ordering follows the order of processes and their
-      internal mechanisms.
+        - The composed process behaves like any other `Process` in
+            execution but internally represents multiple sub-processes.
+        - Mechanism ordering follows the order of processes and their
+            internal mechanisms.
     """
 
-    def __init__(self, processes: Sequence[Process]) -> None:
+    def __init__(self, processes: Sequence[Process]):
         """
         Initialize the composed process with mechanisms from all sub-processes.
 
@@ -49,5 +67,14 @@ class Compose(Process):
             List or sequence of `Process` instances to combine. All
             mechanisms from these processes will be included in the
             composed process.
+
+        Examples
+        --------
+        >>> from procela import Compose, Process
+        >>>
+        # Declare processes (see Process)
+        >>> proc = Compose([p1, p1, ..., pn])
+        >>> assert isinstance(proc, Process)
+        >>> proc.step()
         """
         super().__init__([mech for p in processes for mech in p.mechanisms()])

@@ -1,6 +1,22 @@
 """
 Hypothesis abstraction of a Variable record in Procela.
 
+Examples
+--------
+>>> from procela import HypothesisRecord, VariableRecord, HypothesisState
+>>>
+>>> state = HypothesisState.PROPOSED
+>>>
+>>> hypothesis = HypothesisRecord(
+...     VariableRecord(36.87, confidence=0.45),
+...     state
+... )
+>>>
+>>> print(hypothesis.key())
+<Key>
+>>> print(hypothesis.record)
+VariableRecord(value=36.87, time=None, source=None, confidence=0.45, ...)
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/memory/variable/hypothesis.html
@@ -35,6 +51,20 @@ class HypothesisState(Enum):
         State indicating the hypothesis has passed validation checks.
     REJECTED : HypothesisState
         State indicating the hypothesis has been rejected during validation.
+
+    Examples
+    --------
+    >>> from procela import HypothesisState
+    >>>
+    >>> state = HypothesisState.PROPOSED
+    >>>
+    >>> print(state)
+    HypothesisState.PROPOSED
+    >>> for state in HypothesisState:
+        print(state.name, state.value)
+    PROPOSED 1
+    VALIDATED 2
+    REJECTED 3
 
     Notes
     -----
@@ -82,6 +112,22 @@ class HypothesisRecord:
     TypeError
         If `state` is not a HypothesisState instance.
         If `record` is not a VariableRecord instance or None.
+
+    Examples
+    --------
+    >>> from procela import HypothesisRecord, VariableRecord, HypothesisState
+    >>>
+    >>> state = HypothesisState.PROPOSED
+    >>>
+    >>> hypothesis = HypothesisRecord(
+    ...     VariableRecord(36.87, confidence=0.45),
+    ...     state
+    ... )
+    >>>
+    >>> print(hypothesis.key())
+    <Key>
+    >>> print(hypothesis.record)
+    VariableRecord(value=36.87, time=None, source=None, confidence=0.45, ...)
     """
 
     record: VariableRecord | None

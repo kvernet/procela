@@ -6,6 +6,40 @@ in identifying root causes when anomalies are detected in system variables.
 It analyzes anomaly characteristics, contextual statistics, and historical
 patterns to generate diagnostic hypotheses about the underlying issues.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     AnomalyDiagnoser
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> diagnoser = AnomalyDiagnoser()
+>>>
+>>> result = diagnoser.diagnose(view=view)
+>>>
+>>> print(result.causes)
+['Unidentified system anomaly detected']
+>>> print(result.confidence)
+0.3
+>>> for key, value in result.metadata.items():
+...     print(f"{key:22}: {value}")
+diagnoser             : AnomalyDiagnoser
+severity_threshold    : 2.0
+anomaly_present       : False
+anomaly_score         : None
+met_severity_threshold: False
+causes_identified     : 1
+confidence            : 0.3
+generic_causes_used   : False
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/diagnosis/anomaly.html
@@ -68,6 +102,40 @@ class AnomalyDiagnoser(Diagnoser):
     include_generic_causes : bool
         Flag controlling inclusion of generic diagnostic causes.
 
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     AnomalyDiagnoser
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> diagnoser = AnomalyDiagnoser()
+    >>>
+    >>> result = diagnoser.diagnose(view=view)
+    >>>
+    >>> print(result.causes)
+    ['Unidentified system anomaly detected']
+    >>> print(result.confidence)
+    0.3
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:22}: {value}")
+    diagnoser             : AnomalyDiagnoser
+    severity_threshold    : 2.0
+    anomaly_present       : False
+    anomaly_score         : None
+    met_severity_threshold: False
+    causes_identified     : 1
+    confidence            : 0.3
+    generic_causes_used   : False
+
     Notes
     -----
     This reasoner assumes that anomaly detection has already been performed
@@ -105,6 +173,40 @@ class AnomalyDiagnoser(Diagnoser):
         ------
         ValueError
             If severity_threshold is not positive.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     AnomalyDiagnoser
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> diagnoser = AnomalyDiagnoser()
+        >>>
+        >>> result = diagnoser.diagnose(view=view)
+        >>>
+        >>> print(result.causes)
+        ['Unidentified system anomaly detected']
+        >>> print(result.confidence)
+        0.3
+        >>> for key, value in result.metadata.items():
+        ...     print(f"{key:22}: {value}")
+        diagnoser             : AnomalyDiagnoser
+        severity_threshold    : 2.0
+        anomaly_present       : False
+        anomaly_score         : None
+        met_severity_threshold: False
+        causes_identified     : 1
+        confidence            : 0.3
+        generic_causes_used   : False
         """
         if severity_threshold <= 0:
             raise ValueError(
@@ -371,4 +473,4 @@ class AnomalyDiagnoser(Diagnoser):
         str
             Human-readable description.
         """
-        return f"Anomaly Diagnostic Reasoner " f"(threshold={self.severity_threshold})"
+        return f"Anomaly Diagnostic Reasoner (threshold={self.severity_threshold})"

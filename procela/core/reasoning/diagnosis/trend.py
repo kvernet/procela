@@ -6,6 +6,30 @@ directional patterns and temporal changes in system variables to identify
 potential root causes. It specializes in detecting issues related to
 gradual degradation, improvement trends, and stability violations.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     TrendDiagnoser
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> diagnoser = TrendDiagnoser()
+>>>
+>>> result = diagnoser.diagnose(view=view)
+>>>
+>>> print(result.causes)
+['System appears stable', 'Low confidence in trend detection']
+>>> print(result.confidence)
+0.24
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/diagnosis/trend.html
@@ -73,6 +97,30 @@ class TrendDiagnoser(Diagnoser):
     require_confidence : bool
         Flag controlling confidence requirement.
 
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     TrendDiagnoser
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> diagnoser = TrendDiagnoser()
+    >>>
+    >>> result = diagnoser.diagnose(view=view)
+    >>>
+    >>> print(result.causes)
+    ['System appears stable', 'Low confidence in trend detection']
+    >>> print(result.confidence)
+    0.24
+
     Notes
     -----
     This reasoner assumes that trend analysis has been performed and
@@ -116,6 +164,30 @@ class TrendDiagnoser(Diagnoser):
         ------
         ValueError
             If thresholds are invalid or inconsistent.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     TrendDiagnoser
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> diagnoser = TrendDiagnoser()
+        >>>
+        >>> result = diagnoser.diagnose(view=view)
+        >>>
+        >>> print(result.causes)
+        ['System appears stable', 'Low confidence in trend detection']
+        >>> print(result.confidence)
+        0.24
         """
         if significance_threshold <= 0:
             raise ValueError(

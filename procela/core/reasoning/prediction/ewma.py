@@ -6,6 +6,31 @@ using pre-computed exponentially weighted moving average statistics from
 the epistemic data layer. The predictor leverages incrementally maintained
 statistics to provide efficient, real-time predictions.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     EWMAPredictor
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> predictor = EWMAPredictor()
+>>>
+>>> result = predictor.predict(
+...     view=view, horizon=3
+... )
+>>> print(result.value)
+[11.91, 11.91, 11.91]
+>>> print(result.horizon)
+3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/prediction/ewma.html
@@ -47,6 +72,31 @@ class EWMAPredictor(Predictor):
     ------
     ValueError
         If alpha is not in range (0, 1].
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     EWMAPredictor
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> predictor = EWMAPredictor()
+    >>>
+    >>> result = predictor.predict(
+    ...     view=view, horizon=3
+    ... )
+    >>> print(result.value)
+    [11.91, 11.91, 11.91]
+    >>> print(result.horizon)
+    3
     """
 
     def __init__(self, alpha: float = 0.3) -> None:
@@ -64,6 +114,31 @@ class EWMAPredictor(Predictor):
         ------
         ValueError
             If alpha is outside the valid range (0, 1].
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     EWMAPredictor
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> predictor = EWMAPredictor()
+        >>>
+        >>> result = predictor.predict(
+        ...     view=view, horizon=3
+        ... )
+        >>> print(result.value)
+        [11.91, 11.91, 11.91]
+        >>> print(result.horizon)
+        3
         """
         if not 0 < alpha <= 1:
             raise ValueError(f"alpha must be in range (0, 1], got {alpha}")

@@ -1,6 +1,19 @@
 """
 Anomaly result container.
 
+Examples
+--------
+>>> from procela import AnomalyResult
+>>>
+>>> result = AnomalyResult(
+...     is_anomaly=True,
+...     score=0.9,
+...     threshold=3.0
+... )
+>>>
+>>> print(result.confidence())
+0.3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/assessment/anomaly.html
@@ -48,6 +61,19 @@ class AnomalyResult:
     ------
     ValueError
         If `threshold` is non-positive when provided.
+
+    Examples
+    --------
+    >>> from procela import AnomalyResult
+    >>>
+    >>> result = AnomalyResult(
+    ...     is_anomaly=True,
+    ...     score=0.9,
+    ...     threshold=3.0
+    ... )
+    >>>
+    >>> print(result.confidence())
+    0.3
     """
 
     is_anomaly: bool

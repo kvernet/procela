@@ -34,6 +34,42 @@ class TrendOperator(ABC):
     Trend operators evaluate changes in memory statistics and produce
     trend results for downstream reasoning. This class defines the
     computational interface for trend analysis.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     TrendOperator,
+    ...     TrendResult
+    ... )
+    >>>
+    >>> class MyTrendOperator(TrendOperator):
+    ...     def analyze(self, stats):
+    ...         value = stats.ewma / 2
+    ...         return TrendResult(
+    ...             value=value,
+    ...             direction="stable",
+    ...             threshold=3.0,
+    ...         )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> operator = MyTrendOperator()
+    >>>
+    >>> result = operator.analyze(stats=view.stats)
+    >>>
+    >>> print(result.value)
+    5.955
+    >>> print(result.direction)
+    stable
+    >>> print(result.threshold)
+    3.0
     """
 
     @abstractmethod
@@ -66,6 +102,32 @@ class TrendOperatorThreshold(TrendOperator):
     This operator uses a threshold to determine whether a trend is stable,
     upward, or downward based on EWMA and mean values from memory
     statistics.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     TrendOperatorThreshold
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> operator = TrendOperatorThreshold(threshold=2)
+    >>>
+    >>> result = operator.analyze(stats=view.stats)
+    >>>
+    >>> print(result.value)
+    -0.08999999999999986
+    >>> print(result.direction)
+    stable
+    >>> print(result.threshold)
+    2
     """
 
     def __init__(self, threshold: float | None = 3.0):
@@ -77,6 +139,32 @@ class TrendOperatorThreshold(TrendOperator):
         threshold : float or None
             Threshold value used to determine trend stability. If None, trend
             analysis is disabled.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     TrendOperatorThreshold
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> operator = TrendOperatorThreshold(threshold=2)
+        >>>
+        >>> result = operator.analyze(stats=view.stats)
+        >>>
+        >>> print(result.value)
+        -0.08999999999999986
+        >>> print(result.direction)
+        stable
+        >>> print(result.threshold)
+        2
 
         Notes
         -----
@@ -140,6 +228,51 @@ class DiagnosisOperator(ABC):
     Diagnosis operators evaluate DiagnosticViews and produce
     DiagnosisResults. This class defines the computational interface
     for diagnosis operations.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     DiagnosisOperator,
+    ...     get_diagnoser
+    ... )
+    >>>
+    >>> class MyDiagnosisOperator(DiagnosisOperator):
+    ...     def __init__(self, name, **kwargs):
+    ...         super().__init__()
+    ...         self.diagnoser = get_diagnoser(name, **kwargs)
+    ...     def diagnose(self, view):
+    ...         return self.diagnoser.diagnose(view)
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> operator = MyDiagnosisOperator(name="statistical")
+    >>>
+    >>> result = operator.diagnose(view=view)
+    >>>
+    >>> print(result.causes)
+    []
+    >>> print(result.confidence)
+    0.0
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:22}: {value}")
+    diagnoser             : StatisticalDiagnoser
+    variability_threshold : 0.5
+    drift_sensitivity     : 0.1
+    skewness_threshold    : 1.0
+    stats_available       : True
+    trend_available       : True
+    anomaly_available     : True
+    sample_count          : True
+    causes_identified     : 0
+    patterns_detected     : {'high_variability': False, 'significant_drift': ...}
+    confidence            : 0.0
     """
 
     @abstractmethod
@@ -172,6 +305,48 @@ class DiagnosisOperatorThreshold(DiagnosisOperator):
     This operator delegates diagnosis to a named diagnoser obtained from
     the diagnosis registry. It does not define meaning of diagnostic
     labels.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     DiagnosisOperatorThreshold
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> operator = DiagnosisOperatorThreshold(name="trend")
+    >>>
+    >>> result = operator.diagnose(view=view)
+    >>>
+    >>> print(result.causes)
+    ['System appears stable', 'Low confidence in trend detection']
+    >>> print(result.confidence)
+    0.24
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:22}: {value}")
+    diagnoser             : TrendDiagnoser
+    significance_threshold: 0.2
+    strong_threshold      : 0.5
+    require_confidence    : True
+    trend_available       : True
+    trend_value           : -0.08999999999999986
+    trend_direction       : stable
+    trend_threshold       : 0.3
+    stats_available       : True
+    anomaly_available     : True
+    direction_issues      : 1
+    stability_issues      : 1
+    anomaly_present       : False
+    causes_identified     : 2
+    confidence            : 0.24
+    trend_confidence      : 0.0
     """
 
     def __init__(self, name: str, **kwargs: Any):
@@ -184,6 +359,48 @@ class DiagnosisOperatorThreshold(DiagnosisOperator):
             Identifier of the diagnoser implementation to use.
         **kwargs : Any
             Additional keyword arguments passed to the diagnoser factory.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     DiagnosisOperatorThreshold
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> operator = DiagnosisOperatorThreshold(name="trend")
+        >>>
+        >>> result = operator.diagnose(view=view)
+        >>>
+        >>> print(result.causes)
+        ['System appears stable', 'Low confidence in trend detection']
+        >>> print(result.confidence)
+        0.24
+        >>> for key, value in result.metadata.items():
+        ...     print(f"{key:22}: {value}")
+        diagnoser             : TrendDiagnoser
+        significance_threshold: 0.2
+        strong_threshold      : 0.5
+        require_confidence    : True
+        trend_available       : True
+        trend_value           : -0.08999999999999986
+        trend_direction       : stable
+        trend_threshold       : 0.3
+        stats_available       : True
+        anomaly_available     : True
+        direction_issues      : 1
+        stability_issues      : 1
+        anomaly_present       : False
+        causes_identified     : 2
+        confidence            : 0.24
+        trend_confidence      : 0.0
 
         Notes
         -----

@@ -197,7 +197,7 @@ class TestStatisticsResult:
 
         type_hints = get_type_hints(StatisticsResult)
 
-        assert type_hints["count"] == int
+        assert type_hints["count"] is int
         assert type_hints["sum"] == float | None
         assert type_hints["min"] == float | None
         assert type_hints["max"] == float | None

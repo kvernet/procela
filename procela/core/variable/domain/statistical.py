@@ -4,6 +4,24 @@ Statistical value domains for Procela.
 This module provides domain classes for numeric values with statistical
 validation based on historical data (mean and standard deviation).
 
+Examples
+--------
+>>> from procela import StatisticalDomain, StatisticsResult
+>>>
+>>> domain = StatisticalDomain(k=3)
+>>>
+>>> stats = StatisticsResult(2, 20, 8, 12, 10, 2)
+>>> print(domain.trend_threshold(stats=stats))
+2.0
+>>> print(domain.validate(13, stats=stats))
+True
+>>> print(domain.explain(13, stats=stats))
+Value 13 is within [4, 16]
+>>> print(domain.validate(3e99, stats=stats))
+False
+>>> print(domain.explain(3e99, stats=stats))
+Value 3e+99 is not within [4, 16]
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/statistical.html
@@ -36,6 +54,24 @@ class StatisticalDomain(ValueDomain):
         Default is 3.0 (approximately 99.7% of data in normal distribution).
     name : str
         Optional name for the domain, inherited from ValueDomain.
+
+    Examples
+    --------
+    >>> from procela import StatisticalDomain, StatisticsResult
+    >>>
+    >>> domain = StatisticalDomain(k=3)
+    >>>
+    >>> stats = StatisticsResult(2, 20, 8, 12, 10, 2)
+    >>> print(domain.trend_threshold(stats=stats))
+    2.0
+    >>> print(domain.validate(13, stats=stats))
+    True
+    >>> print(domain.explain(13, stats=stats))
+    Value 13 is within [4, 16]
+    >>> print(domain.validate(3e99, stats=stats))
+    False
+    >>> print(domain.explain(3e99, stats=stats))
+    Value 3e+99 is not within [4, 16]
 
     Notes
     -----
@@ -72,6 +108,24 @@ class StatisticalDomain(ValueDomain):
             If k is negative.
         TypeError
             If k is not numeric.
+
+        Examples
+        --------
+        >>> from procela import StatisticalDomain, StatisticsResult
+        >>>
+        >>> domain = StatisticalDomain(k=3)
+        >>>
+        >>> stats = StatisticsResult(2, 20, 8, 12, 10, 2)
+        >>> print(domain.trend_threshold(stats=stats))
+        2.0
+        >>> print(domain.validate(13, stats=stats))
+        True
+        >>> print(domain.explain(13, stats=stats))
+        Value 13 is within [4, 16]
+        >>> print(domain.validate(3e99, stats=stats))
+        False
+        >>> print(domain.explain(3e99, stats=stats))
+        Value 3e+99 is not within [4, 16]
         """
         super().__init__(name=name)
         if not isinstance(k, int | float):
@@ -172,8 +226,8 @@ class StatisticalDomain(ValueDomain):
         lower = mean - self.k * std
         upper = mean + self.k * std
         if lower <= value <= upper:
-            return f"Value {value} is within [{lower}, {upper}]."
-        return f"Value {value} is not within [{lower}, {upper}]."
+            return f"Value {value} is within [{lower}, {upper}]"
+        return f"Value {value} is not within [{lower}, {upper}]"
 
     def trend_threshold(
         self,

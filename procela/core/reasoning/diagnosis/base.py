@@ -6,6 +6,48 @@ which identify root causes of observed anomalies or system behaviors. Diagnostic
 reasoners are core components of Procela's active reasoning engine, enabling
 variables to perform causal analysis and identify underlying issues.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     Diagnoser,
+...     get_diagnoser
+... )
+>>>
+>>> class MyDiagnoser(Diagnoser):
+...     def __init__(self, name, **kwargs):
+...         super().__init__()
+...         self.diagnoser = get_diagnoser(name, **kwargs)
+...     def diagnose(self, view):
+...         return self.diagnoser.diagnose(view)
+
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> operator = MyDiagnoser(name="anomaly")
+>>>
+>>> result = operator.diagnose(view=view)
+>>>
+>>> print(result.causes)
+['Unidentified system anomaly detected']
+>>> print(result.confidence)
+0.3
+>>> for key, value in result.metadata.items():
+...     print(f"{key:22}: {value}")
+diagnoser             : AnomalyDiagnoser
+severity_threshold    : 2.0
+anomaly_present       : False
+anomaly_score         : None
+met_severity_threshold: False
+causes_identified     : 1
+confidence            : 0.3
+generic_causes_used   : False
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/diagnosis/base.html
@@ -44,6 +86,48 @@ class Diagnoser(ABC):
         This should be a descriptive, human-readable name that
         distinguishes the diagnostic method (e.g., "FaultTreeDiagnoser",
         "BayesianDiagnoser", "RuleBasedDiagnoser").
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     Diagnoser,
+    ...     get_diagnoser
+    ... )
+    >>>
+    >>> class MyDiagnoser(Diagnoser):
+    ...     def __init__(self, name, **kwargs):
+    ...         super().__init__()
+    ...         self.diagnoser = get_diagnoser(name, **kwargs)
+    ...     def diagnose(self, view):
+    ...         return self.diagnoser.diagnose(view)
+
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> operator = MyDiagnoser(name="anomaly")
+    >>>
+    >>> result = operator.diagnose(view=view)
+    >>>
+    >>> print(result.causes)
+    ['Unidentified system anomaly detected']
+    >>> print(result.confidence)
+    0.3
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:22}: {value}")
+    diagnoser             : AnomalyDiagnoser
+    severity_threshold    : 2.0
+    anomaly_present       : False
+    anomaly_score         : None
+    met_severity_threshold: False
+    causes_identified     : 1
+    confidence            : 0.3
+    generic_causes_used   : False
 
     Notes
     -----

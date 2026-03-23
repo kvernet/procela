@@ -7,6 +7,55 @@ are specialized reasoning components that analyze historical statistics
 to identify deviations from expected behavior, forming the foundation
 for proactive system monitoring and diagnostic reasoning.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     AnomalyDetector,
+...     get_detector
+... )
+>>>
+>>> class MyAnomalyDetector(AnomalyDetector):
+...     def __init__(self, name, **kwargs):
+...         super().__init__()
+...         self.detector = get_detector(name, **kwargs)
+...
+...     def detect(self, stats):
+...         return self.detector.detect(stats)
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> detector = MyAnomalyDetector("z-score")
+>>>
+>>> result = detector.detect(stats=view.stats)
+>>>
+>>> print(result.is_anomaly)
+False
+>>> print(result.confidence())
+None
+>>> print(result.method)
+ZScoreDetector
+>>> print(result.score)
+1.2247448713915976
+>>> print(result.threshold)
+3.0
+>>> for key, value in result.metadata.items():
+...     print(f"{key:18}: {value}")
+mean              : 12.0
+std               : 0.8164965809277203
+value             : 11.0
+count             : 3
+z_score           : 1.2247448713915976
+threshold         : 3.0
+deviation         : -1.0
+absolute_deviation: 1.0
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/anomaly/base.html
@@ -53,6 +102,55 @@ class AnomalyDetector(ABC):
         distinguishes the detection method (e.g., "ZScoreDetector",
         "MovingAverageDetector", "IsolationForestDetector").
         This is a class attribute that should be set by subclasses.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     AnomalyDetector,
+    ...     get_detector
+    ... )
+    >>>
+    >>> class MyAnomalyDetector(AnomalyDetector):
+    ...     def __init__(self, name, **kwargs):
+    ...         super().__init__()
+    ...         self.detector = get_detector(name, **kwargs)
+    ...
+    ...     def detect(self, stats):
+    ...         return self.detector.detect(stats)
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> detector = MyAnomalyDetector("z-score")
+    >>>
+    >>> result = detector.detect(stats=view.stats)
+    >>>
+    >>> print(result.is_anomaly)
+    False
+    >>> print(result.confidence())
+    None
+    >>> print(result.method)
+    ZScoreDetector
+    >>> print(result.score)
+    1.2247448713915976
+    >>> print(result.threshold)
+    3.0
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:18}: {value}")
+    mean              : 12.0
+    std               : 0.8164965809277203
+    value             : 11.0
+    count             : 3
+    z_score           : 1.2247448713915976
+    threshold         : 3.0
+    deviation         : -1.0
+    absolute_deviation: 1.0
 
     Notes
     -----

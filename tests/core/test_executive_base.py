@@ -19,6 +19,7 @@ from procela.core.invariant import (
     SystemInvariant,
     VariableSnapshot,
 )
+from procela.core.logger import setup_logging
 from procela.core.mechanism import Mechanism
 from procela.core.process import Process
 from procela.core.variable import Variable
@@ -75,6 +76,16 @@ class TestExecutive:
         executive.remove_mechanism(mock_mechanism)
         assert mock_mechanism not in executive._mechanisms
         assert executive._prepared is True
+
+    def test_set_logger(self):
+        """Test set logger."""
+        executive = Executive()
+        logger = setup_logging(
+            name="procela",
+            console=False,
+        )
+        executive.set_logger(logger)
+        assert executive.logger == logger
 
     def test_prepare_method(self):
         """Test the prepare method collects variables correctly."""
@@ -223,7 +234,7 @@ class TestExecutive:
 
         # Verify results
         assert step_count == 3
-        assert check_calls == []
+        assert len(check_calls) == 0
         assert len(callback_calls) == 3
         for i, (exec, step_num) in enumerate(callback_calls):
             assert exec is executive

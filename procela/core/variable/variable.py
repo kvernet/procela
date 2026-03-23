@@ -7,6 +7,59 @@ It provides methods for recording observations, accessing memory,
 and invoking reasoning tasks such as anomaly detection, trend
 analysis, conflict resolution, action proposal, and prediction.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     RangeDomain,
+...     VariableRole,
+...     VariableRecord,
+...     HighestConfidencePolicy
+... )
+>>>
+>>> var = Variable(name="var", domain=RangeDomain(0., 100.))
+>>>
+>>> assert var.name == "var"
+>>> assert var.value is None
+>>> assert var.confidence is None
+>>> assert len(var.hypotheses) == 0
+>>> assert var.conclusion is None
+>>> assert isinstance(var.domain, RangeDomain)
+>>> assert var.memory is None
+>>> assert var.policy is None
+>>> assert var.reasoning is None
+>>> assert var.role is VariableRole.ENDOGENOUS
+>>> assert var.stats.count == 0
+>>> assert var.units is None
+>>>
+>>> var.set(VariableRecord(value=10.4, confidence=0.94))
+>>> for i in range(10):
+...     var.add_hypothesis(VariableRecord(value=20 + i, confidence=1 - i/9))
+>>> var.policy = HighestConfidencePolicy()
+>>> resolved = var.resolve_conflict()
+>>> var.commit()
+>>> var.clear_hypotheses()
+>>>
+>>> print(var.get(0)[0][1])
+VariableRecord(value=10.4, time=None, source=None, confidence=0.94, ...)
+>>>
+>>> print(var.summary())
+===== Variable summary =====
+name       : var
+description:
+units      : None
+role       : ENDOGENOUS
+config keys: []
+seed       : None
+count      : 2
+mean       : 15.2
+std        : 4.8000000000000025
+min        : 10.4
+max        : 20.0
+confidence : 0.97
+ewma       : 13.28
+sources: 1
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/variable.html
@@ -34,7 +87,6 @@ from ..memory.hypothesis import HypothesisRecord
 from ..memory.record import VariableRecord
 from ..memory.statistics import MemoryStatistics
 from ..policy.resolution.base import ResolutionPolicy
-from ..policy.resolution.confidence import HighestConfidencePolicy
 from ..policy.resolution.resolver import ResolverPolicy
 from ..reasoning.anomaly.operator import AnomalyOperator, AnomalyOperatorThreshold
 from ..reasoning.diagnosis.operator import (
@@ -106,18 +158,17 @@ class VariableEpistemic:
 
         if not isinstance(self.stats, StatisticsResult):
             raise TypeError(
-                f"`stats` should be a StatisticsResult, " f"got {type(self.stats)}"
+                f"`stats` should be a StatisticsResult, got {type(self.stats)}"
             )
 
         if not isinstance(self.anomaly, AnomalyResult | None):
             raise TypeError(
-                f"`anomaly` should be a AnomalyResult or None, "
-                f"got {type(self.anomaly)}"
+                f"`anomaly` should be a AnomalyResult or None, got {type(self.anomaly)}"
             )
 
         if not isinstance(self.trend, TrendResult | None):
             raise TypeError(
-                f"`trend` should be a TrendResult or None, " f"got {type(self.trend)}"
+                f"`trend` should be a TrendResult or None, got {type(self.trend)}"
             )
 
 
@@ -129,6 +180,59 @@ class Variable:
     and reasoning subsystems. It supports recording values with domain
     validation, retrieving memory, generating reasoning views, and
     executing reasoning actions.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     RangeDomain,
+    ...     VariableRole,
+    ...     VariableRecord,
+    ...     HighestConfidencePolicy
+    ... )
+    >>>
+    >>> var = Variable(name="var", domain=RangeDomain(0., 100.))
+    >>>
+    >>> assert var.name == "var"
+    >>> assert var.value is None
+    >>> assert var.confidence is None
+    >>> assert len(var.hypotheses) == 0
+    >>> assert var.conclusion is None
+    >>> assert isinstance(var.domain, RangeDomain)
+    >>> assert var.memory is None
+    >>> assert var.policy is None
+    >>> assert var.reasoning is None
+    >>> assert var.role is VariableRole.ENDOGENOUS
+    >>> assert var.stats.count == 0
+    >>> assert var.units is None
+    >>>
+    >>> var.set(VariableRecord(value=10.4, confidence=0.94))
+    >>> for i in range(10):
+    ...     var.add_hypothesis(VariableRecord(value=20 + i, confidence=1 - i/9))
+    >>> var.policy = HighestConfidencePolicy()
+    >>> resolved = var.resolve_conflict()
+    >>> var.commit()
+    >>> var.clear_hypotheses()
+    >>>
+    >>> print(var.get(0)[0][1])
+    VariableRecord(value=10.4, time=None, source=None, confidence=0.94, ...)
+    >>>
+    >>> print(var.summary())
+    ===== Variable summary =====
+    name       : var
+    description:
+    units      : None
+    role       : ENDOGENOUS
+    config keys: []
+    seed       : None
+    count      : 2
+    mean       : 15.2
+    std        : 4.8000000000000025
+    min        : 10.4
+    max        : 20.0
+    confidence : 0.97
+    ewma       : 13.28
+    sources: 1
     """
 
     def __init__(
@@ -169,6 +273,25 @@ class Variable:
             The iterable validators to filter hypotheses before resolution.
             Default is None.
 
+        Examples
+        --------
+        >>> from procela import Variable, RangeDomain, VariableRole
+        >>>
+        >>> var = Variable(name="var", domain=RangeDomain(0., 100.))
+        >>>
+        >>> assert var.name == "var"
+        >>> assert var.value is None
+        >>> assert var.confidence is None
+        >>> assert len(var.hypotheses) == 0
+        >>> assert var.conclusion is None
+        >>> assert isinstance(var.domain, RangeDomain)
+        >>> assert var.memory is None
+        >>> assert var.policy is None
+        >>> assert var.reasoning is None
+        >>> assert var.role is VariableRole.ENDOGENOUS
+        >>> assert var.stats.count == 0
+        >>> assert var.units is None
+
         Notes
         -----
         This constructor sets up memory and reasoning containers.
@@ -181,7 +304,7 @@ class Variable:
         self.role = role
         self.config = config or {}
         self.seed = seed
-        self.policy = policy or HighestConfidencePolicy()
+        self.policy = policy
         self.validators = validators
 
         from ..key_authority import KeyAuthority
@@ -256,8 +379,7 @@ class Variable:
         if not self.validate(record):
             why = self.domain.explain(record.value)
             raise ValueError(
-                f"The variable [{self.name}] method fails "
-                f"domain constraint in set(): {why}"
+                f"The variable [{self.name}] fails domain constraint in set(): {why}"
             )
         self.clear_hypotheses()
         self.hypotheses.append(HypothesisRecord(record=record))
@@ -265,6 +387,99 @@ class Variable:
         self.reasoning = reasoning
         self.commit()
         self.clear_hypotheses()
+
+    def get(self, start: int, size: int = 1, reverse: bool = False) -> list[
+        tuple[
+            tuple[HypothesisRecord, ...],
+            VariableRecord | None,
+            ReasoningResult | None,
+        ]
+    ]:
+        """
+        Get the memory nodes from a specific index.
+
+        Parameters
+        ----------
+        start : int
+            The start index to locate the memory nodes.
+        size : int
+            The number of nodes from the index. Default is 1.
+        reverse : bool
+            Reverse the result in chronological order or not.
+            Default is False.
+
+        Returns
+        -------
+        list[
+            tuple[
+                tuple[HypothesisRecord, ...],
+                VariableRecord | None,
+                ReasoningResult | None,
+            ]
+        ]
+            The list of tuple containing the node details from the start.
+
+        Notes
+        -----
+            This method uses the iter() method to iterate backwards from memory.
+            It is more efficient for retrieving recent nodes
+            because it iterates backwards.
+        """
+        if self.memory is None:
+            return []
+
+        if start >= 0:
+            loop = self.stats.count - start - 1
+        else:
+            loop = -start - 1
+
+        if loop < 0:
+            return []
+
+        result = []
+
+        for i, (h, c, r) in enumerate(self.memory.iter()):
+            if i > loop - size:
+                result.append((h, c, r))
+
+            if i == loop:
+                break
+
+        if reverse:
+            result.reverse()
+
+        return result
+
+    def recent(self, size: int = 1, reverse: bool = False) -> list[
+        tuple[
+            tuple[HypothesisRecord, ...],
+            VariableRecord | None,
+            ReasoningResult | None,
+        ]
+    ]:
+        """
+        Get the recent nodes from the memory.
+
+        Parameters
+        ----------
+        size : int
+            The number of recent nodes.
+        reverse : bool
+            Reverse the result in chronological order or not.
+            Default is False.
+
+        Returns
+        -------
+        list[
+            tuple[
+                tuple[HypothesisRecord, ...],
+                VariableRecord | None,
+                ReasoningResult | None,
+            ]
+        ]
+            The list of tuple containing the recent node details.
+        """
+        return self.get(start=-size, size=size, reverse=reverse)
 
     @property
     def value(self) -> Any:
@@ -575,7 +790,7 @@ class Variable:
             f"Variable '{self.name}' ({self.role.name})",
             f"Description: {self.description or 'N/A'}",
             f"Units: {self.units or 'N/A'}",
-            f"Latest value: {stats.value} " f"(confidence: {confidence})",
+            f"Latest value: {stats.value} (confidence: {confidence})",
             f"Observed {stats.count} records "
             f"(min={stats.min}, max={stats.max}, "
             f"mean={mean}, std={std})",
@@ -832,7 +1047,7 @@ class Variable:
 
         if not isinstance(operator, TrendOperator | None):
             raise TypeError(
-                "`operator` should be a TrendOperator or None, " f"got {type(operator)}"
+                f"`operator` should be a TrendOperator or None, got {type(operator)}"
             )
 
         if not isinstance(self.domain, StatisticalDomain):

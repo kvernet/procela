@@ -9,6 +9,46 @@ its predecessor and a newly added memory.
 Memories are persistent and immutable: all update operations return new
 memory instances without mutating existing ones.
 
+Examples
+--------
+>>> from procela import (
+...     VariableMemory,
+...     HypothesisRecord,
+...     VariableRecord,
+...     ReasoningResult,
+...     ReasoningTask
+... )
+>>>
+>>> hypotheses = [
+...     HypothesisRecord(
+...         VariableRecord(i + 1, confidence=i/5)
+...     ) for i in range(5)
+... ]
+>>>
+>>> memory = VariableMemory(
+...     hypotheses=tuple(hypotheses),
+...     conclusion=VariableRecord(3, confidence=2/5),
+...     reasoning=ReasoningResult(
+...         task=ReasoningTask.CONFLICT_RESOLUTION,
+...         success=True,
+...         result=3,
+...         confidence=2/5,
+...     )
+... )
+>>>
+>>> memory = memory.new(tuple(hypotheses[:2]), None, None)
+>>>
+>>> for hy, c, r in memory.iter():
+...    print(len(hy), c, r)
+2 None None
+5 VariableRecord(value=3, time=None, source=None, confidence=0.4, ...)
+>>> hy, c, r = memory.latest()
+>>> print(hy, c, r)
+(HypothesisRecord(record=VariableRecord(value=1, time=None, ...)) None None
+>>> memory.reset()
+>>> print(memory)
+VariableMemory(hypotheses=(), conclusion=None, reasoning=None)
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/memory/variable/base.html
@@ -51,6 +91,46 @@ class VariableMemory:
         Configuration metadata associated with this commit.
     previous : Key | None
         Key of the previous memory node.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     VariableMemory,
+    ...     HypothesisRecord,
+    ...     VariableRecord,
+    ...     ReasoningResult,
+    ...     ReasoningTask
+    ... )
+    >>>
+    >>> hypotheses = [
+    ...     HypothesisRecord(
+    ...         VariableRecord(i + 1, confidence=i/5)
+    ...     ) for i in range(5)
+    ... ]
+    >>>
+    >>> memory = VariableMemory(
+    ...     hypotheses=tuple(hypotheses),
+    ...     conclusion=VariableRecord(3, confidence=2/5),
+    ...     reasoning=ReasoningResult(
+    ...         task=ReasoningTask.CONFLICT_RESOLUTION,
+    ...         success=True,
+    ...         result=3,
+    ...         confidence=2/5,
+    ...     )
+    ... )
+    >>>
+    >>> memory = memory.new(tuple(hypotheses[:2]), None, None)
+    >>>
+    >>> for hy, c, r in memory.iter():
+    ...    print(len(hy), c, r)
+    2 None None
+    5 VariableRecord(value=3, time=None, source=None, confidence=0.4, ...)
+    >>> hy, c, r = memory.latest()
+    >>> print(hy, c, r)
+    (HypothesisRecord(record=VariableRecord(value=1, time=None, ...)) None None
+    >>> memory.reset()
+    >>> print(memory)
+    VariableMemory(hypotheses=(), conclusion=None, reasoning=None)
 
     Notes
     -----

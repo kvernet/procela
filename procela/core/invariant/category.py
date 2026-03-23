@@ -1,6 +1,20 @@
 """
 Semantic category of a system invariant.
 
+Examples
+--------
+>>> from procela import InvariantCategory
+>>>
+>>> print(InvariantCategory.CONSISTENCY)
+InvariantCategory.CONSISTENCY
+>>> for category in InvariantCategory:
+...     print(category.name, category.value)
+SAFETY 1
+CONSISTENCY 2
+EPISTEMIC 3
+DYNAMICAL 4
+RESOURCE 5
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/invariant/category.html
@@ -21,6 +35,20 @@ class InvariantCategory(Enum):
 
     Categories describe *what kind of system property* the invariant expresses,
     not how it is enforced.
+
+    Examples
+    --------
+    >>> from procela import InvariantCategory
+    >>>
+    >>> print(InvariantCategory.CONSISTENCY)
+    InvariantCategory.CONSISTENCY
+    >>> for category in InvariantCategory:
+    ...     print(category.name, category.value)
+    SAFETY 1
+    CONSISTENCY 2
+    EPISTEMIC 3
+    DYNAMICAL 4
+    RESOURCE 5
     """
 
     SAFETY = auto()

@@ -21,7 +21,7 @@ from procela.core.memory import (
     VariableMemory,
     VariableRecord,
 )
-from procela.core.policy import ResolutionPolicy
+from procela.core.policy import HighestConfidencePolicy, ResolutionPolicy
 from procela.core.reasoning import (
     AnomalyOperatorThreshold,
     DiagnosisOperatorThreshold,
@@ -83,6 +83,7 @@ def real_variable(real_value_domain):
         domain=real_value_domain,
         description="100% coverage test variable",
         units="test_units",
+        policy=HighestConfidencePolicy(),
         role=VariableRole.ENDOGENOUS,
         config={
             "anomaly": {"method": "z-score", "threshold": 3.0},
@@ -156,6 +157,60 @@ def test_init_minimal(real_value_domain):
     assert var.role == VariableRole.ENDOGENOUS
     assert var.config == {}
     assert var.seed is None
+
+
+def test_get(real_value_domain):
+    """Test get with records."""
+    var = Variable(name="minimal", domain=real_value_domain)
+    records = var.get(start=0)
+    assert len(records) == 0
+
+    var.set(VariableRecord(value=13.5, confidence=0.95))
+    var.set(VariableRecord(value=12.5, confidence=0.99))
+    var.set(VariableRecord(value=14.5, confidence=0.90))
+
+    assert var.stats.count == 3
+    records = var.get(start=2)
+    assert len(records) == 1
+    assert records[0][1].value == 14.5
+
+    records = var.get(start=-1)
+    assert len(records) == 1
+    assert records[0][1].confidence == 0.90
+
+    records = var.get(start=0, size=2, reverse=True)
+    assert len(records) == 2
+    assert records[-1][1].value == 12.5
+
+    records = var.get(start=5)
+    assert len(records) == 0
+
+
+def test_recent(real_value_domain):
+    """Test recent with records."""
+    var = Variable(name="minimal", domain=real_value_domain)
+    records = var.recent()
+    assert len(records) == 0
+
+    var.set(VariableRecord(value=13.5, confidence=0.95))
+    var.set(VariableRecord(value=12.5, confidence=0.99))
+    var.set(VariableRecord(value=14.5, confidence=0.90))
+
+    assert var.stats.count == 3
+    records = var.recent(size=2)
+    assert len(records) == 2
+    assert records[1][1].confidence == 0.99
+
+    records = var.recent(size=1)
+    assert len(records) == 1
+    assert records[0][1].value == 14.5
+
+    records = var.recent(size=3, reverse=True)
+    assert len(records) == 3
+    assert records[-1][1].value == 14.5
+
+    records = var.recent(size=5)
+    assert len(records) == 3
 
 
 def test_variable_epistemic(real_variable):

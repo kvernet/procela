@@ -39,13 +39,13 @@ class TestRealDomain:
         """Test explanation for valid value."""
         domain = RealDomain()
         explanation = domain.explain(50)
-        assert "Value 50 is valid in RealDomain." == explanation
+        assert "Value 50 is valid in RealDomain" == explanation
 
     def test_explain_non_numeric_value(self):
         """Test explanation for non-numeric value."""
         domain = RealDomain()
         explanation = domain.explain("fifty")
-        assert "Value fifty is not numeric." == explanation
+        assert "Value fifty is not numeric" == explanation
 
     def test_edge_case_large_numbers(self):
         """Test edge case with very large numbers."""

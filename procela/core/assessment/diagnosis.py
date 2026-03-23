@@ -4,6 +4,18 @@ Diagnosis result container.
 This module defines the canonical result type produced by
 diagnostic assessment mechanisms in Procela.
 
+Examples
+--------
+>>> from procela import DiagnosisResult
+>>>
+>>> result = DiagnosisResult(
+...     causes=["Insuficient stats."],
+...     confidence=0.27
+... )
+>>>
+>>> print(result)
+DiagnosisResult(causes=['Insuficient stats.'], confidence=0.27, metadata={})
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/assessment/diagnosis.html
@@ -51,6 +63,18 @@ class DiagnosisResult:
     ValueError
         If `confidence` is provided but is not between 0.0
         and 1.0 inclusive.
+
+    Examples
+    --------
+    >>> from procela import DiagnosisResult
+    >>>
+    >>> result = DiagnosisResult(
+    ...     causes=["Insuficient stats."],
+    ...     confidence=0.27
+    ... )
+    >>>
+    >>> print(result)
+    DiagnosisResult(causes=['Insuficient stats.'], confidence=0.27, metadata={})
     """
 
     causes: list[str]
@@ -80,9 +104,7 @@ class DiagnosisResult:
         """
         # Validate causes type and content
         if not isinstance(self.causes, list):
-            raise TypeError(
-                "Causes must be a list, " f"got {type(self.causes).__name__}"
-            )
+            raise TypeError(f"Causes must be a list, got {type(self.causes).__name__}")
         for i, cause in enumerate(self.causes):
             if not isinstance(cause, str):
                 raise TypeError(
@@ -99,5 +121,5 @@ class DiagnosisResult:
                 )
             if not 0.0 <= self.confidence <= 1.0:
                 raise ValueError(
-                    "Confidence must be between 0.0 and 1.0, " f"got {self.confidence}"
+                    f"Confidence must be between 0.0 and 1.0, got {self.confidence}"
                 )

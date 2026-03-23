@@ -1,6 +1,47 @@
 """
 Resolution policy base class in Procela.
 
+Examples
+--------
+>>> import random
+>>>
+>>> from procela import (
+...     HypothesisRecord,
+...     VariableRecord,
+...     ResolutionPolicy
+... )
+>>>
+>>> random.seed(42)
+>>>
+>>> class PriorityOrderPolicy(ResolutionPolicy):
+...     def resolve(self, hypotheses):
+...         hypotheses_list = list(hypotheses)
+...         if not hypotheses_list:
+...             return None
+...
+...         return hypotheses_list[0].record
+>>>
+>>> policy = PriorityOrderPolicy()
+>>>
+>>> hypotheses = [
+...     HypothesisRecord(
+...         VariableRecord(
+...             value=random.gauss(1.3, 0.2),
+...             confidence=random.uniform(0, 1)
+...         ),
+...     ) for _ in range(15)
+... ]
+>>> resolved = policy.resolve(
+...     hypotheses=hypotheses
+... )
+>>>
+>>> print(resolved.value)
+1.2711819340844144
+>>> print(resolved.confidence)
+0.27502931836911926
+>>> print(resolved.explanation)
+None
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/policy/resolution/base.html
@@ -31,6 +72,47 @@ class ResolutionPolicy(ABC):
     Subclasses must implement the `resolve` method with specific resolution
     algorithms (e.g., highest confidence, multi-criteria optimization,
     constraint satisfaction).
+
+    Examples
+    --------
+    >>> import random
+    >>>
+    >>> from procela import (
+    ...     HypothesisRecord,
+    ...     VariableRecord,
+    ...     ResolutionPolicy
+    ... )
+    >>>
+    >>> random.seed(42)
+    >>>
+    >>> class PriorityOrderPolicy(ResolutionPolicy):
+    ...     def resolve(self, hypotheses):
+    ...         hypotheses_list = list(hypotheses)
+    ...         if not hypotheses_list:
+    ...             return None
+    ...
+    ...         return hypotheses_list[0].record
+    >>>
+    >>> policy = PriorityOrderPolicy()
+    >>>
+    >>> hypotheses = [
+    ...     HypothesisRecord(
+    ...         VariableRecord(
+    ...             value=random.gauss(1.3, 0.2),
+    ...             confidence=random.uniform(0, 1)
+    ...         ),
+    ...     ) for _ in range(15)
+    ... ]
+    >>> resolved = policy.resolve(
+    ...     hypotheses=hypotheses
+    ... )
+    >>>
+    >>> print(resolved.value)
+    1.2711819340844144
+    >>> print(resolved.confidence)
+    0.27502931836911926
+    >>> print(resolved.explanation)
+    None
     """
 
     def __init__(self, name: str | None = None) -> None:
@@ -42,6 +124,47 @@ class ResolutionPolicy(ABC):
         name : str | None
             The unique human-readable name of the Resolution.
             Default is the class name object.
+
+        Examples
+        --------
+        >>> import random
+        >>>
+        >>> from procela import (
+        ...     HypothesisRecord,
+        ...     VariableRecord,
+        ...     ResolutionPolicy
+        ... )
+        >>>
+        >>> random.seed(42)
+        >>>
+        >>> class PriorityOrderPolicy(ResolutionPolicy):
+        ...     def resolve(self, hypotheses):
+        ...         hypotheses_list = list(hypotheses)
+        ...         if not hypotheses_list:
+        ...             return None
+        ...
+        ...         return hypotheses_list[0].record
+        >>>
+        >>> policy = PriorityOrderPolicy()
+        >>>
+        >>> hypotheses = [
+        ...     HypothesisRecord(
+        ...         VariableRecord(
+        ...             value=random.gauss(1.3, 0.2),
+        ...             confidence=random.uniform(0, 1)
+        ...         ),
+        ...     ) for _ in range(15)
+        ... ]
+        >>> resolved = policy.resolve(
+        ...     hypotheses=hypotheses
+        ... )
+        >>>
+        >>> print(resolved.value)
+        1.2711819340844144
+        >>> print(resolved.confidence)
+        0.27502931836911926
+        >>> print(resolved.explanation)
+        None
         """
         super().__init__()
         self._key = KeyAuthority.issue(self)

@@ -7,6 +7,46 @@ deviations a data point is from the mean. This detector is particularly
 effective for data that is approximately normally distributed and is a
 cornerstone of univariate statistical process control.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     ZScoreDetector
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> detector = ZScoreDetector()
+>>>
+>>> result = detector.detect(stats=view.stats)
+>>>
+>>> print(result.is_anomaly)
+False
+>>> print(result.confidence())
+None
+>>> print(result.method)
+ZScoreDetector
+>>> print(result.score)
+1.2247448713915976
+>>> print(result.threshold)
+3.0
+>>> for key, value in result.metadata.items():
+...     print(f"{key:18}: {value}")
+mean              : 12.0
+std               : 0.8164965809277203
+value             : 11.0
+count             : 3
+z_score           : 1.2247448713915976
+threshold         : 3.0
+deviation         : -1.0
+absolute_deviation: 1.0
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/anomaly/zscore.html
@@ -55,6 +95,46 @@ class ZScoreDetector(AnomalyDetector):
     threshold : float
         The anomaly detection threshold in standard deviation units.
 
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     ZScoreDetector
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> detector = ZScoreDetector()
+    >>>
+    >>> result = detector.detect(stats=view.stats)
+    >>>
+    >>> print(result.is_anomaly)
+    False
+    >>> print(result.confidence())
+    None
+    >>> print(result.method)
+    ZScoreDetector
+    >>> print(result.score)
+    1.2247448713915976
+    >>> print(result.threshold)
+    3.0
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:18}: {value}")
+    mean              : 12.0
+    std               : 0.8164965809277203
+    value             : 11.0
+    count             : 3
+    z_score           : 1.2247448713915976
+    threshold         : 3.0
+    deviation         : -1.0
+    absolute_deviation: 1.0
+
     Notes
     -----
     The Z-Score method assumes:
@@ -82,6 +162,46 @@ class ZScoreDetector(AnomalyDetector):
         ------
         ValueError
             If threshold is not positive (<= 0).
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     ZScoreDetector
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> detector = ZScoreDetector()
+        >>>
+        >>> result = detector.detect(stats=view.stats)
+        >>>
+        >>> print(result.is_anomaly)
+        False
+        >>> print(result.confidence())
+        None
+        >>> print(result.method)
+        ZScoreDetector
+        >>> print(result.score)
+        1.2247448713915976
+        >>> print(result.threshold)
+        3.0
+        >>> for key, value in result.metadata.items():
+        ...     print(f"{key:18}: {value}")
+        mean              : 12.0
+        std               : 0.8164965809277203
+        value             : 11.0
+        count             : 3
+        z_score           : 1.2247448713915976
+        threshold         : 3.0
+        deviation         : -1.0
+        absolute_deviation: 1.0
         """
         if threshold <= 0:
             raise ValueError(f"Threshold must be > 0, got {threshold}")

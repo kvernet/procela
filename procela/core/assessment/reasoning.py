@@ -7,6 +7,29 @@ encapsulates the outcome of a reasoning process, including its originating
 task, success status, result payload, optional confidence, and
 contextual metadata.
 
+Examples
+--------
+>>> from procela import ReasoningResult, ReasoningTask
+>>>
+>>> result = ReasoningResult.empty()
+>>> print(result.result, result.confidence)
+None None
+>>> result = ReasoningResult(
+...     task=ReasoningTask.CAUSAL_DIAGNOSIS,
+...     success=False,
+...     result=None,
+...     confidence=0.89
+... )
+>>> print(result.result, result.confidence)
+None 0.89
+>>> result = ReasoningResult.failed_result(
+...     task=ReasoningTask.CONFLICT_RESOLUTION,
+...     confidence=0.99,
+...     explanation=""
+... )
+>>> print(result.result, result.confidence)
+None 0.99
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/assessment/reasoning.html
@@ -64,6 +87,29 @@ class ReasoningResult:
         is not numeric when provided.
     ValueError
         If `confidence` is outside [0.0, 1.0] or `execution_time` is negative.
+
+    Examples
+    --------
+    >>> from procela import ReasoningResult, ReasoningTask
+    >>>
+    >>> result = ReasoningResult.empty()
+    >>> print(result.result, result.confidence)
+    None None
+    >>> result = ReasoningResult(
+    ...     task=ReasoningTask.CAUSAL_DIAGNOSIS,
+    ...     success=False,
+    ...     result=None,
+    ...     confidence=0.89
+    ... )
+    >>> print(result.result, result.confidence)
+    None 0.89
+    >>> result = ReasoningResult.failed_result(
+    ...     task=ReasoningTask.CONFLICT_RESOLUTION,
+    ...     confidence=0.99,
+    ...     explanation=""
+    ... )
+    >>> print(result.result, result.confidence)
+    None 0.99
     """
 
     task: ReasoningTask
@@ -102,8 +148,7 @@ class ReasoningResult:
         # Validate task type
         if not isinstance(self.task, ReasoningTask):
             raise TypeError(
-                "Task must be a ReasoningTask instance, "
-                f"got {type(self.task).__name__}"
+                f"Task must be a ReasoningTask instance, got {type(self.task).__name__}"
             )
 
         # Validate confidence range
@@ -115,7 +160,7 @@ class ReasoningResult:
                 )
             if not 0.0 <= self.confidence <= 1.0:
                 raise ValueError(
-                    "Confidence must be between 0.0 and 1.0, " f"got {self.confidence}"
+                    f"Confidence must be between 0.0 and 1.0, got {self.confidence}"
                 )
 
         # Validate timestamp type
@@ -141,7 +186,7 @@ class ReasoningResult:
                 )
             if self.execution_time < 0:
                 raise ValueError(
-                    "Execution time must be non-negative, " f"got {self.execution_time}"
+                    f"Execution time must be non-negative, got {self.execution_time}"
                 )
 
     @classmethod

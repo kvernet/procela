@@ -10,6 +10,42 @@ The registry implements the Factory and Registry design patterns, allowing
 the system to decouple detector implementation from usage and enabling
 runtime configuration of detection strategies.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     get_detector
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> detector = get_detector(name="ewma")
+>>>
+>>> result = detector.detect(stats=view.stats)
+>>>
+>>> print(result.is_anomaly)
+False
+>>> print(result.confidence())
+None
+>>> print(result.method)
+EWMADetector
+>>> print(result.score)
+1.114517832966354
+>>> print(result.threshold)
+3.0
+>>> for key, value in result.metadata.items():
+...     print(f"{key:10}: {value}")
+value     : 11.0
+ewma      : 11.91
+std       : 0.8164965809277203
+difference: -0.9100000000000001
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/anomaly/registry.html
@@ -68,11 +104,47 @@ def get_detector(name: str, **kwargs: Any) -> AnomalyDetector:
     TypeError
         If the provided keyword arguments are incompatible with the
         detector's constructor.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     get_detector
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> detector = get_detector(name="ewma")
+    >>>
+    >>> result = detector.detect(stats=view.stats)
+    >>>
+    >>> print(result.is_anomaly)
+    False
+    >>> print(result.confidence())
+    None
+    >>> print(result.method)
+    EWMADetector
+    >>> print(result.score)
+    1.114517832966354
+    >>> print(result.threshold)
+    3.0
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:10}: {value}")
+    value     : 11.0
+    ewma      : 11.91
+    std       : 0.8164965809277203
+    difference: -0.9100000000000001
     """
     if name not in _ANOMALY_DETECTORS:
         available = ", ".join(sorted(_ANOMALY_DETECTORS.keys()))
         raise KeyError(
-            f"Anomaly detector '{name}' not found. " f"Available detectors: {available}"
+            f"Anomaly detector '{name}' not found. Available detectors: {available}"
         )
 
     detector_class = _ANOMALY_DETECTORS[name]

@@ -168,11 +168,11 @@ class TestStatisticalDomain:
         stats = self.build_memory_statistics(count=2, sum=200.0, sumsq=20200.0)
 
         explanation = domain.explain(95, stats.result())
-        assert "Value 95 is within [80.0, 120.0]." == explanation
+        assert "Value 95 is within [80.0, 120.0]" == explanation
 
         # Different value, same bounds
         explanation2 = domain.explain(125, stats.result())
-        assert "Value 125 is not within [80.0, 120.0]." == explanation2
+        assert "Value 125 is not within [80.0, 120.0]" == explanation2
 
     def test_explain_without_stats(self):
         """Test explanation without stats."""
@@ -214,29 +214,29 @@ class TestStatisticalDomain:
 
         domain1 = StatisticalDomain(k=1.0)
         exp1 = domain1.explain(95, stats.result())
-        assert exp1 == "Value 95 is within [90.0, 110.0]."
+        assert exp1 == "Value 95 is within [90.0, 110.0]"
 
         domain2 = StatisticalDomain(k=2.0)
         exp2 = domain2.explain(95, stats.result())
-        assert exp2 == "Value 95 is within [80.0, 120.0]."
+        assert exp2 == "Value 95 is within [80.0, 120.0]"
 
         domain3 = StatisticalDomain(k=3.0)
         exp3 = domain3.explain(95, stats.result())
-        assert exp3 == "Value 95 is within [70.0, 130.0]."
+        assert exp3 == "Value 95 is within [70.0, 130.0]"
 
     def test_explain_with_k_zero(self):
         """Test explanation with k=0."""
         domain = StatisticalDomain(k=0.0)
         stats = self.build_memory_statistics(count=2, sum=100.0, sumsq=5000.0)
         explanation = domain.explain(50, stats.result())
-        assert explanation == "Value 50 is within [50.0, 50.0]."
+        assert explanation == "Value 50 is within [50.0, 50.0]"
 
     def test_explain_with_zero_std(self):
         """Test explanation with zero standard deviation."""
         domain = StatisticalDomain(k=2.0)
         stats = self.build_memory_statistics(count=2, sum=100.0, sumsq=5000.0)
         explanation = domain.explain(50, stats.result())
-        assert explanation == "Value 50 is within [50.0, 50.0]."
+        assert explanation == "Value 50 is within [50.0, 50.0]"
 
     def test_explain_with_float_precision(self):
         """Test explanation with floating point precision."""

@@ -6,6 +6,18 @@ assessment mechanisms in Procela. A prediction result represents a
 forecasted value along with its associated epistemic attributes such
 as planning horizon and confidence.
 
+Examples
+--------
+>>> from procela import PredictionResult
+>>>
+>>> result = PredictionResult(
+...     value=19.67, horizon=6,
+...     confidence=0.62
+... )
+>>>
+>>> print(result)
+PredictionResult(value=19.67, horizon=6, confidence=0.62, metadata={})
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/assessment/prediction.html
@@ -55,6 +67,18 @@ class PredictionResult:
     ValueError
         If `horizon` is provided and not positive, or if `confidence`
         is provided but not in [0.0, 1.0].
+
+    Examples
+    --------
+    >>> from procela import PredictionResult
+    >>>
+    >>> result = PredictionResult(
+    ...     value=19.67, horizon=6,
+    ...     confidence=0.62
+    ... )
+    >>>
+    >>> print(result)
+    PredictionResult(value=19.67, horizon=6, confidence=0.62, metadata={})
     """
 
     value: Any
@@ -90,7 +114,7 @@ class PredictionResult:
         if self.horizon is not None:
             if not isinstance(self.horizon, int):
                 raise TypeError(
-                    "Horizon must be an integer, " f"got {type(self.horizon).__name__}"
+                    f"Horizon must be an integer, got {type(self.horizon).__name__}"
                 )
             if self.horizon <= 0:
                 raise ValueError(f"Horizon must be positive, got {self.horizon}")
@@ -104,5 +128,5 @@ class PredictionResult:
                 )
             if not 0.0 <= self.confidence <= 1.0:
                 raise ValueError(
-                    "Confidence must be between 0.0 and 1.0, " f"got {self.confidence}"
+                    f"Confidence must be between 0.0 and 1.0, got {self.confidence}"
                 )

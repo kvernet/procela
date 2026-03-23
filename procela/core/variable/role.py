@@ -6,6 +6,20 @@ Semantic classification system for variables in the Procela framework.
 Defines four fundamental roles that determine how variables behave and are
 processed throughout the reasoning pipeline:
 
+Examples
+--------
+>>> from procela import VariableRole
+>>>
+>>> role = VariableRole.ENDOGENOUS
+>>> assert isinstance(role, VariableRole)
+>>>
+>>> for role in VariableRole:
+...     print(role.name)
+ENDOGENOUS
+EXOGENOUS
+CONTROL
+DERIVED
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/role.html
@@ -46,6 +60,20 @@ class VariableRole(Enum):
     DERIVED
         Variables computed from other variables through transformations.
         These represent aggregated, derived, or synthesized information.
+
+    Examples
+    --------
+    >>> from procela import VariableRole
+    >>>
+    >>> role = VariableRole.ENDOGENOUS
+    >>> assert isinstance(role, VariableRole)
+    >>>
+    >>> for role in VariableRole:
+    ...     print(role.name)
+    ENDOGENOUS
+    EXOGENOUS
+    CONTROL
+    DERIVED
     """
 
     ENDOGENOUS = auto()

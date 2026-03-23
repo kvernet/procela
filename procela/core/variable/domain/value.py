@@ -1,6 +1,30 @@
 """
 Value domain semantic definitions for Procela.
 
+Examples
+--------
+>>> from procela import ValueDomain
+>>>
+>>> class EvenDomain(ValueDomain):
+...         def validate(self, value, stats = None):
+...             return isinstance(value, int | float) and value % 2 == 0
+...
+...         def explain(self, value, stats = None):
+...             if self.validate(value):
+...                 return f"Value {value} is even"
+...             else:
+...                 return f"Value {value} is not even"
+>>>
+>>> domain = EvenDomain()
+>>> print(domain.validate(12))
+True
+>>> print(domain.explain(12))
+Value 12 is even
+>>> print(domain.validate(37))
+False
+>>> print(domain.explain(37))
+Value 37 is not even
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/variable/domain/value.html
@@ -30,6 +54,30 @@ class ValueDomain(ABC):
     name : str
         Optional name for the domain. Used for identification and debugging.
 
+    Examples
+    --------
+    >>> from procela import ValueDomain
+    >>>
+    >>> class EvenDomain(ValueDomain):
+    ...         def validate(self, value, stats = None):
+    ...             return isinstance(value, int | float) and value % 2 == 0
+    ...
+    ...         def explain(self, value, stats = None):
+    ...             if self.validate(value):
+    ...                 return f"Value {value} is even"
+    ...             else:
+    ...                 return f"Value {value} is not even"
+    >>>
+    >>> domain = EvenDomain()
+    >>> print(domain.validate(12))
+    True
+    >>> print(domain.explain(12))
+    Value 12 is even
+    >>> print(domain.validate(37))
+    False
+    >>> print(domain.explain(37))
+    Value 37 is not even
+
     Notes
     -----
     This is an abstract base class. Subclasses must implement the
@@ -47,6 +95,30 @@ class ValueDomain(ABC):
         name : str, optional
             Name for the domain. Default is empty string.
             Useful for debugging and when domains are used in collections.
+
+        Examples
+        --------
+        >>> from procela import ValueDomain
+        >>>
+        >>> class EvenDomain(ValueDomain):
+        ...         def validate(self, value, stats = None):
+        ...             return isinstance(value, int | float) and value % 2 == 0
+        ...
+        ...         def explain(self, value, stats = None):
+        ...             if self.validate(value):
+        ...                 return f"Value {value} is even"
+        ...             else:
+        ...                 return f"Value {value} is not even"
+        >>>
+        >>> domain = EvenDomain()
+        >>> print(domain.validate(12))
+        True
+        >>> print(domain.explain(12))
+        Value 12 is even
+        >>> print(domain.validate(37))
+        False
+        >>> print(domain.explain(37))
+        Value 37 is not even
         """
         self.name = name
 

@@ -10,6 +10,17 @@ Statistical results are typically produced by memory analysis layers
 and consumed through epistemic views by reasoning, diagnosis, anomaly
 detection, and monitoring components.
 
+Examples
+--------
+>>> from procela import StatisticsResult
+>>>
+>>> result = StatisticsResult(
+...     count=2, sum=100, min=8, max=12
+... )
+>>>
+>>> print(result)
+StatisticsResult(count=2, sum=100, min=8, max=12, mean=None, ...)
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/assessment/statistics.html
@@ -68,6 +79,17 @@ class StatisticsResult:
     confidence : float | None, optional
         Confidence level associated with the statistical estimation, if
         applicable.
+
+    Examples
+    --------
+    >>> from procela import StatisticsResult
+    >>>
+    >>> result = StatisticsResult(
+    ...     count=2, sum=100, min=8, max=12
+    ... )
+    >>>
+    >>> print(result)
+    StatisticsResult(count=2, sum=100, min=8, max=12, mean=None, ...)
 
     Notes
     -----

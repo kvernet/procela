@@ -6,6 +6,42 @@ identify anomalies based on the deviation of recent values from the EWMA
 estimate. It's a lightweight detector that leverages the framework's
 built-in statistical computations rather than maintaining its own state.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     EWMADetector
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> detector = EWMADetector()
+>>>
+>>> result = detector.detect(stats=view.stats)
+>>>
+>>> print(result.is_anomaly)
+False
+>>> print(result.confidence())
+None
+>>> print(result.method)
+EWMADetector
+>>> print(result.score)
+1.114517832966354
+>>> print(result.threshold)
+3.0
+>>> for key, value in result.metadata.items():
+...     print(f"{key:10}: {value}")
+value     : 11.0
+ewma      : 11.91
+std       : 0.8164965809277203
+difference: -0.9100000000000001
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/anomaly/ewma.html
@@ -58,6 +94,42 @@ class EWMADetector(AnomalyDetector):
     threshold : float
         The anomaly detection threshold.
 
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     EWMADetector
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> detector = EWMADetector()
+    >>>
+    >>> result = detector.detect(stats=view.stats)
+    >>>
+    >>> print(result.is_anomaly)
+    False
+    >>> print(result.confidence())
+    None
+    >>> print(result.method)
+    EWMADetector
+    >>> print(result.score)
+    1.114517832966354
+    >>> print(result.threshold)
+    3.0
+    >>> for key, value in result.metadata.items():
+    ...     print(f"{key:10}: {value}")
+    value     : 11.0
+    ewma      : 11.91
+    std       : 0.8164965809277203
+    difference: -0.9100000000000001
+
     Notes
     -----
     This detector assumes that StatisticsResult provides:
@@ -85,6 +157,42 @@ class EWMADetector(AnomalyDetector):
         ------
         ValueError
             If threshold is not positive.
+
+        Examples
+        --------
+        >>> from procela import (
+        ...     Variable,
+        ...     StatisticalDomain,
+        ...     VariableRecord,
+        ...     EWMADetector
+        ... )
+        >>>
+        >>> var = Variable("var", StatisticalDomain())
+        >>> var.set(VariableRecord(value=12, confidence=0.98))
+        >>> var.set(VariableRecord(value=13, confidence=0.94))
+        >>> var.set(VariableRecord(value=11, confidence=0.90))
+        >>> view = var.epistemic()
+        >>>
+        >>> detector = EWMADetector()
+        >>>
+        >>> result = detector.detect(stats=view.stats)
+        >>>
+        >>> print(result.is_anomaly)
+        False
+        >>> print(result.confidence())
+        None
+        >>> print(result.method)
+        EWMADetector
+        >>> print(result.score)
+        1.114517832966354
+        >>> print(result.threshold)
+        3.0
+        >>> for key, value in result.metadata.items():
+        ...     print(f"{key:10}: {value}")
+        value     : 11.0
+        ewma      : 11.91
+        std       : 0.8164965809277203
+        difference: -0.9100000000000001
         """
         if threshold <= 0:
             raise ValueError(f"threshold must be > 0, got {threshold}")

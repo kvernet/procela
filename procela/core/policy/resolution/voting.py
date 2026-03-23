@@ -1,6 +1,37 @@
 """
 Resolution policy based on hypothesis voting in Procela.
 
+Examples
+--------
+>>> import random
+>>>
+>>> from procela import (
+...     HypothesisRecord,
+...     VariableRecord,
+...     WeightedVotingPolicy
+... )
+>>>
+>>> random.seed(42)
+>>>
+>>> policy=WeightedVotingPolicy()
+>>>
+>>> hypotheses = [
+...     HypothesisRecord(
+...         VariableRecord(
+...             value=random.gauss(1.3, 0.2),
+...             confidence=random.uniform(0, 1)
+...         ),
+...     ) for _ in range(15)
+... ]
+>>> resolved = policy.resolve(hypotheses=hypotheses)
+>>>
+>>> print(resolved.value)
+1.3103318616666704
+>>> print(resolved.confidence)
+0.38029515762103755
+>>> print(resolved.explanation)
+Weighted voting resolution
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/policy/resolution/voting.html
@@ -20,7 +51,40 @@ from .base import ResolutionPolicy
 
 
 class WeightedVotingPolicy(ResolutionPolicy):
-    """Policy that resolves competing hypotheses with weighted voting."""
+    """
+    Policy that resolves competing hypotheses with weighted voting.
+
+    Examples
+    --------
+    >>> import random
+    >>>
+    >>> from procela import (
+    ...     HypothesisRecord,
+    ...     VariableRecord,
+    ...     WeightedVotingPolicy
+    ... )
+    >>>
+    >>> random.seed(42)
+    >>>
+    >>> policy=WeightedVotingPolicy()
+    >>>
+    >>> hypotheses = [
+    ...     HypothesisRecord(
+    ...         VariableRecord(
+    ...             value=random.gauss(1.3, 0.2),
+    ...             confidence=random.uniform(0, 1)
+    ...         ),
+    ...     ) for _ in range(15)
+    ... ]
+    >>> resolved = policy.resolve(hypotheses=hypotheses)
+    >>>
+    >>> print(resolved.value)
+    1.3103318616666704
+    >>> print(resolved.confidence)
+    0.38029515762103755
+    >>> print(resolved.explanation)
+    Weighted voting resolution
+    """
 
     def resolve(self, hypotheses: Iterable[HypothesisRecord]) -> VariableRecord | None:
         """

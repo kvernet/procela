@@ -6,6 +6,16 @@ temporal information, provenance, confidence, and optional explanation.
 This forms the atomic unit of Variable memory - each record is a
 timestamped, attributed observation that can be reasoned about.
 
+Examples
+--------
+>>> from procela import VariableRecord
+>>>
+>>> record = VariableRecord(value=0.45, confidence=0.98, source=None)
+>>>
+>>> assert record.key() is not None
+>>>
+>>> print(record.describe())
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/memory/variable/record.html
@@ -43,6 +53,16 @@ class VariableRecord:
         explanation: Optional string explaining the rationale or provenance.
                     Supports debugging and transparency.
         _key: Private unique identity token for this record (Key).
+
+    Examples
+    --------
+    >>> from procela import VariableRecord
+    >>>
+    >>> record = VariableRecord(value=0.45, confidence=0.98, source=None)
+    >>>
+    >>> assert record.key() is not None
+    >>>
+    >>> print(record.describe())
     """
 
     value: Any = field(compare=False)

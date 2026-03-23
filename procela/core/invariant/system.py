@@ -1,6 +1,52 @@
 """
 System-level invariant evaluated against a snapshot.
 
+Examples
+--------
+>>> import random
+>>>
+>>> from procela import (
+...     SystemInvariant,
+...     InvariantPhase,
+...     InvariantCategory,
+...     InvariantSeverity,
+...     InvariantSoftness,
+...     VariableSnapshot,
+...     InvariantViolation,
+...     Variable,
+...     RealDomain,
+...     VariableRecord
+... )
+>>>
+>>> random.seed(42)
+>>>
+>>> X = Variable("X", RealDomain())
+>>> Y = Variable("Y", RealDomain())
+>>>
+>>> for _ in range(7):
+...    for var in [X, Y]:
+...        var.set(VariableRecord(
+...            value=random.gauss(1.8, 1.3), confidence=random.uniform(0, 1)
+...        ))
+>>>
+>>> invariant = SystemInvariant(
+...     name="", condition=lambda v: v.views[0].stats.mean < 2.0,
+...     on_violation=lambda v, s: None,
+...     phase=InvariantPhase.PRE,
+...     category=InvariantCategory.EPISTEMIC,
+...     severity=InvariantSeverity.FATAL,
+...     softness=InvariantSoftness.HARD,
+...     message="Invariant violation - mean exceeds threshold"
+... )
+>>>
+>>> snapshot = VariableSnapshot(step=1, views=[X.epistemic(), Y.epistemic()])
+>>>
+>>> try:
+...     print(invariant.check(snapshot))
+... except InvariantViolation as err:
+...     print(f"Error: {err}")
+Error: Invariant violation - mean exceeds threshold
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/invariant/system.html
@@ -34,6 +80,52 @@ class SystemInvariant:
 
     Invariants define non-negotiable assumptions about the system's
     epistemic, dynamical, or safety properties.
+
+    Examples
+    --------
+    >>> import random
+    >>>
+    >>> from procela import (
+    ...     SystemInvariant,
+    ...     InvariantPhase,
+    ...     InvariantCategory,
+    ...     InvariantSeverity,
+    ...     InvariantSoftness,
+    ...     VariableSnapshot,
+    ...     InvariantViolation,
+    ...     Variable,
+    ...     RealDomain,
+    ...     VariableRecord
+    ... )
+    >>>
+    >>> random.seed(42)
+    >>>
+    >>> X = Variable("X", RealDomain())
+    >>> Y = Variable("Y", RealDomain())
+    >>>
+    >>> for _ in range(7):
+    ...    for var in [X, Y]:
+    ...        var.set(VariableRecord(
+    ...            value=random.gauss(1.8, 1.3), confidence=random.uniform(0, 1)
+    ...        ))
+    >>>
+    >>> invariant = SystemInvariant(
+    ...     name="", condition=lambda v: v.views[0].stats.mean < 2.0,
+    ...     on_violation=lambda v, s: None,
+    ...     phase=InvariantPhase.PRE,
+    ...     category=InvariantCategory.EPISTEMIC,
+    ...     severity=InvariantSeverity.FATAL,
+    ...     softness=InvariantSoftness.HARD,
+    ...     message="Invariant violation - mean exceeds threshold"
+    ... )
+    >>>
+    >>> snapshot = VariableSnapshot(step=1, views=[X.epistemic(), Y.epistemic()])
+    >>>
+    >>> try:
+    ...     print(invariant.check(snapshot))
+    ... except InvariantViolation as err:
+    ...     print(f"Error: {err}")
+    Error: Invariant violation - mean exceeds threshold
     """
 
     def __init__(
@@ -75,6 +167,52 @@ class SystemInvariant:
             Default is hard.
         message : str, optional
             Custom violation message.
+
+        Examples
+        --------
+        >>> import random
+        >>>
+        >>> from procela import (
+        ...     SystemInvariant,
+        ...     InvariantPhase,
+        ...     InvariantCategory,
+        ...     InvariantSeverity,
+        ...     InvariantSoftness,
+        ...     VariableSnapshot,
+        ...     InvariantViolation,
+        ...     Variable,
+        ...     RealDomain,
+        ...     VariableRecord
+        ... )
+        >>>
+        >>> random.seed(42)
+        >>>
+        >>> X = Variable("X", RealDomain())
+        >>> Y = Variable("Y", RealDomain())
+        >>>
+        >>> for _ in range(7):
+        ...    for var in [X, Y]:
+        ...        var.set(VariableRecord(
+        ...            value=random.gauss(1.8, 1.3), confidence=random.uniform(0, 1)
+        ...        ))
+        >>>
+        >>> invariant = SystemInvariant(
+        ...     name="", condition=lambda v: v.views[0].stats.mean < 2.0,
+        ...     on_violation=lambda v, s: None,
+        ...     phase=InvariantPhase.PRE,
+        ...     category=InvariantCategory.EPISTEMIC,
+        ...     severity=InvariantSeverity.FATAL,
+        ...     softness=InvariantSoftness.HARD,
+        ...     message="Invariant violation - mean exceeds threshold"
+        ... )
+        >>>
+        >>> snapshot = VariableSnapshot(step=1, views=[X.epistemic(), Y.epistemic()])
+        >>>
+        >>> try:
+        ...     print(invariant.check(snapshot))
+        ... except InvariantViolation as err:
+        ...     print(f"Error: {err}")
+        Error: Invariant violation - mean exceeds threshold
         """
         self.name = name
         self.condition = condition

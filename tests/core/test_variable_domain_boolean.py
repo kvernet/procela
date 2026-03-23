@@ -104,7 +104,7 @@ class TestBooleanDomain:
         """Test explanation for non-boolean values."""
         domain = BooleanDomain()
         explanation = domain.explain(1)
-        assert "Value 1 is allowed in categories {False, True}." in explanation
+        assert "Value 1 is allowed in categories {False, True}" in explanation
         assert "True" in explanation
         assert "False" in explanation
 

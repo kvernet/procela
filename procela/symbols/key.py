@@ -1,5 +1,41 @@
 """
-Key: Pure identity token for Procela.
+Key: Pure identity token in Procela.
+
+Examples
+--------
+>>> from procela import Key
+>>>
+Key creation (abstract, non-deterministic)
+>>> k1 = Key()
+>>> k2 = Key()
+>>>
+>>> assert k1 != k2         # Distinct identities
+>>> assert k1 == k1         # Self-equality
+>>> assert hash(k1) == hash(k1)  # Hash consistency
+>>>
+Valid usage
+>>> mapping = {k1: "entity_data", k2: "other_data"}
+>>> collection = {k1, k2}
+>>>
+Invalid operations (semantic violations)
+>>> k1 + k2
+Traceback (most recent call last):
+...
+procela.core.exceptions.SemanticViolation: Keys cannot be concatenated or composed
+>>> k1 < k2
+Traceback (most recent call last):
+...
+procela.core.exceptions.SemanticViolation: Keys cannot be ordered
+>>>
+>>>
+>>> from procela import generate_key
+>>>
+>>> k2 = generate_key()
+>>>
+>>> k1 & k2
+Traceback (most recent call last):
+...
+procela.core.exceptions.SemanticViolation: Keys cannot be intersected or merged
 
 Semantics Reference
 -------------------
@@ -31,6 +67,32 @@ class Key:
     _token : bytes
         Private 32-byte opaque token. This attribute is private and
         should not be accessed directly by users.
+
+    Examples
+    --------
+    >>> from procela import Key
+    >>>
+    Key creation (abstract, non-deterministic)
+    >>> k1 = Key()
+    >>> k2 = Key()
+    >>>
+    >>> assert k1 != k2         # Distinct identities
+    >>> assert k1 == k1         # Self-equality
+    >>> assert hash(k1) == hash(k1)  # Hash consistency
+    >>>
+    Valid usage
+    >>> mapping = {k1: "entity_data", k2: "other_data"}
+    >>> collection = {k1, k2}
+    >>>
+    Invalid operations (semantic violations)
+    >>> k1 + k2
+    Traceback (most recent call last):
+    ...
+    procela.core.exceptions.SemanticViolation: Keys cannot be concatenated or composed
+    >>> k1 < k2
+    Traceback (most recent call last):
+    ...
+    procela.core.exceptions.SemanticViolation: Keys cannot be ordered
     """
 
     __slots__ = ("_token",)
@@ -420,5 +482,17 @@ def generate_key() -> Key:
     -----
     This is the recommended way to create new Keys when the
     default `Key()` constructor is not sufficient for readability.
+
+    Examples
+    --------
+    >>> from procela import Key, generate_key
+    >>>
+    >>> k1 = Key()
+    >>> k2 = generate_key()
+    >>>
+    >>> k1 & k2
+    Traceback (most recent call last):
+    ...
+    procela.core.exceptions.SemanticViolation: Keys cannot be intersected or merged
     """
     return Key()

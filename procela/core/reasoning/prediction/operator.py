@@ -6,6 +6,34 @@ computational predictions over variable histories. Operators in this
 module compute prediction results only; the semantics of predictions
 are defined externally.
 
+Examples
+--------
+>>> from procela import (
+...     Variable,
+...     StatisticalDomain,
+...     VariableRecord,
+...     PredictionOperator,
+...     get_predictor
+... )
+>>>
+>>> var = Variable("var", StatisticalDomain())
+>>> var.set(VariableRecord(value=12, confidence=0.98))
+>>> var.set(VariableRecord(value=13, confidence=0.94))
+>>> var.set(VariableRecord(value=11, confidence=0.90))
+>>> view = var.epistemic()
+>>>
+>>> operator = PredictionOperator()
+>>> predictor = get_predictor(name="ewma")
+>>>
+>>> result = operator.predict(
+...     predictor=predictor,
+...     view=view, horizon=3
+... )
+>>> print(result.value)
+PredictionResult(value=[11.91, 11.91, 11.91], horizon=3, confidence=0.94, ...
+>>> print(result.horizon)
+3
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/reasoning/prediction/operator.html
@@ -29,6 +57,34 @@ class PredictionOperator:
     This class executes computational prediction using a Predictor instance
     over a VariableView. It does not define the semantic interpretation
     of predictions; this is handled externally.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     Variable,
+    ...     StatisticalDomain,
+    ...     VariableRecord,
+    ...     PredictionOperator,
+    ...     get_predictor
+    ... )
+    >>>
+    >>> var = Variable("var", StatisticalDomain())
+    >>> var.set(VariableRecord(value=12, confidence=0.98))
+    >>> var.set(VariableRecord(value=13, confidence=0.94))
+    >>> var.set(VariableRecord(value=11, confidence=0.90))
+    >>> view = var.epistemic()
+    >>>
+    >>> operator = PredictionOperator()
+    >>> predictor = get_predictor(name="ewma")
+    >>>
+    >>> result = operator.predict(
+    ...     predictor=predictor,
+    ...     view=view, horizon=3
+    ... )
+    >>> print(result.value)
+    PredictionResult(value=[11.91, 11.91, 11.91], horizon=3, confidence=0.94, ...
+    >>> print(result.horizon)
+    3
     """
 
     def predict(

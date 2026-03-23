@@ -132,51 +132,51 @@ class TestRangeDomain:
         """Test explanation for valid value."""
         domain = RangeDomain(min_value=0, max_value=100)
         explanation = domain.explain(50)
-        assert "Value 50 is valid in RangeDomain." == explanation
+        assert "Value 50 is valid in RangeDomain" == explanation
 
     def test_explain_non_numeric_value(self):
         """Test explanation for non-numeric value."""
         domain = RangeDomain(min_value=0, max_value=100)
         explanation = domain.explain("fifty")
-        assert "Value fifty is not numeric." == explanation
+        assert "Value fifty is not numeric" == explanation
 
     def test_explain_value_below_min(self):
         """Test explanation for value below minimum."""
         domain = RangeDomain(min_value=10, max_value=100)
         explanation = domain.explain(5)
-        assert "Value 5 is less than minimum 10." == explanation
+        assert "Value 5 is less than minimum 10" == explanation
 
     def test_explain_value_above_max(self):
         """Test explanation for value above maximum."""
         domain = RangeDomain(min_value=0, max_value=50)
         explanation = domain.explain(75)
-        assert "Value 75 is greater than maximum 50." == explanation
+        assert "Value 75 is greater than maximum 50" == explanation
 
     def test_explain_with_only_min_bound(self):
         """Test explanation with only minimum bound."""
         domain = RangeDomain(min_value=5)
-        assert domain.explain(3) == "Value 3 is less than minimum 5."
-        assert domain.explain(10) == "Value 10 is valid in RangeDomain."
-        assert domain.explain("test") == "Value test is not numeric."
+        assert domain.explain(3) == "Value 3 is less than minimum 5"
+        assert domain.explain(10) == "Value 10 is valid in RangeDomain"
+        assert domain.explain("test") == "Value test is not numeric"
 
     def test_explain_with_only_max_bound(self):
         """Test explanation with only maximum bound."""
         domain = RangeDomain(max_value=20)
-        assert domain.explain(25) == "Value 25 is greater than maximum 20."
-        assert domain.explain(15) == "Value 15 is valid in RangeDomain."
+        assert domain.explain(25) == "Value 25 is greater than maximum 20"
+        assert domain.explain(15) == "Value 15 is valid in RangeDomain"
 
     def test_explain_with_no_bounds(self):
         """Test explanation with no bounds."""
         domain = RangeDomain()
-        assert domain.explain(42) == "Value 42 is valid in RangeDomain."
-        assert domain.explain("test") == "Value test is not numeric."
+        assert domain.explain(42) == "Value 42 is valid in RangeDomain"
+        assert domain.explain("test") == "Value test is not numeric"
 
     def test_explain_with_context_parameter(self):
         """Test explanation with context parameter (should be ignored)."""
         domain = RangeDomain(min_value=0, max_value=100)
         context = {"some": "context"}
         explanation = domain.explain(50, context)
-        assert "Value 50 is valid in RangeDomain." == explanation
+        assert "Value 50 is valid in RangeDomain" == explanation
 
     def test_edge_case_float_precision(self):
         """Test edge case with float precision."""

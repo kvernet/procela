@@ -10,6 +10,44 @@ Mechanism templates are intended for structural exploration, optimization,
 and configuration by executive-level components. They are **not executed
 directly**; execution occurs only through instantiated mechanisms.
 
+Examples
+--------
+>>> from procela import (
+...     MechanismTemplate,
+...     Variable,
+...     RangeDomain,
+...     VariableRecord
+... )
+>>>
+>>> X = Variable("X", RangeDomain(0., 50.))
+>>> Y = Variable("Y", RangeDomain(-50., 50.))
+>>>
+>>> class Mech(MechanismTemplate):
+...     def reads(self):
+...         return [X, Y]
+...
+...     def writes(self):
+...         return [Y]
+...
+...     def transform(self, inputs, outputs):
+...         x, y = [var.value for var in inputs]
+...         outputs[0].add_hypothesis(
+...             VariableRecord(17.4 - x + y, confidence=1.0)
+...         )
+>>>
+>>> mech = Mech()
+>>>
+# Init variables
+>>> X.init(VariableRecord(6, confidence=1.0))
+>>> Y.init(VariableRecord(2.1, confidence=1.0))
+>>>
+>>> mech.transform(inputs=[X, Y], outputs=[Y])
+>>>
+>>> print(len(X.hypotheses))
+0
+>>> print(len(Y.hypotheses))
+1
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/mechanism/template.html
@@ -39,6 +77,44 @@ class MechanismTemplate(ABC):
     ----------
     None. Concrete implementations define specific reads, writes,
     and transformation logic.
+
+    Examples
+    --------
+    >>> from procela import (
+    ...     MechanismTemplate,
+    ...     Variable,
+    ...     RangeDomain,
+    ...     VariableRecord
+    ... )
+    >>>
+    >>> X = Variable("X", RangeDomain(0., 50.))
+    >>> Y = Variable("Y", RangeDomain(-50., 50.))
+    >>>
+    >>> class Mech(MechanismTemplate):
+    ...     def reads(self):
+    ...         return [X, Y]
+    ...
+    ...     def writes(self):
+    ...         return [Y]
+    ...
+    ...     def transform(self, inputs, outputs):
+    ...         x, y = [var.value for var in inputs]
+    ...         outputs[0].add_hypothesis(
+    ...             VariableRecord(17.4 - x + y, confidence=1.0)
+    ...         )
+    >>>
+    >>> mech = Mech()
+    >>>
+    # Init variables
+    >>> X.init(VariableRecord(6, confidence=1.0))
+    >>> Y.init(VariableRecord(2.1, confidence=1.0))
+    >>>
+    >>> mech.transform(inputs=[X, Y], outputs=[Y])
+    >>>
+    >>> print(len(X.hypotheses))
+    0
+    >>> print(len(Y.hypotheses))
+    1
 
     Notes
     -----

@@ -7,6 +7,140 @@ variable conflict resolution occurs consistently across the system.
 
 The executive represents the runtime world instance of a Procela model.
 
+Examples
+--------
+>>> import random
+>>>
+>>> from procela import (
+...     Executive,
+...     Mechanism,
+...     Variable,
+...     RangeDomain,
+...     VariableRecord,
+...     WeightedVotingPolicy,
+...     HighestConfidencePolicy,
+...     SystemInvariant,
+...     InvariantPhase,
+...     VariableSnapshot,
+...     InvariantViolation
+... )
+>>>
+>>> random.seed(42)
+>>>
+>>> X = Variable("X", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+>>> Y = Variable("Y", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+>>> Z = Variable("Z", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+>>>
+>>> def init_variables():
+...     X.init(VariableRecord(1.8, confidence=1.0))
+...     Y.init(VariableRecord(-0.5, confidence=1.0))
+...     Z.init(VariableRecord(9.2, confidence=1.0))
+>>>
+>>> class AddMechanism(Mechanism):
+...     def __init__(self, reads, writes):
+...         super().__init__(reads, writes)
+...
+...     def transform(self):
+...         i1, i2 = [var.value for var in self.reads()]
+...         self.writes()[0].add_hypothesis(VariableRecord(
+...             i1 + i2, confidence=random.uniform(0., 1.), source=self.key()
+...         ))
+>>>
+>>> class DivideBy2Mechanism(Mechanism):
+...     def __init__(self, reads, writes):
+...         super().__init__(reads, writes)
+...
+...     def transform(self):
+...         for var in self.writes():
+...             var.add_hypothesis(VariableRecord(
+...                 var.value*0.5,
+...                 confidence=random.uniform(0., 1.),
+...                 source=self.key()
+...             ))
+>>>
+>>> class EmergencyMechanism(Mechanism):
+...     def __init__(self, reads, writes):
+...         super().__init__(reads, writes)
+...
+...     def transform(self):
+...         for var in self.writes():
+...             var.add_hypothesis(VariableRecord(
+...                 var.value*0.3, confidence=1.0, source=self.key()
+...             ))
+>>>
+>>> emergencyMech = EmergencyMechanism([], [X, Y, Z])
+>>>
+>>> executive = Executive(mechanisms=[
+...     AddMechanism([X, Y], [Z]),
+...     AddMechanism([X, Z], [Y]),
+...     AddMechanism([Y, Z], [X]),
+...     DivideBy2Mechanism([], [X, Y, Z])
+... ])
+>>>
+>>> class SafetyInvariant(SystemInvariant):
+...     def __init__(self, threshold: float = 75.0):
+...         self.threshold = threshold
+...         self.added = False
+...
+...         def check_condition(snapshot: VariableSnapshot):
+...             for view in snapshot.views:
+...                 if view.stats.mean > self.threshold:
+...                     return False
+...             return True
+...
+...         def handle_violation(
+...             invariant: InvariantViolation, snapshot: VariableSnapshot
+...         ):
+...             if not self.added:
+...                 executive.add_mechanism(emergencyMech)
+...                 for var in [X, Y, Z]:
+...                     var.policy = HighestConfidencePolicy()
+...                 self.added = True
+...
+...         super().__init__(
+...             "SafetyInvariant",
+...             condition=check_condition,
+...             on_violation=handle_violation,
+...             phase=InvariantPhase.RUNTIME,
+...             message=""
+...         )
+>>>
+>>> executive.add_invariant(
+...     SafetyInvariant(threshold=700000.0)
+... )
+>>>
+>>> def pre_step(executive: Executive, step: int):
+...     for mech in executive.mechanisms():
+...         if mech == emergencyMech:
+...             print(f"Step {step}: Mechanism has been added.")
+...
+...     if step == 80:
+...         executive.remove_mechanism(emergencyMech)
+>>>
+# Simulation
+>>> init_variables()
+>>> executive.run(steps=100, pre_step=pre_step, post_step=None)
+>>>
+>>> for var in [X, Y, Z]:
+...     _, conclusion, _ = var.memory.latest()
+...     print(var.name, var.value, var.confidence)
+Step 68: Mechanism has been added.
+Step 69: Mechanism has been added.
+Step 70: Mechanism has been added.
+Step 71: Mechanism has been added.
+Step 72: Mechanism has been added.
+Step 73: Mechanism has been added.
+Step 74: Mechanism has been added.
+Step 75: Mechanism has been added.
+Step 76: Mechanism has been added.
+Step 77: Mechanism has been added.
+Step 78: Mechanism has been added.
+Step 79: Mechanism has been added.
+Step 80: Mechanism has been added.
+X 35.499546845738266 0.6239227647681721
+Y 95.6222768274126 0.5870536688252231
+Z 12.311591567968035 0.6060587403984868
+
 Semantics Reference
 -------------------
 https://procela.org/docs/semantics/core/executive/base.html
@@ -18,6 +152,7 @@ https://procela.org/docs/examples/core/executive/base.html
 
 from __future__ import annotations
 
+import logging
 import random
 from typing import Callable, Sequence
 
@@ -36,6 +171,7 @@ from ..invariant.phase import InvariantPhase
 from ..invariant.snapshot import VariableSnapshot
 from ..invariant.system import SystemInvariant
 from ..key_authority import KeyAuthority
+from ..logger import setup_logging
 from ..mechanism.base import Mechanism
 from ..process.base import Process
 from ..variable.variable import Variable
@@ -49,10 +185,148 @@ class Executive:
     consistency, and ensures that variable conflict resolution occurs
     exactly once per variable per step. It does not resolve conflicts
     itself but orchestrates when variables must do so.
+
+    Examples
+    --------
+    >>> import random
+    >>>
+    >>> from procela import (
+    ...     Executive,
+    ...     Mechanism,
+    ...     Variable,
+    ...     RangeDomain,
+    ...     VariableRecord,
+    ...     WeightedVotingPolicy,
+    ...     HighestConfidencePolicy,
+    ...     SystemInvariant,
+    ...     InvariantPhase,
+    ...     VariableSnapshot,
+    ...     InvariantViolation
+    ... )
+    >>>
+    >>> random.seed(42)
+    >>>
+    >>> X = Variable("X", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+    >>> Y = Variable("Y", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+    >>> Z = Variable("Z", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+    >>>
+    >>> def init_variables():
+    ...     X.init(VariableRecord(1.8, confidence=1.0))
+    ...     Y.init(VariableRecord(-0.5, confidence=1.0))
+    ...     Z.init(VariableRecord(9.2, confidence=1.0))
+    >>>
+    >>> class AddMechanism(Mechanism):
+    ...     def __init__(self, reads, writes):
+    ...         super().__init__(reads, writes)
+    ...
+    ...     def transform(self):
+    ...         i1, i2 = [var.value for var in self.reads()]
+    ...         self.writes()[0].add_hypothesis(VariableRecord(
+    ...             i1 + i2, confidence=random.uniform(0., 1.), source=self.key()
+    ...         ))
+    >>>
+    >>> class DivideBy2Mechanism(Mechanism):
+    ...     def __init__(self, reads, writes):
+    ...         super().__init__(reads, writes)
+    ...
+    ...     def transform(self):
+    ...         for var in self.writes():
+    ...             var.add_hypothesis(VariableRecord(
+    ...                 var.value*0.5,
+    ...                 confidence=random.uniform(0., 1.),
+    ...                 source=self.key()
+    ...             ))
+    >>>
+    >>> class EmergencyMechanism(Mechanism):
+    ...     def __init__(self, reads, writes):
+    ...         super().__init__(reads, writes)
+    ...
+    ...     def transform(self):
+    ...         for var in self.writes():
+    ...             var.add_hypothesis(VariableRecord(
+    ...                 var.value*0.3, confidence=1.0, source=self.key()
+    ...             ))
+    >>>
+    >>> emergencyMech = EmergencyMechanism([], [X, Y, Z])
+    >>>
+    >>> executive = Executive(mechanisms=[
+    ...     AddMechanism([X, Y], [Z]),
+    ...     AddMechanism([X, Z], [Y]),
+    ...     AddMechanism([Y, Z], [X]),
+    ...     DivideBy2Mechanism([], [X, Y, Z])
+    ... ])
+    >>>
+    >>> class SafetyInvariant(SystemInvariant):
+    ...     def __init__(self, threshold: float = 75.0):
+    ...         self.threshold = threshold
+    ...         self.added = False
+    ...
+    ...         def check_condition(snapshot: VariableSnapshot):
+    ...             for view in snapshot.views:
+    ...                 if view.stats.mean > self.threshold:
+    ...                     return False
+    ...             return True
+    ...
+    ...         def handle_violation(
+    ...             invariant: InvariantViolation, snapshot: VariableSnapshot
+    ...         ):
+    ...             if not self.added:
+    ...                 executive.add_mechanism(emergencyMech)
+    ...                 for var in [X, Y, Z]:
+    ...                     var.policy = HighestConfidencePolicy()
+    ...                 self.added = True
+    ...
+    ...         super().__init__(
+    ...             "SafetyInvariant",
+    ...             condition=check_condition,
+    ...             on_violation=handle_violation,
+    ...             phase=InvariantPhase.RUNTIME,
+    ...             message=""
+    ...         )
+    >>>
+    >>> executive.add_invariant(
+    ...     SafetyInvariant(threshold=700000.0)
+    ... )
+    >>>
+    >>> def pre_step(executive: Executive, step: int):
+    ...     for mech in executive.mechanisms():
+    ...         if mech == emergencyMech:
+    ...             print(f"Step {step}: Mechanism has been added.")
+    ...
+    ...     if step == 80:
+    ...         executive.remove_mechanism(emergencyMech)
+    >>>
+    # Simulation
+    >>> init_variables()
+    >>> executive.run(steps=100, pre_step=pre_step, post_step=None)
+    >>>
+    >>> for var in [X, Y, Z]:
+    ...     _, conclusion, _ = var.memory.latest()
+    ...     print(var.name, var.value, var.confidence)
+    Step 68: Mechanism has been added.
+    Step 69: Mechanism has been added.
+    Step 70: Mechanism has been added.
+    Step 71: Mechanism has been added.
+    Step 72: Mechanism has been added.
+    Step 73: Mechanism has been added.
+    Step 74: Mechanism has been added.
+    Step 75: Mechanism has been added.
+    Step 76: Mechanism has been added.
+    Step 77: Mechanism has been added.
+    Step 78: Mechanism has been added.
+    Step 79: Mechanism has been added.
+    Step 80: Mechanism has been added.
+    X 35.499546845738266 0.6239227647681721
+    Y 95.6222768274126 0.5870536688252231
+    Z 12.311591567968035 0.6060587403984868
     """
 
     def __init__(
-        self, *, processes: Sequence[Process] = [], mechanisms: Sequence[Mechanism] = []
+        self,
+        *,
+        processes: Sequence[Process] = [],
+        mechanisms: Sequence[Mechanism] = [],
+        logger: logging.Logger | None = None,
     ) -> None:
         """
         Initialize the executive.
@@ -63,6 +337,142 @@ class Executive:
             Processes participating in the world.
         mechanisms : Sequence[Mechanism]
             Mechanisms participating in the world.
+        logger : logging.Logger | None
+            Logger to use.
+
+        Examples
+        --------
+        >>> import random
+        >>>
+        >>> from procela import (
+        ...     Executive,
+        ...     Mechanism,
+        ...     Variable,
+        ...     RangeDomain,
+        ...     VariableRecord,
+        ...     WeightedVotingPolicy,
+        ...     HighestConfidencePolicy,
+        ...     SystemInvariant,
+        ...     InvariantPhase,
+        ...     VariableSnapshot,
+        ...     InvariantViolation
+        ... )
+        >>>
+        >>> random.seed(42)
+        >>>
+        >>> X = Variable("X", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+        >>> Y = Variable("Y", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+        >>> Z = Variable("Z", RangeDomain(-100., 100.), policy=WeightedVotingPolicy())
+        >>>
+        >>> def init_variables():
+        ...     X.init(VariableRecord(1.8, confidence=1.0))
+        ...     Y.init(VariableRecord(-0.5, confidence=1.0))
+        ...     Z.init(VariableRecord(9.2, confidence=1.0))
+        >>>
+        >>> class AddMechanism(Mechanism):
+        ...     def __init__(self, reads, writes):
+        ...         super().__init__(reads, writes)
+        ...
+        ...     def transform(self):
+        ...         i1, i2 = [var.value for var in self.reads()]
+        ...         self.writes()[0].add_hypothesis(VariableRecord(
+        ...             i1 + i2, confidence=random.uniform(0., 1.), source=self.key()
+        ...         ))
+        >>>
+        >>> class DivideBy2Mechanism(Mechanism):
+        ...     def __init__(self, reads, writes):
+        ...         super().__init__(reads, writes)
+        ...
+        ...     def transform(self):
+        ...         for var in self.writes():
+        ...             var.add_hypothesis(VariableRecord(
+        ...                 var.value*0.5,
+        ...                 confidence=random.uniform(0., 1.),
+        ...                 source=self.key()
+        ...             ))
+        >>>
+        >>> class EmergencyMechanism(Mechanism):
+        ...     def __init__(self, reads, writes):
+        ...         super().__init__(reads, writes)
+        ...
+        ...     def transform(self):
+        ...         for var in self.writes():
+        ...             var.add_hypothesis(VariableRecord(
+        ...                 var.value*0.3, confidence=1.0, source=self.key()
+        ...             ))
+        >>>
+        >>> emergencyMech = EmergencyMechanism([], [X, Y, Z])
+        >>>
+        >>> executive = Executive(mechanisms=[
+        ...     AddMechanism([X, Y], [Z]),
+        ...     AddMechanism([X, Z], [Y]),
+        ...     AddMechanism([Y, Z], [X]),
+        ...     DivideBy2Mechanism([], [X, Y, Z])
+        ... ])
+        >>>
+        >>> class SafetyInvariant(SystemInvariant):
+        ...     def __init__(self, threshold: float = 75.0):
+        ...         self.threshold = threshold
+        ...         self.added = False
+        ...
+        ...         def check_condition(snapshot: VariableSnapshot):
+        ...             for view in snapshot.views:
+        ...                 if view.stats.mean > self.threshold:
+        ...                     return False
+        ...             return True
+        ...
+        ...         def handle_violation(
+        ...             invariant: InvariantViolation, snapshot: VariableSnapshot
+        ...         ):
+        ...             if not self.added:
+        ...                 executive.add_mechanism(emergencyMech)
+        ...                 for var in [X, Y, Z]:
+        ...                     var.policy = HighestConfidencePolicy()
+        ...                 self.added = True
+        ...
+        ...         super().__init__(
+        ...             "SafetyInvariant",
+        ...             condition=check_condition,
+        ...             on_violation=handle_violation,
+        ...             phase=InvariantPhase.RUNTIME,
+        ...             message=""
+        ...         )
+        >>>
+        >>> executive.add_invariant(
+        ...     SafetyInvariant(threshold=700000.0)
+        ... )
+        >>>
+        >>> def pre_step(executive: Executive, step: int):
+        ...     for mech in executive.mechanisms():
+        ...         if mech == emergencyMech:
+        ...             print(f"Step {step}: Mechanism has been added.")
+        ...
+        ...     if step == 80:
+        ...         executive.remove_mechanism(emergencyMech)
+        >>>
+        # Simulation
+        >>> init_variables()
+        >>> executive.run(steps=100, pre_step=pre_step, post_step=None)
+        >>>
+        >>> for var in [X, Y, Z]:
+        ...     _, conclusion, _ = var.memory.latest()
+        ...     print(var.name, var.value, var.confidence)
+        Step 68: Mechanism has been added.
+        Step 69: Mechanism has been added.
+        Step 70: Mechanism has been added.
+        Step 71: Mechanism has been added.
+        Step 72: Mechanism has been added.
+        Step 73: Mechanism has been added.
+        Step 74: Mechanism has been added.
+        Step 75: Mechanism has been added.
+        Step 76: Mechanism has been added.
+        Step 77: Mechanism has been added.
+        Step 78: Mechanism has been added.
+        Step 79: Mechanism has been added.
+        Step 80: Mechanism has been added.
+        X 35.499546845738266 0.6239227647681721
+        Y 95.6222768274126 0.5870536688252231
+        Z 12.311591567968035 0.6060587403984868
 
         Notes
         -----
@@ -78,6 +488,11 @@ class Executive:
         self._invariants: list[SystemInvariant] = []
         self.rng: random.Random | np.random.Generator | None = None
         self._step_index: int = 0
+        self.logger = logger or setup_logging(
+            name="procela",
+            log_file="logs/procela.log",
+            json_file="logs/procela.jsonl",
+        )
         self.prepare()
 
     def add_process(self, process: Process) -> None:
@@ -153,6 +568,17 @@ class Executive:
         """
         self.rng = rng
 
+    def set_logger(self, logger: logging.Logger) -> None:
+        """
+        Set logger.
+
+        Parameters
+        ----------
+        logger : logging.Logger
+            The logging logger to use.
+        """
+        self.logger = logger
+
     def prepare(self) -> None:
         """
         Prepare the executive for execution.
@@ -181,8 +607,8 @@ class Executive:
 
         Execution consists of five strictly ordered phases:
 
-        1. Call pre-phase invariants before collecting hypotheses
-        2. Process execution where conflicts are collected
+        1. Call pre-phase invariants
+        2. Collect competing hypotheses
         3. Call runtime-phase invariants before resolution
         4. Ask writable variables to resolve their conflicts
         5. Call post-phase invariants after resolution
@@ -195,22 +621,18 @@ class Executive:
         if not self._prepared:
             raise ExecutionError("Executive must be prepared before execution.")
 
-        # Phase 1: call pre-phase invariants
         self._check_invariants(InvariantPhase.PRE)
 
         # Increment step index
         self._step_index += 1
 
-        # Phase 2: execute processes and mechanisms
         for process in self._processes:
             process.step()
         for mechanism in self._mechanisms:
             mechanism.run()
 
-        # Phase 3: call runtime-phase invariants
         self._check_invariants(InvariantPhase.RUNTIME)
 
-        # Phase 4: ask writable variables to resolve their conflicts
         for variable in self.writable():
             if not isinstance(variable, Variable):
                 raise TypeError(f"Expected `Variable`, got {type(variable)}")
@@ -224,7 +646,6 @@ class Executive:
             # Clear candidates
             variable.clear_hypotheses()
 
-        # Phase 5: call post-phase invariants
         self._check_invariants(InvariantPhase.POST)
 
     def run(
@@ -238,10 +659,10 @@ class Executive:
 
         Execution consists of three strictly ordered phases:
 
-        1. Call pre_step event
-        2. Process execution where conflicts are collected
-           then resolution policy applied
-        3. Call post_step event
+        1. Call pre_step event before collecting hypotheses
+        2. Process execution where invariants are checked,
+           conflicts are collected, then resolution policy applied
+        3. Call post_step event after simulation
 
         Raises
         ------
