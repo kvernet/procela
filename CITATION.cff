@@ -1,0 +1,28 @@
+cff-version: 1.2.0
+message: "If you use Procela in your research, please cite the following work."
+title: "Procela: A Framework for Epistemic Governance in Mechanistic Simulation"
+authors:
+  - family-names: "Vernet"
+    given-names: "Kinson"
+    orcid: "https://orcid.org/0009-0009-7535-3357"
+repository-code: "https://github.com/kvernet/procela"
+url: "https://procela.org"
+abstract: "Procela is a Python framework where variables act as epistemic authorities, mechanisms encode competing ontologies, and governances observe epistemic signals and mutate system topology at runtime."
+keywords:
+  - epistemic governance
+  - mechanistic simulation
+  - competing ontologies
+  - antimicrobial resistance
+  - auditability
+license: "Apache-2.0"
+version: "1.0.0"
+date-released: "2026-03-27"
+preferred-citation:
+  type: article
+  authors:
+    - family-names: "Vernet"
+      given-names: "Kinson"
+  title: "Procela: A Framework for Epistemic Governance in Mechanistic Simulation"
+  year: 2026
+  journal: "Advanced Theory and Simulations"
+  url: "https://procela.org/paper"
