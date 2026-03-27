@@ -5,7 +5,7 @@ Project Lead
 Kinson Vernet <kinson.vernet@gmail.com> (0009-0009-7535-3357)
   - Project architecture
   - Mechanistic core engine
-  - Causal reasoning
+  - Variables epistemic authorities
   - System invariant abstraction
 
 
@@ -41,8 +41,8 @@ NOTES:
 - Contributors will be added as the project evolves
 - Contact: To be established
 
-# Last updated: 2026-01-04
-# Version: 0.1.0 (structural foundation)
+# Last updated: 2026-03-23
+# Version: 0.1.0 (core foundation)
 
 
 ---

@@ -623,9 +623,6 @@ class Executive:
 
         self._check_invariants(InvariantPhase.PRE)
 
-        # Increment step index
-        self._step_index += 1
-
         for process in self._processes:
             process.step()
         for mechanism in self._mechanisms:
@@ -645,6 +642,9 @@ class Executive:
 
             # Clear candidates
             variable.clear_hypotheses()
+
+        # Increment step index
+        self._step_index += 1
 
         self._check_invariants(InvariantPhase.POST)
 
@@ -793,6 +793,17 @@ class Executive:
             The system invariant to add.
         """
         self._invariants.append(invariant)
+
+    def remove_invariant(self, invariant: SystemInvariant) -> None:
+        """
+        Remove completely an invariant from the Execution.
+
+        Parameters
+        ----------
+        invariant : SystemInvariant
+            The invariant to be removed.
+        """
+        self._invariants = [inv for inv in self._invariants if inv != invariant]
 
     def safe_mode(self, invariant: SystemInvariant) -> None:
         """

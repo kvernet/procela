@@ -115,7 +115,8 @@ class WeightedVotingPolicy(ResolutionPolicy):
         -----
             This method use the product of metadata.get("weight", 1.0)
             and hypothesis.confidence. If hypothesis doesn't have a weight,
-            1.0 is used as default.
+            1.0 is used as default. It skips null hypothesis and
+            hypothesis which value or confidence is None.
         """
         # Convert to list for reusability and to check emptiness
         hypotheses_list = list(hypotheses)
@@ -135,7 +136,7 @@ class WeightedVotingPolicy(ResolutionPolicy):
                 )
 
             record = hypothesis.record
-            if record is None or record.source is None or record.confidence is None:
+            if record is None or record.value is None or record.confidence is None:
                 continue
 
             if not (0 <= record.confidence <= 1):

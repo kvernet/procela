@@ -332,13 +332,25 @@ class TestExecutive:
         mock_variable.epistemic.assert_called_once()
 
     def test_add_invariant_method(self):
-        """Test add_invariant method adds to list."""
+        """Test add_invariant method."""
         executive = Executive()
         mock_invariant = create_autospec(SystemInvariant)
 
         executive.add_invariant(mock_invariant)
 
         assert executive._invariants == [mock_invariant]
+
+    def test_remove_invariant_method(self):
+        """Test remove_invariant method."""
+        executive = Executive()
+        mock_invariant = create_autospec(SystemInvariant)
+
+        executive.add_invariant(mock_invariant)
+
+        executive.remove_invariant(mock_invariant)
+        executive.step()
+
+        assert executive._invariants == []
 
     def test_safe_mode_method(self):
         """Test safe_mode method (currently not implemented)."""

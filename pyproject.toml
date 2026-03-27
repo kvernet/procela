@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "procela"
 version = "0.1.0"
-description = ""
+description = "Epistemic Governance in Mechanistic Simulations Under Structural Uncertainty"
 authors = [
     { name = "Kinson Vernet", email = "kinson.vernet@gmail.com" }
 ]
@@ -18,6 +18,10 @@ dependencies = [
     "numpy>=1.26.0",
 ]
 
+[project.urls]
+Homepage = "https://procela.org"
+Documentation = "https://docs.procela.org/"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.4",
@@ -29,9 +33,7 @@ dev = [
     "mypy==1.8.0",
     "pydocstyle>=6.3",
 ]
-
 docs = []
-
 notebooks = []
 
 [tool.setuptools.packages.find]
