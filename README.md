@@ -144,16 +144,16 @@ We demonstrate Procela on antimicrobial resistance (AMR) spread with three compe
 
 | Governance strategy | Error reduction | Regret improvement |
 |---------------------|-----------------|-------------------|
-| Policy fragility | -1.88% | **-11.2%** |
-| Coverage decay | **15.04%** | 15.0% |
-| Structural probe | 9.02 | **67.0%** |
-| All combined | 2.06% | 54.5% |
+| Policy fragility | -1.63% | **-9.8%** |
+| Coverage decay | **20.42%** | 35.5% |
+| Structural probe | 9.31 | **69.0%** |
+| All combined | 8.18% | 61.6% |
 
 > **Key finding**: The case study has revealed a fundamental trade-off:
 
 - Prediction-optimal $\neq$ decision-optimal
-- Coverage improves predictions but makes worse decisions (+15.04%, C.E=-15.0%)
-- Probe makes better decisions but only modestly improves predictions (+9.02%, C.E=-67.0%)
+- Coverage decay makes better predictions but modest decisions (+20.42%, C.E=35.5%)
+- Probe makes better decisions but only modestly improves predictions (+9.31%, C.E=69.0%)
 
 Consider hybrid — probe for information, coverage for prediction.
 
@@ -199,9 +199,9 @@ make pre-commit  # Run all checks
 
 ## 📖 Documentation
 
-- **User guide**: [https://procela.org/docs](https://procela.org/docs)
-- **API reference**: [https://procela.org/api](https://procela.dev/api)
-- **Examples**: [https://procela.org/examples](https://procela.org/examples)
+- **User guide**: [https://docs.procela.org/](https://docs.procela.org/)
+- **API reference**: [https://docs.procela.org/api/procela.html](https://docs.procela.org/api/procela.html)
+- **Examples**: [https://docs.procela.org/examples](https://docs.procela.org/examples)
 
 ---
 
@@ -228,9 +228,9 @@ If you use Procela in your research, please cite:
 ```bibtex
 @software{procela_2026,
   author = {Kinson Vernet},
-  title = {Procela: A Framework for Epistemic Governance in Mechanistic Simulation},
+  title = {Procela: Epistemic Governance in Mechanistic Simulation Under Structural Uncertainty},
   year = {2026},
-  url = {https://procela.orh},
+  url = {https://procela.org},
   doi = {10.xxxx/xxxxx}
 }
 ```
@@ -245,7 +245,7 @@ Procela is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for
 
 ## 🙏 Acknowledgments
 
-Procela was developed with support from [Your Institution/Funding Source]. We thank the open-source community for Pyodide, NumPy, and the Python scientific ecosystem.
+We thank the open-source community for Pyodide, NumPy, and the Python scientific ecosystem.
 
 ---
 

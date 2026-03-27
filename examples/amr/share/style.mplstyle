@@ -1,0 +1,78 @@
+# ===============================
+# Style for Procela PoC.
+# ===============================
+
+# Figure
+figure.figsize: 6, 4
+figure.dpi: 300
+figure.facecolor: white
+figure.autolayout: True
+
+# Savefig
+savefig.dpi: 600
+savefig.bbox: tight
+savefig.format: pdf
+savefig.pad_inches: 0.02
+savefig.transparent: False
+
+# Fonts
+font.family: serif
+font.serif: Times New Roman, Times, DejaVu Serif
+font.size: 11
+axes.labelsize: 12
+axes.titlesize: 14
+xtick.labelsize: 10
+ytick.labelsize: 10
+legend.fontsize: 10
+
+# Lines & markers
+lines.linewidth: 2.0
+lines.markersize: 6
+lines.markeredgewidth: 1.0
+
+# Axes & spines
+axes.linewidth: 1.2
+axes.edgecolor: black
+axes.facecolor: white
+axes.grid: True
+grid.color: 0.85
+grid.linestyle: --
+grid.linewidth: 0.6
+grid.alpha: 0.5
+
+# Ticks
+xtick.direction: out
+ytick.direction: out
+xtick.major.size: 5
+ytick.major.size: 5
+xtick.minor.size: 3
+ytick.minor.size: 3
+xtick.major.width: 1.2
+ytick.major.width: 1.2
+xtick.top: True
+ytick.right: True
+
+# Legend
+legend.frameon: False
+legend.framealpha: 0.9
+legend.fancybox: False
+legend.edgecolor: 0.8
+legend.borderpad: 0.4
+legend.loc: best
+
+# Color cycle (colorblind friendly)
+axes.prop_cycle: cycler("color", ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b", "#e377c2", "#7f7f7f"])
+
+# Errorbars
+errorbar.capsize: 3
+
+# Image
+image.cmap: viridis
+image.interpolation: nearest
+axes.formatter.use_mathtext: True
+axes.formatter.limits: -3, 3
+
+# Editable text in Illustrator/Adobe
+pdf.fonttype: 42
+ps.fonttype: 42
+svg.fonttype: none

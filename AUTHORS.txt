@@ -42,7 +42,7 @@ NOTES:
 - Contact: To be established
 
 # Last updated: 2026-03-23
-# Version: 0.1.0 (core foundation)
+# Version: 1.0.0 (core foundation)
 
 
 ---
