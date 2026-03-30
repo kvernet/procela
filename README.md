@@ -149,6 +149,11 @@ We demonstrate Procela on antimicrobial resistance (AMR) spread with three compe
 | Structural probe | 9.31 | **69.0%** |
 | All combined | 8.18% | 61.6% |
 
+<p align="center">
+    <img src="./figures/governance_stats.png" width="49%" />
+    <img src="./figures/cumulative_difference.png" width="49%" />
+</p>
+
 > **Key finding**: The case study has revealed a fundamental trade-off:
 
 - Prediction-optimal $\neq$ decision-optimal
@@ -156,6 +161,11 @@ We demonstrate Procela on antimicrobial resistance (AMR) spread with three compe
 - Probe makes better decisions but only modestly improves predictions (+9.31%, C.E=69.0%)
 
 Consider hybrid — probe for information, coverage for prediction.
+
+### Topology dynamics
+Procela ensures complete auditability. The memories of variables can be used to visualize the topology dynamics. As illustrated in the following figure, the topology evolution for each governance in the AMR study is illustrated. The contact family has three mechanisms, while the environmental and selection families have four each. In total, the AMR case study has eleven competing mechanisms that governance restructures over time.
+
+![Topology dynamics](./figures/topology_evolution.png)
 
 ---
 
@@ -168,7 +178,7 @@ git clone https://github.com/kvernet/procela.git
 cd procela
 python -m venv .venv
 source .venv/bin/activate  # On Windows: .venv\Scripts\activate
-make install-dev
+make dev-install
 ```
 
 ### Available makefile targets
