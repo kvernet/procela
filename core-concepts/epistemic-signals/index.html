@@ -1,0 +1,2562 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Epistemic Governance in Mechanistic Simulations Under Structural Uncertainty">
+      
+      
+      
+        <link rel="canonical" href="https://docs.procela.org/core-concepts/epistemic-signals/">
+      
+      
+        <link rel="prev" href="../governance/">
+      
+      
+        <link rel="next" href="../executive/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Epistemic Signals - Procela</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#epistemic-signals-measuring-what-we-know" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Procela" class="md-header__button md-logo" aria-label="Procela" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Procela
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Epistemic Signals
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kvernet/procela" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kvernet/procela
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Procela" class="md-nav__button md-logo" aria-label="Procela" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Procela
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kvernet/procela" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kvernet/procela
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/first-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    First Simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Variables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mechanisms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mechanisms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Epistemic Signals
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Epistemic Signals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-epistemic-signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What are Epistemic Signals?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples-of-epistemic-signals-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples of Epistemic Signals Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples of Epistemic Signals Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coverage-prediction-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage: Prediction Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fragility-policy-sensitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fragility: Policy Sensitivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conflict-hypothesis-disagreement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conflict: Hypothesis Disagreement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confidence-current-certainty" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Confidence: Current Certainty
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entropy-hypothesis-diversity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entropy: Hypothesis Diversity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signal-aggregation-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal Aggregation and Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Signal Aggregation and Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-signal-composite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Signal Composite
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signal-time-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal Time Series
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signal-based-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal-Based Governance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Signal-Based Governance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-adaptive-threshold-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Adaptive Threshold Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-signal-driven-mechanism-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Signal-Driven Mechanism Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signal-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal Visualization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-signal-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Signal Normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-signal-smoothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Signal Smoothing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-signal-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Signal Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-signal-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Signal Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signal-combinations-for-decision-making" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal Combinations for Decision Making
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../executive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Executive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/custom-policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/audit-trail/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Trail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/temperature-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Temperature
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/amr-case-study/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AMR Case Study
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/other-domains/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Other Domains
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../semantics/key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../semantics/time/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Time
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#what-are-epistemic-signals" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What are Epistemic Signals?
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#examples-of-epistemic-signals-implementation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Examples of Epistemic Signals Implementation
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Examples of Epistemic Signals Implementation">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#coverage-prediction-accuracy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Coverage: Prediction Accuracy
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#fragility-policy-sensitivity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Fragility: Policy Sensitivity
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#conflict-hypothesis-disagreement" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Conflict: Hypothesis Disagreement
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#confidence-current-certainty" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Confidence: Current Certainty
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#entropy-hypothesis-diversity" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Entropy: Hypothesis Diversity
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signal-aggregation-and-analysis" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal Aggregation and Analysis
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Signal Aggregation and Analysis">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multi-signal-composite" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Multi-Signal Composite
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signal-time-series" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal Time Series
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signal-based-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal-Based Governance
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Signal-Based Governance">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-adaptive-threshold-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Adaptive Threshold Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-signal-driven-mechanism-selection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example: Signal-Driven Mechanism Selection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signal-visualization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal Visualization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-signal-normalization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Signal Normalization
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-signal-smoothing" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Signal Smoothing
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-signal-caching" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Signal Caching
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-signal-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Signal Validation
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#signal-combinations-for-decision-making" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Signal Combinations for Decision Making
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="epistemic-signals-measuring-what-we-know">Epistemic Signals: Measuring what we know</h1>
+<p><strong>Epistemic signals</strong> are the measurable quantities that reveal the state of knowledge within a simulation. Unlike traditional simulation outputs (like temperature or population), epistemic signals tell us about <strong>confidence, uncertainty, disagreement, and stability</strong>—the meta-level properties that governance units use to make decisions.</p>
+<p>This guide covers:</p>
+<ul>
+<li>What epistemic signals are and why they matter</li>
+<li>Examples of epistemic signals (coverage, fragility, conflict, confidence, entropy)</li>
+<li>Signal aggregation, time series, and anomaly detection</li>
+<li>Signal-driven governance examples</li>
+<li>Visualization techniques</li>
+<li>Best practices for signal computation and validation</li>
+<li>Decision matrices combining multiple signals</li>
+</ul>
+<h2 id="what-are-epistemic-signals">What are Epistemic Signals?</h2>
+<p>Epistemic signals answer questions like:
+- <strong>Coverage</strong>: How accurate are our predictions?
+- <strong>Fragility</strong>: How sensitive are decisions to resolution policies?
+- <strong>Conflict</strong>: How much do mechanisms disagree?
+- <strong>Confidence</strong>: How certain are we about current values?
+- <strong>Entropy</strong>: How diverse are the competing hypotheses?</p>
+<pre><code class="language-python">from procela import VariableSnapshot
+
+class EpistemicSignal:
+    def __init__(self, snapshot: VariableSnapshot):
+        self.snapshot = snapshot
+
+    # Prediction accuracy
+    def coverage(self):
+        pass
+
+    # Policy sensitivity
+    def fragility(self):
+        pass
+
+    # Hypothesis disagreement
+    def conflict(self):
+        pass
+
+    # Current certainty
+    def confidence(self):
+        pass
+
+    # Hypothesis diversity
+    def entropy(self):
+        pass
+</code></pre>
+<h2 id="examples-of-epistemic-signals-implementation">Examples of Epistemic Signals Implementation</h2>
+<h3 id="coverage-prediction-accuracy">Coverage: Prediction Accuracy</h3>
+<p>Coverage measures how well mechanisms have predicted actual outcomes:</p>
+<pre><code class="language-python">import numpy as np
+
+from procela import VariableSnapshot, KeyAuthority
+
+class CoverageSignal:
+    &quot;&quot;&quot;Measures prediction accuracy over time&quot;&quot;&quot;
+
+    def __init__(self, snapshot: VariableSnapshot):
+        &quot;&quot;&quot;
+        Coverage = 1 - (prediction_error / domain_range)
+
+        Parameters
+        ----------
+        snapshot : VariableSnapshot
+            The snapshot to compute coverage from.
+        &quot;&quot;&quot;
+        self.snapshot = snapshot
+
+    def compute(self, window: int) -&gt; float:
+        &quot;&quot;&quot;
+        Coverage = 1 - (prediction_error / domain_range)
+
+        Parameters
+        ----------
+        window : int
+            The window for recent errors.
+
+        Returns
+        -------
+            float: Coverage score between 0 and 1
+                  1 = perfect predictions
+                  0 = predictions are maximally wrong
+        &quot;&quot;&quot;
+        if min([view.stats.count for view in self.snapshot.views]) &lt; window:
+            return 0.5  # Not enough data
+
+        # Compare recent predictions with actual outcomes
+        actual_var, predicted_var = [
+            KeyAuthority.resolve(view.key) for view in self.snapshot.views[:2]
+        ]
+        domain_range = predicted_var.domain.max_value - predicted_var.domain.mix_value
+        errors = []
+        for actuals, preds in zip(
+            actual_var.get(start=-window, size=window),
+            predicted_var.get(start=-window, size=window)
+        ):
+            predicted = preds[1].value
+            actual = actuals[1].value
+            error = abs(predicted - actual)
+            errors.append(error)
+
+        avg_error = np.mean(errors)
+
+        coverage = 1 - (avg_error / domain_range)
+        return max(0, min(1, coverage))  # Clamp to [0,1]
+
+# Usage for some snapshot
+coverage = CoverageSignal().compute(snapshot)
+if coverage &lt; 0.3:
+    print(&quot;⚠️ Low coverage - predictions are unreliable!&quot;)
+</code></pre>
+<h3 id="fragility-policy-sensitivity">Fragility: Policy Sensitivity</h3>
+<p>Fragility measures how much the resolved value changes when you change the resolution policy:</p>
+<pre><code class="language-python">from procela import (
+    Variable,
+    RangeDomain,
+    WeightedConfidencePolicy,
+    WeightedVotingPolicy,
+    HighestConfidencePolicy,
+    ResolutionPolicy
+)
+
+class FragilitySignal:
+    &quot;&quot;&quot;Measures sensitivity to resolution policy&quot;&quot;&quot;
+
+    def compute(self, variable: Variable) -&gt; float:
+        &quot;&quot;&quot;
+        Fragility = max_deviation / domain_range
+
+        Returns
+        -------
+            float: Fragility score between 0 and 1
+                  0 = stable (all policies agree)
+                  1 = fragile (policies give very different results)
+        &quot;&quot;&quot;
+        hypotheses = variable.hypotheses
+        if len(hypotheses) &lt; 2:
+            return 0.0
+
+        # Compute what each policy would produce
+        policies: list[ResolutionPolicy] = [
+            WeightedConfidencePolicy(),
+            WeightedVotingPolicy(),
+            HighestConfidencePolicy(),
+            #MedianPolicy(), # To be implemented
+            #MeanPolicy() # To be implemented
+        ]
+
+        results = []
+        for policy in policies:
+            resolved = policy.resolve(hypotheses)
+            results.append(resolved.value)
+
+        # Calculate spread
+        min_val = min(results)
+        max_val = max(results)
+        spread = max_val - min_val
+        domain_range = self._domain_range(variable)
+
+        fragility = spread / domain_range
+        return min(1, fragility)  # Cap at 1
+
+    def _domain_range(self, variable: Variable) -&gt; float:
+        if not isinstance(variable.domain, RangeDomain):
+            return 1.0
+
+        return variable.domain.max_value - variable.domain.min_value
+
+# Usage for some variable
+fragility = FragilitySignal().compute(variable)
+if fragility &gt; 0.5:
+    print(&quot;⚠️ High fragility - policy choice matters greatly!&quot;)
+</code></pre>
+<h3 id="conflict-hypothesis-disagreement">Conflict: Hypothesis Disagreement</h3>
+<p>Conflict measures how much mechanisms disagree with each other:</p>
+<pre><code class="language-python">import numpy
+
+from procela import Variable, RangeDomain
+
+class ConflictSignal:
+    &quot;&quot;&quot;Measures disagreement among competing hypotheses&quot;&quot;&quot;
+
+    def compute(self, variable: Variable) -&gt; float:
+        &quot;&quot;&quot;
+        Conflict = normalized standard deviation of hypotheses
+
+        Returns
+        -------
+            float: Conflict score between 0 and 1
+                  0 = perfect agreement
+                  1 = maximal disagreement
+        &quot;&quot;&quot;
+        values = [
+            hypothesis.record.value for hypothesis in variable.hypotheses
+            if hypothesis.record.value is not None
+        ]
+
+        if len(values) &lt; 2:
+            return 0.0
+
+        # Standard deviation as measure of spread
+        std_dev = numpy.std(values)
+        domain_range = self._domain_range(variable)
+
+        conflict = std_dev / domain_range
+        return min(1, conflict)  # Cap at 1
+
+    def _domain_range(self, variable: Variable) -&gt; float:
+        if not isinstance(variable.domain, RangeDomain):
+            return 1.0
+
+        return variable.domain.max_value - variable.domain.min_value
+
+# Usage for some variable with different disagreement patterns
+conflict = ConflictSignal().compute(variable)
+
+if conflict &lt; 0.1:
+    print(&quot;✅ High consensus among mechanisms&quot;)
+elif conflict &lt; 0.5:
+    print(&quot;⚠️ Moderate disagreement&quot;)
+else:
+    print(&quot;🔥 Strong disagreement - epistemic crisis!&quot;)
+</code></pre>
+<h3 id="confidence-current-certainty">Confidence: Current Certainty</h3>
+<p>Confidence represents how certain we are about the current value:</p>
+<pre><code class="language-python">from procela import Variable
+
+class ConfidenceSignal:
+    &quot;&quot;&quot;Measures current confidence in resolved value&quot;&quot;&quot;
+
+    def compute(self, variable: Variable) -&gt; float:
+        &quot;&quot;&quot;
+        Confidence = weighted average of hypothesis confidences
+
+        Returns
+        -------
+            float: Confidence score between 0 and 1
+        &quot;&quot;&quot;
+        if not variable.hypotheses:
+            return 0.0
+
+        total_weight = sum(
+            hypothesis.record.confidence for hypothesis in variable.hypotheses
+            if hypothesis.record.confidence is not None
+        )
+        weighted_sum = sum(
+            hypothesis.record.confidence**2 for hypothesis in variable.hypotheses
+            if hypothesis.record.confidence is not None
+        )
+
+        if total_weight == 0:
+            return 0.0
+
+        confidence = weighted_sum / total_weight
+        return min(1, confidence)
+
+# Usage for some variable
+confidence = ConfidenceSignal().compute(variable)
+print(f&quot;Current confidence: {confidence:.2%}&quot;)
+
+if confidence &lt; 0.5:
+    print(&quot;⚠️ Low confidence - consider gathering more evidence&quot;)
+</code></pre>
+<h3 id="entropy-hypothesis-diversity">Entropy: Hypothesis Diversity</h3>
+<p>Entropy measures the diversity of hypotheses (information-theoretic):</p>
+<pre><code class="language-python">import numpy as np
+
+from procela import Variable, RangeDomain
+
+class EntropySignal:
+    &quot;&quot;&quot;Measures diversity of competing hypotheses&quot;&quot;&quot;
+
+    def compute(self, variable: Variable, bins: int = 10) -&gt; float:
+        &quot;&quot;&quot;
+        Shannon entropy of hypothesis distribution
+
+        Returns
+        -------
+            float: Entropy between 0 (all hypotheses identical)
+                  and log(bins) (uniformly distributed)
+        &quot;&quot;&quot;
+        values = [
+            hypothesis.record.value for hypothesis in variable.hypotheses
+            if hypothesis.record.value is not None
+        ]
+
+        if len(values) &lt; 2:
+            return 0.0
+
+        # Bin the values to create a distribution
+        domain_min, domain_max = self._domain_range(variable)
+        bins_edges = np.linspace(domain_min, domain_max, bins + 1)
+
+        hist, _ = np.histogram(values, bins=bins_edges)
+        hist = hist / len(values)  # Normalize to probabilities
+
+        # Remove zero probabilities
+        hist = hist[hist &gt; 0]
+
+        # Compute Shannon entropy
+        entropy = -np.sum(hist * np.log2(hist))
+
+        # Normalize to [0, 1]
+        max_entropy = np.log2(bins)
+        normalized_entropy = entropy / max_entropy
+
+        return normalized_entropy
+
+    def _domain_range(self, variable: Variable) -&gt; float:
+        if not isinstance(variable.domain, RangeDomain):
+            return [0.0, 1.0]
+
+        return [variable.domain.max_value, variable.domain.min_value]
+
+# Usage for some variable
+entropy = EntropySignal().compute(variable, bins=10)
+print(f&quot;Hypothesis entropy: {entropy:.3f}&quot;)
+
+if entropy &gt; 0.8:
+    print(&quot;🔀 High entropy - mechanisms have diverse views&quot;)
+elif entropy &lt; 0.3:
+    print(&quot;🎯 Low entropy - strong consensus&quot;)
+</code></pre>
+<h2 id="signal-aggregation-and-analysis">Signal Aggregation and Analysis</h2>
+<h3 id="multi-signal-composite">Multi-Signal Composite</h3>
+<pre><code class="language-python">class CompositeSignal:
+    &quot;&quot;&quot;Combines multiple signals into a single score&quot;&quot;&quot;
+
+    def __init__(self, weights: list[float] | None = None) -&gt; None:
+        self.weights = weights or [0.3, 0.3, -0.2, -0.2]
+
+    def compute(self, values: list[float]) -&gt; float:
+        score = 0.0
+
+        for value, weight in zip(values, self.weights):
+                score += weight * value
+
+        # Normalize to [0, 1]
+        score = (score + 1) / 2
+        return max(0, min(1, score))
+
+# Usage for the previous signal
+composite = CompositeSignal()
+values = [coverage, confidence, conflict, fragility]
+health_score = composite.compute(values)
+
+if health_score &gt; 0.7:
+    print(&quot;✅ System is healthy&quot;)
+elif health_score &gt; 0.3:
+    print(&quot;⚠️ System needs attention&quot;)
+else:
+    print(&quot;🔥 System is in crisis!&quot;)
+</code></pre>
+<h3 id="signal-time-series">Signal Time Series</h3>
+<pre><code class="language-python">import numpy as np
+
+class SignalTimeSeries:
+    &quot;&quot;&quot;Tracks signal evolution over time&quot;&quot;&quot;
+
+    def __init__(self, max_history=1000):
+        self.max_history = max_history
+        self.history = {}  # signal_name -&gt; list of values
+
+    def record(self, signals):
+        &quot;&quot;&quot;Record current signal values&quot;&quot;&quot;
+        for signal_name in signals:
+            if signal_name.endswith(&quot;_signal&quot;):
+                value = getattr(signals, signal_name)()
+
+                if signal_name not in self.history:
+                    self.history[signal_name] = []
+
+                self.history[signal_name].append({
+                    &quot;step&quot;: signals[&quot;step&quot;],
+                    &quot;value&quot;: value
+                })
+
+                # Maintain history size
+                if len(self.history[signal_name]) &gt; self.max_history:
+                    self.history[signal_name].pop(0)
+
+    def get_trend(self, signal_name, window=10):
+        &quot;&quot;&quot;Calculate recent trend&quot;&quot;&quot;
+        if signal_name not in self.history:
+            return 0.0
+
+        recent = self.history[signal_name][-window:]
+        if len(recent) &lt; 2:
+            return 0.0
+
+        values = [r[&quot;value&quot;] for r in recent]
+        return values[-1] - values[0]  # Simple trend
+
+    def detect_anomaly(self, signal_name, threshold=2.0):
+        &quot;&quot;&quot;Detect anomalous signal values&quot;&quot;&quot;
+        if signal_name not in self.history:
+            return False
+
+        values = [r[&quot;value&quot;] for r in self.history[signal_name]]
+        if len(values) &lt; 10:
+            return False
+
+        mean = np.mean(values)
+        std = np.std(values)
+        current = values[-1]
+
+        z_score = abs(current - mean) / (std + 1e-6)
+        return z_score &gt; threshold
+
+# Usage for some signals
+tracker = SignalTimeSeries()
+tracker.record(signals)
+
+if tracker.detect_anomaly(&quot;coverage&quot;):
+    print(&quot;🚨 Coverage anomaly detected!&quot;)
+</code></pre>
+<h2 id="signal-based-governance">Signal-Based Governance</h2>
+<h3 id="example-adaptive-threshold-governance">Example: Adaptive Threshold Governance</h3>
+<pre><code class="language-python">import numpy as np
+
+from procela import (
+    SystemInvariant,
+    InvariantPhase,
+    VariableSnapshot,
+    InvariantViolation,
+    HighestConfidencePolicy,
+    Variable
+)
+
+class AdaptiveThresholdGovernance(SystemInvariant):
+    &quot;&quot;&quot;Governance that adapts its thresholds based on signal history&quot;&quot;&quot;
+
+    def __init__(self, variable: Variable, base_threshold: float = 0.3):
+        self.variable = variable
+        self.base_threshold = base_threshold
+        self.signal_history = []
+        self.adaptive_threshold = base_threshold
+
+        def _conflict(snapshot: VariableSnapshot):
+            pass
+
+        def _coverage(snapshot: VariableSnapshot):
+            pass
+
+        def _adapt_threshold(snapshot: VariableSnapshot):
+            &quot;&quot;&quot;Dynamically adjust threshold based on system state&quot;&quot;&quot;
+            # Track signal history
+            self.signal_history.append({
+                &quot;step&quot;: snapshot.step,
+                &quot;conflict&quot;: _conflict(snapshot),
+                &quot;coverage&quot;: _coverage(snapshot)
+            })
+
+            # Keep recent history only
+            if len(self.signal_history) &gt; 100:
+                self.signal_history.pop(0)
+
+            # If coverage is high, we can be more tolerant of conflict
+            if len(self.signal_history) &gt; 20:
+                avg_coverage = np.mean([h[&quot;coverage&quot;] for h in self.signal_history[-20:]])
+
+                # Higher coverage → higher tolerance
+                self.adaptive_threshold = self.base_threshold * (1 + avg_coverage)
+
+        def check(snapshot: VariableSnapshot) -&gt; bool:
+            # Get current signals
+            conflict = _conflict()
+            coverage = _coverage()
+
+            # Adapt threshold based on recent performance
+            _adapt_threshold(snapshot)
+
+            # Check if threshold exceeded
+            return conflict &lt;= self.adaptive_threshold
+
+        def handle(invariant: InvariantViolation, snapshot: VariableSnapshot) -&gt; None:
+            conflict = _conflict(snapshot)
+            print(f&quot;⚠️ Conflict threshold exceeded: {conflict:.3f} &gt; {self.adaptive_threshold:.3f}&quot;)
+            print(&quot;Initiating conflict resolution...&quot;)
+
+            # Switch to highest-confidence policy during conflict
+            self.variable.policy = HighestConfidencePolicy()
+
+        super().__init__(
+            name=&quot;AdaptiveThreshold&quot;,
+            condition=check,
+            on_violation=handle,
+            phase=InvariantPhase.RUNTIME
+        )
+</code></pre>
+<h3 id="example-signal-driven-mechanism-selection">Example: Signal-Driven Mechanism Selection</h3>
+<pre><code class="language-python">import numpy as np
+
+from procela import (
+    SystemInvariant,
+    InvariantPhase,
+    VariableSnapshot,
+    Variable,
+    Mechanism
+)
+
+
+class MechanismSelector(SystemInvariant):
+    &quot;&quot;&quot;Selects mechanisms based on their signal profiles&quot;&quot;&quot;
+
+    def __init__(self, mechanisms: list[Mechanism], variable: Variable):
+        self.mechanisms = mechanisms
+        self.variable = variable
+        self.performance_tracking = {m.key(): [] for m in mechanisms}
+
+        def _coverage(snapshot: VariableSnapshot):
+            pass
+
+        def _conflict(snapshot: VariableSnapshot):
+            pass
+
+        def _evaluate_mechanisms(snapshot: VariableSnapshot) -&gt; None:
+            &quot;&quot;&quot;Evaluate each mechanism's contribution to signals&quot;&quot;&quot;
+            hypotheses, conclusion, _ = variable.memory.latest()
+            if conclusion is not None and conclusion.value is not None:
+                for hypothesis in hypotheses:
+                    mech_key = hypothesis.record.key
+                    if hypothesis.record.value is None or mech_key is None:
+                        continue
+                    error = abs(hypothesis.record.value - conclusion.value)
+
+                    # Track performance
+                    self.performance_tracking[mech_key].append(error)
+
+                    # Keep window
+                    if len(self.performance_tracking[mech_key]) &gt; 50:
+                        self.performance_tracking[mech_key].pop(0)
+
+                # Periodically adjust mechanism weights based on signals
+                if snapshot.step % 20 == 0:
+                    _adjust_weights(snapshot)
+
+        def _adjust_weights(snapshot: VariableSnapshot) -&gt; None:
+            &quot;&quot;&quot;Adjust which mechanisms are active based on signals&quot;&quot;&quot;
+            # Calculate signal health
+            coverage = _coverage(snapshot)
+            conflict = _conflict(snapshot)
+
+            if coverage &lt; 0.3:
+                # Low coverage - need better mechanisms
+                print(&quot;Low coverage detected, switching to high-confidence mechanisms&quot;)
+                _select_by_confidence()
+            elif conflict &gt; 0.7:
+                # High conflict - need consensus
+                print(&quot;High conflict detected, using median mechanisms&quot;)
+                _select_by_consensus() # To be implemented
+            else:
+                # Normal operation
+                _select_by_performance() # To be implemented
+
+        def _select_by_confidence():
+            &quot;&quot;&quot;Select mechanisms with highest average confidence&quot;&quot;&quot;
+            confidences = {}
+            for mech in self.mechanisms:
+                if mech.key() in self.performance_tracking:
+                    # Confidence = 1 - normalized error
+                    errors = self.performance_tracking[mech.key()]
+                    if errors:
+                        avg_error = np.mean(errors)
+                        confidence = 1 - avg_error
+                        confidences[mech.key()] = confidence
+
+            # Enable top 3 mechanisms
+            top_mechs = sorted(confidences.items(), key=lambda x: x[1], reverse=True)[:3]
+            for mech in self.mechanisms:
+                if mech.key() in [m[0] for m in top_mechs]:
+                    mech.enable()
+                else:
+                    mech.disable()
+
+        def check(snapshot: VariableSnapshot) -&gt; bool:
+            # Always evaluate
+            self._evaluate_mechanisms(snapshot)
+            return True
+
+        super().__init__(
+            name=&quot;MechanismSelector&quot;,
+            condition=check,
+            on_violation=None,
+            phase=InvariantPhase.POST
+        )
+</code></pre>
+<h2 id="signal-visualization">Signal Visualization</h2>
+<p>Install matplotlib if not already installed.</p>
+<pre><code class="language-bash">pip install matplotlib
+</code></pre>
+<pre><code class="language-python">import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+
+def visualize_signals(signal_history, variable_name):
+    &quot;&quot;&quot;Create dashboard of epistemic signals&quot;&quot;&quot;
+
+    steps = [s[&quot;step&quot;] for s in signal_history]
+
+    fig = plt.figure(figsize=(12, 10))
+    gs = GridSpec(3, 2, figure=fig)
+
+    # 1. Coverage
+    ax1 = fig.add_subplot(gs[0, 0])
+    coverage = [s[&quot;coverage&quot;] for s in signal_history]
+    ax1.plot(steps, coverage, 'g-', linewidth=2)
+    ax1.axhline(y=0.5, color='r', linestyle='--', alpha=0.5)
+    ax1.set_ylabel('Coverage')
+    ax1.set_title('Prediction Accuracy')
+    ax1.grid(True, alpha=0.3)
+
+    # 2. Confidence
+    ax2 = fig.add_subplot(gs[0, 1])
+    confidence = [s[&quot;confidence&quot;] for s in signal_history]
+    ax2.plot(steps, confidence, 'b-', linewidth=2)
+    ax2.set_ylabel('Confidence')
+    ax2.set_title('Current Certainty')
+    ax2.grid(True, alpha=0.3)
+
+    # 3. Conflict
+    ax3 = fig.add_subplot(gs[1, 0])
+    conflict = [s[&quot;conflict&quot;] for s in signal_history]
+    ax3.fill_between(steps, 0, conflict, alpha=0.3, color='red')
+    ax3.plot(steps, conflict, 'r-', linewidth=2)
+    ax3.set_ylabel('Conflict')
+    ax3.set_title('Mechanism Disagreement')
+    ax3.grid(True, alpha=0.3)
+
+    # 4. Fragility
+    ax4 = fig.add_subplot(gs[1, 1])
+    fragility = [s[&quot;fragility&quot;] for s in signal_history]
+    ax4.plot(steps, fragility, 'orange', linewidth=2)
+    ax4.set_ylabel('Fragility')
+    ax4.set_title('Policy Sensitivity')
+    ax4.grid(True, alpha=0.3)
+
+    # 5. Entropy
+    ax5 = fig.add_subplot(gs[2, :])
+    entropy = [s[&quot;entropy&quot;] for s in signal_history]
+    ax5.plot(steps, entropy, 'purple', linewidth=2)
+    ax5.set_xlabel('Simulation Step')
+    ax5.set_ylabel('Entropy')
+    ax5.set_title('Hypothesis Diversity')
+    ax5.grid(True, alpha=0.3)
+
+    plt.suptitle(f'Epistemic Signals for {variable_name}')
+    plt.tight_layout()
+    plt.savefig(f'{variable_name}_signals.png', dpi=150)
+    plt.show()
+
+# Usage for some signal_history and variable_name
+visualize_signals(signal_history, variable_name)
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-signal-normalization">1. Signal Normalization</h3>
+<pre><code class="language-python"># Always normalize signals to [0, 1] for comparability
+def normalize_signal(value, min_val, max_val):
+    return (value - min_val) / (max_val - min_val)
+
+# Or use domain ranges when available
+def normalize_by_domain(value, domain_range):
+    return value / domain_range
+</code></pre>
+<h3 id="2-signal-smoothing">2. Signal Smoothing</h3>
+<p>Install scipy if not already installed.</p>
+<pre><code class="language-bash">pip install scipy
+</code></pre>
+<pre><code class="language-python">from scipy.signal import savgol_filter
+
+def smooth_signal(values, window=11):
+    &quot;&quot;&quot;Apply smoothing to reduce noise&quot;&quot;&quot;
+    if len(values) &lt; window:
+        return values
+    return savgol_filter(values, window, 3)
+</code></pre>
+<h3 id="3-signal-caching">3. Signal Caching</h3>
+<pre><code class="language-python">class CachedSignal(EpistemicSignal):
+    &quot;&quot;&quot;Cache expensive signal computations&quot;&quot;&quot;
+
+    def __init__(self, compute_func, cache_ttl=10):
+        self.compute_func = compute_func
+        self.cache_ttl = cache_ttl
+        self.cache = {}
+
+    def compute(self, snapshot):
+        step = snapshot.step
+        key = (step // self.cache_ttl)  # Cache per TTL block
+
+        if key not in self.cache:
+            self.cache[key] = self.compute_func(snapshot)
+
+        return self.cache[key]
+</code></pre>
+<h3 id="4-signal-validation">4. Signal Validation</h3>
+<pre><code class="language-python">def validate_signal(signal_value, signal_name):
+    &quot;&quot;&quot;Validate signal is within expected range&quot;&quot;&quot;
+    if not 0 &lt;= signal_value &lt;= 1:
+        print(f&quot;⚠️ Invalid {signal_name}: {signal_value} (clamping to [0,1])&quot;)
+        return max(0, min(1, signal_value))
+    return signal_value
+</code></pre>
+<h2 id="signal-combinations-for-decision-making">Signal Combinations for Decision Making</h2>
+<pre><code class="language-python">class DecisionMatrix:
+    &quot;&quot;&quot;Combines signals for governance decisions&quot;&quot;&quot;
+
+    def __init__(self):
+        self.rules = []
+
+    def add_rule(self, conditions, action):
+        &quot;&quot;&quot;Add decision rule&quot;&quot;&quot;
+        self.rules.append((conditions, action))
+
+    def decide(self, snapshot):
+        &quot;&quot;&quot;Evaluate all rules and take highest priority action&quot;&quot;&quot;
+        signals = {
+            &quot;coverage&quot;: self._coverage(snapshot),
+            &quot;confidence&quot;: self._confidence(snapshot),
+            &quot;conflict&quot;: self._conflict(snapshot),
+            &quot;fragility&quot;: self._fragility(snapshot)
+        }
+
+        for conditions, action in self.rules:
+            if all(conditions[k](v) for k, v in signals.items() if k in conditions):
+                return action
+
+        return None  # No action needed
+
+    def _coverage(self, snapshot):
+        return NotImplementedError
+
+    def _confidence(self, snapshot):
+        return NotImplementedError
+
+    def _conflict(self, snapshot):
+        return NotImplementedError
+
+    def _fragility(self, snapshot):
+        return NotImplementedError
+
+# Usage for some snapshot
+matrix = DecisionMatrix()
+matrix.add_rule(
+    conditions={
+        &quot;coverage&quot;: lambda x: x &lt; 0.3,
+        &quot;confidence&quot;: lambda x: x &lt; 0.5
+    },
+    action=&quot;gather_more_data&quot;
+)
+matrix.add_rule(
+    conditions={
+        &quot;conflict&quot;: lambda x: x &gt; 0.7,
+        &quot;fragility&quot;: lambda x: x &gt; 0.5
+    },
+    action=&quot;switch_to_highest_confidence&quot;
+)
+matrix.add_rule(
+    conditions={
+        &quot;coverage&quot;: lambda x: x &gt; 0.8,
+        &quot;conflict&quot;: lambda x: x &lt; 0.2
+    },
+    action=&quot;maintain_current_policy&quot;
+)
+
+decision = matrix.decide(snapshot)
+print(f&quot;Decision: {decision}&quot;)
+</code></pre>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Learn how <a href="../governance/">Governance</a> uses signals to make decisions</li>
+<li>See signals in action in the <a href="../../examples/amr-case-study/">AMR Case Study</a></li>
+<li>Explore <a href="../advanced/signal-processing.md">Advanced Signal Processing</a></li>
+<li>Check the <a href="../../api/reference/">API Reference</a> for complete Signal documentation</li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 3, 2026 19:05:31 UTC">April 3, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 3, 2026 19:05:31 UTC">April 3, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

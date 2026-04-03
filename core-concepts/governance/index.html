@@ -1,0 +1,2277 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Epistemic Governance in Mechanistic Simulations Under Structural Uncertainty">
+      
+      
+      
+        <link rel="canonical" href="https://docs.procela.org/core-concepts/governance/">
+      
+      
+        <link rel="prev" href="../mechanisms/">
+      
+      
+        <link rel="next" href="../epistemic-signals/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Governance - Procela</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#governance-the-scientific-method-in-code" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Procela" class="md-header__button md-logo" aria-label="Procela" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Procela
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Governance
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kvernet/procela" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kvernet/procela
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Procela" class="md-nav__button md-logo" aria-label="Procela" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Procela
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kvernet/procela" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kvernet/procela
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/first-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    First Simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../variables/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Variables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mechanisms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mechanisms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-scientific-method-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Scientific Method Pattern
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-governance-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Governance Components
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Governance Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systeminvariant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SystemInvariant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invariant-phases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariant Phases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-4-multi-objective-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 4: Multi-Objective Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-governance-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Governance Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Governance Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reversible-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reversible Experiments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#composite-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composite Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-adaptive-ensemble-weighting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Adaptive Ensemble Weighting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-topology-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Topology Exploration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-minimal-intervention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Minimal Intervention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-checkpoint-before-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Checkpoint Before Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-log-governance-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Log Governance Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-test-governance-separately" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Test Governance Separately
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../epistemic-signals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Epistemic Signals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../executive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Executive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/custom-policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/audit-trail/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Trail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/temperature-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Temperature
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/amr-case-study/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AMR Case Study
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/other-domains/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Other Domains
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../semantics/key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../semantics/time/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Time
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#the-scientific-method-pattern" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        The Scientific Method Pattern
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#core-governance-components" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Governance Components
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Governance Components">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#systeminvariant" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        SystemInvariant
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#invariant-phases" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Invariant Phases
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#hooks" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Hooks
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-4-multi-objective-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 4: Multi-Objective Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#advanced-governance-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Advanced Governance Features
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Advanced Governance Features">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#reversible-experiments" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reversible Experiments
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#composite-governance" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Composite Governance
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-adaptive-ensemble-weighting" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Adaptive Ensemble Weighting
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-topology-exploration" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Topology Exploration
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#best-practices" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Best Practices
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Best Practices">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#1-minimal-intervention" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        1. Minimal Intervention
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#2-checkpoint-before-changes" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        2. Checkpoint Before Changes
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#3-log-governance-actions" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        3. Log Governance Actions
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#4-test-governance-separately" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        4. Test Governance Separately
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#performance-considerations" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Performance Considerations
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="governance-the-scientific-method-in-code">Governance: The Scientific Method in Code</h1>
+<p><strong>Governance</strong> is what makes Procela unique—it enables simulations to <strong>question their own assumptions</strong> and <strong>restructure themselves</strong> at runtime. Governance units follow the <strong>scientific method pattern</strong>, observing epistemic signals, forming hypotheses, running experiments, and adapting the system based on results.</p>
+<p>This comprehensive governance guide covers:</p>
+<ul>
+<li>The scientific method pattern encoded in code</li>
+<li>Core governance components and phases</li>
+<li>Practical patterns : multi-objective</li>
+<li>Advanced features like reversible experiments and composite governance</li>
+<li>Best practices and performance considerations</li>
+<li>Testing strategies</li>
+</ul>
+<h2 id="the-scientific-method-pattern">The Scientific Method Pattern</h2>
+<p>Procela encodes the scientific method as executable code:</p>
+<pre><code>┌─────────────┐     ┌──────────────┐     ┌─────────────┐     ┌────────────┐     ┌───────────┐
+│   DETECT    │────▶│  HYPOTHESIZE │────▶│  EXPERIMENT │────▶│  EVALUATE  │────▶│  CONCLUDE │
+│ (Observe)   │     │  (Plan)      │     │  (Execute)  │     │ (Measure)  │     │ (Adapt)   │
+└─────────────┘     └──────────────┘     └─────────────┘     └────────────┘     └───────────┘
+</code></pre>
+<p>Each governance unit is a <strong>first-class citizen</strong> that can:
+- <strong>Observe</strong> epistemic signals (coverage, fragility, conflict)
+- <strong>Hypothesize</strong> changes
+- <strong>Experiment</strong> by temporarily modifying the system
+- <strong>Evaluate</strong> the impact of changes
+- <strong>Conclude</strong> by keeping or reverting modifications</p>
+<h2 id="core-governance-components">Core Governance Components</h2>
+<h3 id="systeminvariant">SystemInvariant</h3>
+<p>The basic governance unit (second-class) that monitors conditions and triggers actions:</p>
+<pre><code class="language-python">from procela import (
+    SystemInvariant,
+    InvariantPhase,
+    InvariantViolation,
+    VariableSnapshot,
+    Variable,
+    HighestConfidencePolicy,
+    KeyAuthority
+)
+
+class MyInvariant(SystemInvariant):
+    def __init__(self, threshold=0.5):
+        self.threshold = threshold
+
+        def check(snapshot: VariableSnapshot):
+            &quot;&quot;&quot;Detect condition&quot;&quot;&quot;
+            # snapshot contains variable state
+            confidences = [view.stats.confidence for view in snapshot.views]
+            if confidences:
+                return max(confidences) - min(confidences) &lt;= self.threshold
+            return True
+
+        def handle(invariant: InvariantViolation, snapshot: VariableSnapshot):
+            &quot;&quot;&quot;Respond to violation&quot;&quot;&quot;
+            print(f&quot;Step {snapshot.step} - Violation detected! Switching policy...&quot;)
+            for view in snapshot.views:
+                var = KeyAuthority.resolve(view.key)
+                if isinstance(var, Variable):
+                    var.policy = HighestConfidencePolicy()
+
+        super().__init__(
+            name=&quot;MyInvariant&quot;,
+            condition=check,
+            on_violation=handle,
+            phase=InvariantPhase.RUNTIME,
+            message=&quot;Confidence spread too high&quot;
+        )
+</code></pre>
+<h3 id="invariant-phases">Invariant Phases</h3>
+<p>Governance can act at different stages of simulation:</p>
+<pre><code class="language-python">from procela import SystemInvariant, InvariantPhase
+
+# PRE: Before mechanisms execute
+class PreInvariant(SystemInvariant):
+    def __init__(self):
+        super().__init__(phase=InvariantPhase.PRE)
+
+# RUNTIME: After mechanism execution and before resolution
+class RuntimeInvariant(SystemInvariant):
+    def __init__(self):
+        super().__init__(phase=InvariantPhase.RUNTIME)
+
+# POST: After resolution
+class PostInvariant(SystemInvariant):
+    def __init__(self):
+        super().__init__(phase=InvariantPhase.POST)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Phase</th>
+<th>Timing</th>
+<th>Use Cases</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>PRE</strong></td>
+<td>Before mechanisms run</td>
+<td>Initialization, precondition checks</td>
+</tr>
+<tr>
+<td><strong>RUNTIME</strong></td>
+<td>After mechanism execution and before resolution</td>
+<td>Dynamic adaptation, policy switching</td>
+</tr>
+<tr>
+<td><strong>POST</strong></td>
+<td>After all updates</td>
+<td>Validation, logging, analysis</td>
+</tr>
+</tbody>
+</table>
+<h3 id="hooks">Hooks</h3>
+<p>The basic governance unit (first-class) that monitors conditions and triggers actions:</p>
+<pre><code class="language-python">from procela import Executive, Mechanism, WeightedVotingPolicy
+
+executive = Executive()
+
+class MyMechanism(Mechanism):
+    pass
+
+# Pre step hook
+def pre_step(executive: Executive, step: int) -&gt; None:
+    # Disable a mechanism from some step
+    if step == 10:
+        for mech in executive.mechanisms():
+            if mech.name == &quot;Mechanism to disable&quot;:
+                mech.disable()
+                print(f&quot;Step {step} - The mechanism has been disabled&quot;)
+
+    # Add a new mechanism from some step
+    if step == 30:
+        executive.add_mechanism(MyMechanism())
+        print(f&quot;Step {step} - The mechanism has been added&quot;)
+
+
+# Post step creator
+def create_post_step(threshold: float = 0.1):
+    def post_step(executive: Executive, step: int) -&gt; None:
+        writable = list(executive.writable())
+        if writable[0].stats.ewma &gt; threshold:
+            writable[0].policy = WeightedVotingPolicy()
+            print(
+                f&quot;Step {step} - The variable policy has been switched &quot;
+                f&quot;to {writable[0].policy.name}&quot;
+            )
+
+    return post_step
+</code></pre>
+<h3 id="pattern-4-multi-objective-governance">Pattern 4: Multi-Objective Governance</h3>
+<p>Balances multiple competing objectives:</p>
+<pre><code class="language-python">import numpy as np
+
+from procela import (
+    SystemInvariant,
+    VariableSnapshot,
+    InvariantPhase,
+    KeyAuthority,
+    Variable
+)
+
+class MultiObjectiveGovernance(SystemInvariant):
+    &quot;&quot;&quot;Balances prediction accuracy and structural stability.&quot;&quot;&quot;
+
+    def __init__(self, accuracy_weight=0.7, stability_weight=0.3):
+        self.accuracy_weight = accuracy_weight
+        self.stability_weight = stability_weight
+        self.objective_history = []
+
+        def _policy_changes():
+            # To be implemented
+            return NotImplementedError()
+
+        def _mechanism_changes():
+            # To be implemented
+            return NotImplementedError()
+
+        def _rebalance(snapshot: VariableSnapshot):
+            &quot;&quot;&quot;Adjust weights based on performance&quot;&quot;&quot;
+            if len(self.objective_history) &lt; 20:
+                return
+
+            # Check which objective is underperforming
+            recent = self.objective_history[-10:]
+            accuracy_trend = recent[-1][&quot;accuracy&quot;] - recent[0][&quot;accuracy&quot;]
+            stability_trend = recent[-1][&quot;stability&quot;] - recent[0][&quot;stability&quot;]
+
+            if accuracy_trend &lt; -0.1:
+                print(&quot;Increasing accuracy weight due to declining accuracy&quot;)
+                self.accuracy_weight = min(0.9, self.accuracy_weight + 0.1)
+                self.stability_weight = 1 - self.accuracy_weight
+            elif stability_trend &lt; -0.1:
+                print(&quot;Increasing stability weight due to instability&quot;)
+                self.stability_weight = min(0.9, self.stability_weight + 0.1)
+                self.accuracy_weight = 1 - self.stability_weight
+
+        def _evaluate_objectives(snapshot: VariableSnapshot):
+            &quot;&quot;&quot;Calculate and track multi-objective performance&quot;&quot;&quot;
+
+            # Objective 1: Prediction Accuracy
+            if snapshot.views[0].stats.count &gt; 10:
+                var = KeyAuthority.resolve(snapshot.views[0].key)
+                if not isinstance(var, Variable):
+                    return
+
+                recent = var.get(-10, 10)
+                errors = [abs(recent[i+1][1].value - recent[i][1].value)
+                        for i in range(len(recent)-1)]
+
+                domain_range = var.domain.max_value, var.domain.min_value
+                accuracy = 1 - (np.mean(errors) / domain_range)
+            else:
+                accuracy = 0.5
+
+            # Objective 2: Structural Stability
+            policy_changes = _policy_changes()
+            mechanism_changes = _mechanism_changes()
+            stability = 1 / (1 + policy_changes + mechanism_changes)
+
+            # Combined score
+            combined = (self.accuracy_weight * accuracy +
+                    self.stability_weight * stability)
+
+            self.objective_history.append({
+                &quot;step&quot;: snapshot.step,
+                &quot;accuracy&quot;: accuracy,
+                &quot;stability&quot;: stability,
+                &quot;combined&quot;: combined
+            })
+
+            # Log if combined score drops significantly
+            if len(self.objective_history) &gt; 20:
+                recent_avg = np.mean([o[&quot;combined&quot;]
+                                    for o in self.objective_history[-10:]])
+                historical_avg = np.mean([o[&quot;combined&quot;]
+                                        for o in self.objective_history[:-10]])
+
+                if recent_avg &lt; 0.7 * historical_avg:
+                    print(f&quot;⚠️ Multi-objective performance drop: &quot;
+                        f&quot;{historical_avg:.3f} → {recent_avg:.3f}&quot;)
+
+                    # Trigger rebalancing
+                    _rebalance(snapshot)
+
+        def check(snapshot: VariableSnapshot):
+            # Always evaluate (never violates)
+            _evaluate_objectives(snapshot)
+            return True  # No violation, just monitoring
+
+        def handle(invariant, snapshot):
+            # Only called if condition returns False (never here)
+            pass
+
+        super().__init__(
+            name=&quot;MultiObjectiveGovernance&quot;,
+            condition=check,
+            on_violation=handle,
+            phase=InvariantPhase.POST
+        )
+</code></pre>
+<h2 id="advanced-governance-features">Advanced Governance Features</h2>
+<h3 id="reversible-experiments">Reversible Experiments</h3>
+<p>Procela supports automatic rollback of failed experiments:</p>
+<pre><code class="language-python">from procela import (
+    Executive,
+    SystemInvariant,
+    VariableSnapshot,
+    InvariantViolation,
+    InvariantPhase
+)
+
+class ReversibleExperiment(SystemInvariant):
+    &quot;&quot;&quot;Governance that can automatically revert changes&quot;&quot;&quot;
+
+    def __init__(self, executive: Executive):
+        self.executive = executive
+
+        def check(snapshot: VariableSnapshot):
+            # Trigger experiment condition
+            return snapshot.views[0].stats.count &gt; 100
+
+        def handle(invariant: InvariantViolation, snapshot: VariableSnapshot):
+            # Save checkpoint before experiment
+            checkpoint = self.executive.create_checkpoint()
+
+            # Run experiment for 10 steps
+            self.executive.run_experiment(steps=10)
+
+            # After experiment, evaluate
+            success = self._evaluate_experiment()
+
+            if not success:
+                print(&quot;Experiment failed! Reverting...&quot;)
+                self.executive.restore_checkpoint(checkpoint)
+            else:
+                print(&quot;Experiment successful! Keeping changes.&quot;)
+
+        super().__init__(
+            name=&quot;ReversibleExperiment&quot;,
+            condition=check,
+            on_violation=handle,
+            phase=InvariantPhase.PRE
+        )
+</code></pre>
+<h3 id="composite-governance">Composite Governance</h3>
+<p>Combine multiple governance strategies:</p>
+<pre><code class="language-python">from procela import Executive, SystemInvariant
+
+class CompositeGovernance:
+    &quot;&quot;&quot;Manages multiple governance units together&quot;&quot;&quot;
+
+    def __init__(self, executive: Executive):
+        self.executive = executive
+        self.governors: list[SystemInvariant] = []
+
+    def add_governor(self, governor: SystemInvariant):
+        self.governors.append(governor)
+        self.executive.add_invariant(governor)
+
+    def get_governance_state(self):
+        &quot;&quot;&quot;Report on all governance units&quot;&quot;&quot;
+        state = {}
+        for gov in self.governors:
+            state[gov.name] = {
+                &quot;violations&quot;: gov.violation_count,
+                &quot;actions&quot;: gov.action_count,
+                &quot;last_triggered&quot;: gov.last_triggered
+            }
+        return state
+
+# Usage
+governance = CompositeGovernance(executive)
+governance.add_governor(FragilityGovernance(variable=X))
+governance.add_governor(CoverageGovernance())
+governance.add_governor(ProbeGovernance(executive))
+</code></pre>
+<h2 id="practical-examples">Practical Examples</h2>
+<h3 id="example-1-adaptive-ensemble-weighting">Example 1: Adaptive Ensemble Weighting</h3>
+<pre><code class="language-python">from procela import (
+    SystemInvariant,
+    InvariantPhase,
+    VariableSnapshot,
+    Mechanism,
+    Variable
+)
+
+class AdaptiveWeightingGovernance(SystemInvariant):
+    &quot;&quot;&quot;Adjusts mechanism weights based on performance&quot;&quot;&quot;
+
+    def __init__(self, mechanisms: list[Mechanism], variable: Variable):
+        self.mechanisms = mechanisms
+        self.variable = variable
+        self.performance = {m.key(): [] for m in mechanisms}
+
+        def check(snapshot: VariableSnapshot) -&gt; bool:
+            # Always evaluate
+            self._update_weights(snapshot)
+            return True
+
+        super().__init__(
+            name=&quot;AdaptiveWeighting&quot;,
+            condition=check,
+            on_violation=None,
+            phase=InvariantPhase.POST
+        )
+
+    def _update_weights(self, snapshot: VariableSnapshot) -&gt; None:
+        &quot;&quot;&quot;Update mechanism weights based on prediction accuracy&quot;&quot;&quot;
+</code></pre>
+<h3 id="example-2-topology-exploration">Example 2: Topology Exploration</h3>
+<pre><code class="language-python">from procela import (
+    Executive,
+    SystemInvariant,
+    InvariantPhase,
+    InvariantViolation,
+    VariableSnapshot
+)
+
+class TopologyExplorer(SystemInvariant):
+    &quot;&quot;&quot;Explores different mechanism combinations&quot;&quot;&quot;
+
+    def __init__(self, executive: Executive):
+        self.executive = executive
+        self.all_mechanisms = executive.mechanisms()
+        self.exploration_step = 0
+        self.current_config = None
+
+        def check(snapshot: VariableSnapshot):
+            # Explore every 100 steps
+            if snapshot.step % 100 == 0 and snapshot.step &gt; 0:
+                return False
+            return True
+
+        def handle(invariant: InvariantViolation, snapshot: VariableSnapshot):
+            self._explore_topology(snapshot)
+
+        super().__init__(
+            name=&quot;TopologyExplorer&quot;,
+            condition=check,
+            on_violation=handle,
+            phase=InvariantPhase.PRE
+        )
+
+    def _explore_topology(self, snapshot: VariableSnapshot):
+        &quot;&quot;&quot;Try a different combination of mechanisms&quot;&quot;&quot;
+        import random
+
+        # Save current state
+        self.executive.create_checkpoint()
+
+        # Try a new configuration
+        num_active = random.randint(1, len(self.all_mechanisms))
+        active_mechs = random.sample(self.all_mechanisms, num_active)
+
+        # Disable all, then enable selected
+        for mech in self.all_mechanisms:
+            mech.disable()
+        for mech in active_mechs:
+            mech.enable()
+
+        print(f&quot;🔍 Exploring topology: {len(active_mechs)} active mechanisms&quot;)
+
+        self.current_config = {
+            &quot;active&quot;: active_mechs,
+            &quot;step&quot;: snapshot.step
+        }
+</code></pre>
+<h2 id="best-practices">Best Practices</h2>
+<h3 id="1-minimal-intervention">1. Minimal Intervention</h3>
+<pre><code class="language-python"># Good: Only act when necessary
+def check(snapshot):
+    if fragility &gt; threshold:
+        return False  # Trigger action
+    return True
+
+# Avoid: Acting on every step
+def check(snapshot):
+    # Always returns False, triggers action every time
+    return False
+</code></pre>
+<h3 id="2-checkpoint-before-changes">2. Checkpoint Before Changes</h3>
+<pre><code class="language-python"># Always save state before making irreversible changes
+def handle(invariant, snapshot):
+    checkpoint = self.executive.create_checkpoint()
+    # Make changes...
+    if not success:
+        self.executive.restore_checkpoint(checkpoint)
+</code></pre>
+<h3 id="3-log-governance-actions">3. Log Governance Actions</h3>
+<pre><code class="language-python">from procela import (
+    Executive,
+    SystemInvariant,
+    InvariantPhase,
+)
+
+class LoggingGovernance(SystemInvariant):
+    def __init__(self, executive: Executive):
+        self.executive = executive
+
+        def _get_details():
+            pass
+
+        def handle(invariant, snapshot):
+            self.executive.logger.info({
+                &quot;step&quot;: snapshot.step,
+                &quot;action&quot;: self.name,
+                &quot;details&quot;: _get_details()
+            })
+
+        super().__init__(
+            &quot;LoggingGovernance&quot;,
+            condition=lambda s: False,
+            on_violation=handle,
+            phase=InvariantPhase.POST,
+            message=&quot;&quot;
+        )
+</code></pre>
+<h3 id="4-test-governance-separately">4. Test Governance Separately</h3>
+<pre><code class="language-python">from procela import (
+    Variable,
+    RangeDomain,
+    VariableRecord,
+    WeightedVotingPolicy,
+    HighestConfidencePolicy
+)
+
+def test_fragility_governance():
+    # Create controlled environment
+    X = Variable(&quot;X&quot;, RangeDomain(0, 100))
+    X.policy = WeightedVotingPolicy()
+
+    # Force fragility
+    X.add_hypothesis(VariableRecord(10, 0.9))
+    X.add_hypothesis(VariableRecord(90, 0.1))
+
+    # Check fragility governance
+    #TODO
+
+    # Assert fragility governance changes policy
+    assert X.policy == HighestConfidencePolicy()
+</code></pre>
+<h2 id="performance-considerations">Performance Considerations</h2>
+<pre><code class="language-python">from procela import VariableSnapshot, SystemInvariant
+
+class EfficientGovernance(SystemInvariant):
+    &quot;&quot;&quot;Governance with performance optimizations&quot;&quot;&quot;
+
+    def __init__(self):
+        self.check_interval = 10  # Only check every 10 steps
+        self.last_check = 0
+        self.cached_result = None
+
+    def check(self, snapshot: VariableSnapshot):
+        # Only compute expensive checks periodically
+        if snapshot.step - self.last_check &lt; self.check_interval:
+            return self.cached_result
+
+        self.last_check = snapshot.step
+
+        # Expensive computation here
+        result = self._expensive_check(snapshot)
+        self.cached_result = result
+
+        return result
+</code></pre>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Learn about <a href="../epistemic-signals/">Epistemic Signals</a> for monitoring system health</li>
+<li>See governance in action in the <a href="../../examples/amr-case-study/">AMR Case Study</a></li>
+<li>Explore <a href="../advanced/governance-patterns.md">Advanced Governance Patterns</a></li>
+<li>Check the <a href="../../api/reference/">API Reference</a> for complete Governance documentation</li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 3, 2026 19:05:31 UTC">April 3, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 3, 2026 19:05:31 UTC">April 3, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>

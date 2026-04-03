@@ -1,0 +1,2322 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Epistemic Governance in Mechanistic Simulations Under Structural Uncertainty">
+      
+      
+      
+        <link rel="canonical" href="https://docs.procela.org/core-concepts/variables/">
+      
+      
+        <link rel="prev" href="../../getting-started/first-simulation/">
+      
+      
+        <link rel="next" href="../mechanisms/">
+      
+      
+        
+      
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+    
+    
+      
+        <title>Variables - Procela</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.484c7ddc.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.ab4e12ef.min.css">
+      
+      
+
+
+    
+    
+      
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo">
+  
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#variables-memory-bearing-epistemic-authorities" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--shadow" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Procela" class="md-header__button md-logo" aria-label="Procela" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3zm0 5h18v2H3zm0 5h18v2H3z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Procela
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Variables
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      
+        <form class="md-header__option" data-md-component="palette">
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_0">
+    
+      <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_1" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+    
+    
+    
+    <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="indigo" data-md-color-accent="indigo"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_1">
+    
+      <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_0" hidden>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12s-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12z"/></svg>
+      </label>
+    
+  
+</form>
+      
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&palette.color){if("(prefers-color-scheme)"===palette.color.media){var media=matchMedia("(prefers-color-scheme: light)"),input=document.querySelector(media.matches?"[data-md-color-media='(prefers-color-scheme: light)']":"[data-md-color-media='(prefers-color-scheme: dark)']");palette.color.media=input.getAttribute("data-md-color-media"),palette.color.scheme=input.getAttribute("data-md-color-scheme"),palette.color.primary=input.getAttribute("data-md-color-primary"),palette.color.accent=input.getAttribute("data-md-color-accent")}for(var[key,value]of Object.entries(palette.color))document.body.setAttribute("data-md-color-"+key,value)}</script>
+    
+    
+    
+      
+      
+        <label class="md-header__button md-icon" for="__search">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        </label>
+        <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.52 6.52 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5"/></svg>
+        
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" title="Clear" aria-label="Clear" tabindex="-1">
+          
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" tabindex="0" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list" role="presentation"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+      
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/kvernet/procela" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kvernet/procela
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Procela" class="md-nav__button md-logo" aria-label="Procela" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54"/></svg>
+
+    </a>
+    Procela
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/kvernet/procela" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--! Font Awesome Free 7.1.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2025 Fonticons, Inc.--><path d="M173.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6m-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3m44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9M252.8 8C114.1 8 8 113.3 8 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C436.2 457.8 504 362.9 504 252 504 113.3 391.5 8 252.8 8M105.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1m-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7m32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1m-11.4-14.7c-1.6 1-1.6 3.6 0 5.9s4.3 3.3 5.6 2.3c1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2"/></svg>
+  </div>
+  <div class="md-source__repository">
+    kvernet/procela
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Home
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
+        
+          
+          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Getting Started
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_2">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Getting Started
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/installation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Installation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/quickstart/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Quick Start
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../getting-started/first-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    First Simulation
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+    
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" checked>
+        
+          
+          <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Core Concepts
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_3_label" aria-expanded="true">
+          <label class="md-nav__title" for="__nav_3">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Core Concepts
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+    
+  
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Variables
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Variables
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Concepts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-makes-variables-different" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Makes Variables Different?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a Variable
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a Variable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Creation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Domain Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initialization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variable-anatomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variable Anatomy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Variable Anatomy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hypothesisrecord-the-hypothesis-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HypothesisRecord: The Hypothesis Unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-and-user-defined-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in and User-defined Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-multi-source-temperature-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Multi-Source Temperature Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-decision-making-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Decision-Making Variable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-1-variable-with-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 1: Variable with Fallback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-2-anomaly-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 2: Anomaly Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../mechanisms/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Mechanisms
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../governance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Governance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../epistemic-signals/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Epistemic Signals
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../executive/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Executive
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Advanced
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Advanced
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/custom-policies/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Custom Policies
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/audit-trail/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Audit Trail
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../advanced/performance/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Performance
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Examples
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Examples
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/temperature-simulation/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Temperature
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/amr-case-study/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    AMR Case Study
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../examples/other-domains/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Other Domains
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../api/reference/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    API Reference
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../contributing/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Contributing
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+    
+      
+        
+        
+      
+    
+    
+    <li class="md-nav__item md-nav__item--section md-nav__item--nested">
+      
+        
+        
+          
+        
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_8" id="__nav_8_label" tabindex="">
+            
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Semantics
+  
+
+    
+  </span>
+  
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_8">
+            <span class="md-nav__icon md-icon"></span>
+            
+  
+    Semantics
+  
+
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../semantics/key/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Key
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../semantics/time/" class="md-nav__link">
+        
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Time
+  
+
+    
+  </span>
+  
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#core-concepts" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Core Concepts
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Core Concepts">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#what-makes-variables-different" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        What Makes Variables Different?
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#key-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Key Features
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#creating-a-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Creating a Variable
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating a Variable">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#basic-creation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Basic Creation
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#domain-types" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Domain Types
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#initialization" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Initialization
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#variable-anatomy" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Variable Anatomy
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Variable Anatomy">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#hypothesisrecord-the-hypothesis-unit" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        HypothesisRecord: The Hypothesis Unit
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#memory-management" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Memory Management
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#policy-resolution" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Policy Resolution
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Policy Resolution">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#built-in-and-user-defined-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Built-in and User-defined Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#custom-policies" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Custom Policies
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#practical-examples" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Practical Examples
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Practical Examples">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#example-1-multi-source-temperature-monitoring" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 1: Multi-Source Temperature Monitoring
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#example-2-decision-making-variable" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Example 2: Decision-Making Variable
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#common-patterns" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Common Patterns
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Common Patterns">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#pattern-1-variable-with-fallback" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 1: Variable with Fallback
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#pattern-2-anomaly-detection" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Pattern 2: Anomaly Detection
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#next-steps" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Next Steps
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          
+            <div class="md-content" data-md-component="content">
+              
+              <article class="md-content__inner md-typeset">
+                
+                  
+
+
+  
+  
+
+
+<h1 id="variables-memory-bearing-epistemic-authorities">Variables: Memory-bearing Epistemic Authorities</h1>
+<p>In Procela, <strong>Variables</strong> are not simple containers for data—they are <strong>epistemic authorities</strong> that actively manage knowledge about the system. They maintain complete hypothesis histories, resolve competing claims, and track the provenance of every value.</p>
+<p>This guide covers:</p>
+<ul>
+<li>Core concepts and what makes Procela variables unique</li>
+<li>Creation, initialization, and configuration</li>
+<li>Policy resolution with built-in and custom examples</li>
+<li>Advanced features like source tracking and memory management</li>
+<li>Practical examples</li>
+<li>Common patterns for specialized variable types</li>
+</ul>
+<h2 id="core-concepts">Core Concepts</h2>
+<h3 id="what-makes-variables-different">What Makes Variables Different?</h3>
+<p>Traditional simulation frameworks treat variables as simple state containers:</p>
+<pre><code class="language-python"># Traditional approach
+temperature = 20.0  # Just a number
+</code></pre>
+<p>Procela variables are epistemic agents:</p>
+<pre><code class="language-python"># Procela approach
+temperature = Variable(&quot;Temperature&quot;, domain=RangeDomain(-10, 50))
+temperature.init(VariableRecord(20.0, confidence=1.0, source=None))
+
+# Later, multiple mechanisms propose competing hypotheses
+# The variable resolves them based on its policy
+# Every value has tracked provenance
+</code></pre>
+<h3 id="key-features">Key Features</h3>
+<table>
+<thead>
+<tr>
+<th>Feature</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Hypothesis Memory</strong></td>
+<td>Stores all proposed values with metadata</td>
+</tr>
+<tr>
+<td><strong>Source Tracking</strong></td>
+<td>Every hypothesis records its origin (mechanism, confidence)</td>
+</tr>
+<tr>
+<td><strong>Policy Resolution</strong></td>
+<td>Competing claims resolved via configurable policies</td>
+</tr>
+<tr>
+<td><strong>Domain Constraints</strong></td>
+<td>Ensures values stay within valid ranges</td>
+</tr>
+<tr>
+<td><strong>Audit Trail</strong></td>
+<td>Complete history of all changes and decisions</td>
+</tr>
+</tbody>
+</table>
+<h2 id="creating-a-variable">Creating a Variable</h2>
+<h3 id="basic-creation">Basic Creation</h3>
+<pre><code class="language-python">from procela import Variable, RangeDomain, WeightedVotingPolicy, HighestConfidencePolicy
+
+# Create with minimal parameters
+population = Variable(&quot;Population&quot;, domain=RangeDomain(0, 1e9))
+
+# With custom policy
+temp = Variable(
+    name=&quot;Temperature&quot;,
+    domain=RangeDomain(-273.15, 1000),
+    policy=WeightedVotingPolicy()
+)
+
+# With unit &amp; description
+cases = Variable(
+    name=&quot;InfectedCases&quot;,
+    domain=RangeDomain(0, 1e6),
+    units=&quot;people&quot;,
+    policy=HighestConfidencePolicy(),
+    description=&quot;source WHO&quot;
+)
+</code></pre>
+<h3 id="domain-types">Domain Types</h3>
+<p>Procela provides several domain types for constraining values:</p>
+<pre><code class="language-python">from procela import Variable, RangeDomain, CategoricalDomain, CompositeDomain, VariableRecord
+
+# Continuous range
+temperature = Variable(&quot;Temp&quot;, RangeDomain(-10, 40))
+
+# Specific list of options
+state = Variable(&quot;State&quot;, CategoricalDomain([&quot;S&quot;, &quot;I&quot;, &quot;R&quot;]))
+
+# Custom domain with validation
+class PositiveDomain(RangeDomain):
+    def __init__(self):
+        super().__init__(0, float('inf'))
+
+    def validate(self, value, stats):
+        return value &gt;= 0
+
+
+# Composite domain (Positive &amp; Discrete integer range)
+age = Variable(&quot;Age&quot;, CompositeDomain([
+    PositiveDomain(), CategoricalDomain(list(range(0, 120)))
+]))
+
+age.set(VariableRecord(value=10, confidence=None)) # Correct
+
+age.set(VariableRecord(value=10.9, confidence=None)) # Failed composite domain
+</code></pre>
+<h2 id="initialization">Initialization</h2>
+<p>Variables must be initialized before use:</p>
+<pre><code class="language-python">from procela import (
+    Variable,
+    RangeDomain,
+    VariableRecord,
+    HighestConfidencePolicy,
+    Key
+)
+
+# Continuous range
+temperature = Variable(&quot;Temp&quot;, RangeDomain(-10, 40))
+
+# Basic initialization
+X = Variable(&quot;X&quot;, domain=RangeDomain(0, 100))
+X.init(VariableRecord(50.0, confidence=1.0, source=None))
+
+# Initialize with history
+hypotheses = [
+    VariableRecord(10.0, confidence=0.8, source=Key()),
+    VariableRecord(12.0, confidence=0.9, source=Key()),
+]
+
+# Temporary memory
+for hy in hypotheses:
+    X.add_hypothesis(hy)
+
+print(X.summary())
+
+
+# Permanent memory
+X.policy = HighestConfidencePolicy()
+X.resolve_conflict()
+X.commit()
+
+print(X.summary())
+</code></pre>
+<h2 id="variable-anatomy">Variable Anatomy</h2>
+<h3 id="hypothesisrecord-the-hypothesis-unit">HypothesisRecord: The Hypothesis Unit</h3>
+<p>Every hypothesis is stored as a <code>HypothesisRecord</code>:</p>
+<pre><code class="language-python">from procela import HypothesisRecord, VariableRecord, HypothesisState, Key
+
+record = HypothesisRecord(
+    VariableRecord(
+        value=42.5,           # The proposed value
+        confidence=0.85,      # Confidence score (0-1)
+        source=Key(),  # Origin of hypothesis
+        explanation=&quot;&quot;,
+        metadata={            # Optional additional data
+            &quot;model_version&quot;: &quot;2.1&quot;,
+            &quot;training_data&quot;: &quot;2024_dataset&quot;
+        },
+    ),
+    state=HypothesisState.PROPOSED  # State status
+)
+
+</code></pre>
+<h3 id="memory-management">Memory Management</h3>
+<p>Variables maintain complete hypothesis histories:</p>
+<pre><code class="language-python">import random
+
+from procela import (
+    Variable,
+    RangeDomain,
+    VariableRecord,
+    WeightedConfidencePolicy,
+    Key,
+    ReasoningTask
+)
+
+random.seed(42)
+
+X = Variable(&quot;X&quot;, RangeDomain(0, 100), policy=WeightedConfidencePolicy())
+X.init(VariableRecord(10.4, confidence=1.0))
+
+for _ in range(100):
+    hypotheses = [
+        VariableRecord(value=random.gauss(0, 1), confidence=0.9, source=Key()),
+        VariableRecord(value=random.gauss(0, 3), confidence=0.5, source=Key()),
+        VariableRecord(value=random.gauss(0, 2), confidence=0.75, source=Key())
+    ]
+    for hypothesis in hypotheses:
+        X.add_hypothesis(hypothesis)
+
+    X.resolve_conflict()
+    X.commit()
+    X.clear_hypotheses()
+
+
+# Access memory
+all_records = X.memory.records()  # List of all VariableRecords ever RECORDED (included the init)
+print(f&quot;{len(all_records)} records&quot;)
+print(X.value, X.confidence)
+
+
+all_records = X.memory.records(task=ReasoningTask.CONFLICT_RESOLUTION)  # List of all VariableRecords ever proposed
+print(f&quot;{len(all_records)} records&quot;)
+
+
+current_record = X.get(-1)[0]  # Current VariableRecord (with provenance)
+print(len(current_record[0]), current_record[1].value, current_record[2].explanation)
+
+current_record = all_records[-1]
+print(len(current_record[0]), current_record[1].value, current_record[2].explanation)
+
+current_record = X.memory.latest()
+print(len(current_record[0]), current_record[1].value, current_record[2].explanation)
+
+
+# Memory introspection
+for i, (_, record, _) in enumerate(X.get(-10, 10, reverse=True)):  # Last 10 hypotheses
+    print(f&quot;Step {i}: value={record.value:.2f}, &quot;
+          f&quot;conf={record.confidence:.2f}, &quot;
+          f&quot;source={record.source}&quot;)
+</code></pre>
+<h2 id="policy-resolution">Policy Resolution</h2>
+<p>Policies determine how competing hypotheses are resolved into a single value.</p>
+<h3 id="built-in-and-user-defined-policies">Built-in and User-defined Policies</h3>
+<pre><code class="language-python">from procela import (
+    Variable,
+    RealDomain,
+    WeightedVotingPolicy,
+    HighestConfidencePolicy
+)
+
+X = Variable(&quot;X&quot;, RealDomain())
+
+# Weighted by confidence
+X.policy = WeightedVotingPolicy()
+
+# Always pick highest confidence
+X.policy = HighestConfidencePolicy()
+
+
+# Users can define their own policies
+# Statistical aggregation
+X.policy = MedianPolicy()     # Median value
+X.policy = MeanPolicy()       # Arithmetic mean
+
+# Democratic voting
+X.policy = MajorityVotingPolicy()  # Most common value
+</code></pre>
+<h3 id="custom-policies">Custom Policies</h3>
+<p>Create custom resolution logic:</p>
+<pre><code class="language-python">from procela import (
+    Variable,
+    RealDomain,
+    ResolutionPolicy,
+    VariableRecord,
+    Key
+)
+
+X = Variable(&quot;X&quot;, RealDomain())
+
+class ConsensusWithThresholdPolicy(ResolutionPolicy):
+    &quot;&quot;&quot;Requires minimum agreement before settling on a value&quot;&quot;&quot;
+
+    def __init__(self, threshold=0.7):
+        super().__init__()
+        self.threshold = threshold
+
+    def resolve(self, hypotheses):
+        &quot;&quot;&quot;
+        Parameters
+        ----------
+            hypotheses: List of HypothesisRecord objects
+
+        Returns
+        -------
+            VariableRecord: The resolved hypothesis or None
+        &quot;&quot;&quot;
+        if not hypotheses:
+            return None
+
+        # Check if we have strong agreement
+        values = [h.record.value for h in hypotheses]
+        confidences = [h.record.confidence for h in hypotheses]
+
+        # Weighted average
+        total_weight = sum(confidences)
+        weighted_avg = sum(v * c for v, c in zip(values, confidences)) / total_weight
+
+        # Calculate spread
+        spread = max(values) - min(values)
+
+        if spread &lt; self.threshold:
+            # Good consensus - return weighted average
+            value = weighted_avg
+            confidence = total_weight / len(hypotheses)
+            explanation = &quot;Good consensus - return weighted average&quot;
+        else:
+            # Poor consensus - fall back to highest confidence
+            best = max(hypotheses, key=lambda h: h.record.confidence)
+            value = best.record.value
+            confidence = best.record.confidence * 0.8  # Penalized
+            explanation = &quot;Poor consensus - fall back to highest confidence&quot;
+
+        return VariableRecord(
+            value=value,
+            confidence=confidence,
+            source=self.key(),
+            explanation=explanation
+        )
+
+# Use custom policy
+X.policy = ConsensusWithThresholdPolicy(threshold=0.5)
+
+X.add_hypothesis(VariableRecord(10, confidence=0.8, source=Key()))
+X.add_hypothesis(VariableRecord(9.9, confidence=0.85, source=Key()))
+
+resolved = X.resolve_conflict()
+X.clear_hypotheses()
+
+print(resolved.value, resolved.confidence, resolved.explanation)
+
+
+X.add_hypothesis(VariableRecord(10, confidence=0.8, source=Key()))
+X.add_hypothesis(VariableRecord(0.9, confidence=0.85, source=Key()))
+
+resolved = X.resolve_conflict()
+X.clear_hypotheses()
+
+print(resolved.value, resolved.confidence, resolved.explanation)
+</code></pre>
+<h2 id="practical-examples">Practical Examples</h2>
+<h3 id="example-1-multi-source-temperature-monitoring">Example 1: Multi-Source Temperature Monitoring</h3>
+<pre><code class="language-python">import numpy as np
+
+from procela import (
+    Variable,
+    RangeDomain,
+    VariableRecord,
+    WeightedVotingPolicy,
+    Mechanism,
+    Key
+)
+
+# Create temperature variable with multiple sensor inputs
+temperature = Variable(
+    &quot;Temperature&quot;,
+    domain=RangeDomain(-20, 45),
+    policy=WeightedVotingPolicy()
+)
+
+# Initialize with sensor calibration
+sensor_configs = {
+    &quot;sensor_A&quot;: {&quot;confidence&quot;: 0.95, &quot;bias&quot;: 0.2, &quot;weight&quot;: 0.3, &quot;source&quot;: Key()},
+    &quot;sensor_B&quot;: {&quot;confidence&quot;: 0.88, &quot;bias&quot;: -0.1, &quot;weight&quot;: 0.6, &quot;source&quot;: Key()},
+    &quot;sensor_C&quot;: {&quot;confidence&quot;: 0.92, &quot;bias&quot;: 0.0, &quot;weight&quot;: 0.1, &quot;source&quot;: Key()}
+}
+
+class SensorMechanism(Mechanism):
+    def __init__(self, config):
+        super().__init__(reads=[], writes=[temperature])
+        self.config = config
+
+    def transform(self):
+        # Simulate sensor reading with noise and bias
+        true_temp = 22.5
+        measurement = (true_temp +
+                      self.config[&quot;bias&quot;] +
+                      np.random.normal(0, 0.3))
+
+        temperature.add_hypothesis(
+            VariableRecord(
+                value=measurement,
+                confidence=self.config[&quot;confidence&quot;],
+                source=self.config[&quot;source&quot;],
+                metadata={&quot;weight&quot;: self.config[&quot;weight&quot;]}
+            )
+        )
+
+mechs = [
+    SensorMechanism(config=config)
+    for config in sensor_configs.values()
+]
+
+for mech in mechs:
+    mech.run()
+
+
+for hy in temperature.hypotheses:
+    print(hy.record.value, hy.record.confidence, hy.record.source)
+
+
+resolved = temperature.resolve_conflict()
+
+print(resolved)
+</code></pre>
+<h3 id="example-2-decision-making-variable">Example 2: Decision-Making Variable</h3>
+<pre><code class="language-python">from procela import (
+    Variable,
+    RangeDomain,
+    CategoricalDomain,
+    VariableRecord,
+    HighestConfidencePolicy,
+    Mechanism
+)
+
+# Variable for strategic decisions
+market_volume = Variable(
+    &quot;market_volume&quot;,
+    domain=RangeDomain(0, 1e12),
+    policy=None
+)
+market_volatility = Variable(
+    &quot;market_volatility&quot;,
+    domain=RangeDomain(0, 1),
+    policy=None
+)
+strategy = Variable(
+    &quot;Strategy&quot;,
+    domain=CategoricalDomain([&quot;aggressive&quot;, &quot;conservative&quot;, &quot;adaptive&quot;]),
+    policy=HighestConfidencePolicy()
+)
+
+# Different experts propose strategies
+class ExpertMechanism(Mechanism):
+    def __init__(self, expert_type):
+        super().__init__(reads=[market_volume, market_volatility], writes=[strategy])
+        self.expert_type = expert_type
+
+    def transform(self):
+        volume, volatility = [var.value for var in self.reads()]
+
+        if self.expert_type == &quot;risk_taker&quot;:
+            proposed = &quot;aggressive&quot; if volatility &lt; 0.3 else &quot;conservative&quot;
+            confidence = 0.7
+        elif self.expert_type == &quot;risk_averse&quot;:
+            proposed = &quot;conservative&quot;
+            confidence = 0.9
+        else:  # balanced
+            proposed = &quot;adaptive&quot;
+            confidence = 0.8
+
+        strategy.add_hypothesis(
+            VariableRecord(
+                value=proposed,
+                confidence=confidence,
+                source=self.key()
+            )
+        )
+
+market_volatility.init(VariableRecord(value=0.7, confidence=0.9))
+
+mechs = [
+    ExpertMechanism(expert_type=expert_type)
+    for expert_type in (&quot;risk_taker&quot;, &quot;risk_averse&quot;, &quot;balanced&quot;)
+]
+
+for mech in mechs:
+    mech.run()
+
+strategy.resolve_conflict()
+strategy.commit()
+
+# Variable resolves to most confident strategy
+print(f&quot;Adopted strategy: {strategy.value}&quot;)
+</code></pre>
+<h2 id="common-patterns">Common Patterns</h2>
+<h3 id="pattern-1-variable-with-fallback">Pattern 1: Variable with Fallback</h3>
+<pre><code class="language-python">from procela import Variable
+
+class FallbackVariable(Variable):
+    def resolve_conflict(self):
+        &quot;&quot;&quot;Try policy, fallback to previous value on failure&quot;&quot;&quot;
+        try:
+            return super().resolve_conflict()
+        except:
+            # Return last good value if resolution fails
+            return self.value
+</code></pre>
+<h3 id="pattern-2-anomaly-detection">Pattern 2: Anomaly Detection</h3>
+<pre><code class="language-python">import numpy as np
+
+from procela import Variable, RangeDomain, VariableRecord, WeightedConfidencePolicy
+
+np.random.seed(42)
+
+class AnomalyDetectingVariable(Variable):
+    def add_hypothesis(self, record):
+        confidence = record.confidence
+        metadata = record.metadata
+
+        # Check for anomalies before adding
+        if self.memory:
+            records = self.memory.records()
+            mean = np.mean([r.value for _, r, _ in records[-10:]])
+            std = np.std([r.value for _, r, _ in records[-10:]])
+
+            if abs(record.value - mean) &gt; 3 * std:
+                # Anomaly detected - reduce confidence
+                confidence *= 0.5
+                metadata[&quot;anomaly&quot;] = True
+
+        super().add_hypothesis(
+            VariableRecord(value=record.value, confidence=confidence*0.5, metadata=metadata)
+        )
+
+X = AnomalyDetectingVariable(&quot;X&quot;, RangeDomain(0, 100))
+X.policy = WeightedConfidencePolicy()
+
+for _ in range(5):
+    X.add_hypothesis(VariableRecord(value=1, confidence=0.9))
+    X.add_hypothesis(VariableRecord(value=10, confidence=0.4))
+    X.add_hypothesis(VariableRecord(value=2, confidence=0.7))
+
+    for hy in X.hypotheses:
+        print(hy.record.value, hy.record.confidence, hy.record.metadata.get(&quot;anomaly&quot;, False))
+
+    X.resolve_conflict()
+    X.commit()
+    X.clear_hypotheses()
+</code></pre>
+<h2 id="next-steps">Next Steps</h2>
+<ul>
+<li>Learn about <a href="../mechanisms/">Mechanisms</a> that propose hypotheses to variables</li>
+<li>Understand <a href="../governance/">Governance</a> that observes variable signals</li>
+<li>Explore <a href="../epistemic-signals/">Epistemic Signals</a> for monitoring variable states</li>
+<li>See the <a href="../../api/reference/">API Reference</a> for complete Variable documentation</li>
+</ul>
+
+
+
+
+
+
+
+  
+    
+  
+  
+    
+  
+
+
+  <aside class="md-source-file">
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Last update">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1zM12.5 7v5.2l4 2.4-1 1L11 13V7zM11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 3, 2026 19:05:31 UTC">April 3, 2026</span>
+  </span>
+
+    
+    
+      
+  <span class="md-source-file__fact">
+    <span class="md-icon" title="Created">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3z"/></svg>
+    </span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date" title="April 3, 2026 19:05:31 UTC">April 3, 2026</span>
+  </span>
+
+    
+    
+    
+  </aside>
+
+
+
+
+
+                
+              </article>
+            </div>
+          
+          
+<script>var target=document.getElementById(location.hash.slice(1));target&&target.name&&(target.checked=target.name.startsWith("__tabbed_"))</script>
+        </div>
+        
+          <button type="button" class="md-top md-icon" data-md-component="top" hidden>
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8z"/></svg>
+  Back to top
+</button>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    
+    
+    
+      
+      
+      <script id="__config" type="application/json">{"annotate": null, "base": "../..", "features": ["navigation.instant", "navigation.tracking", "navigation.sections", "navigation.expand", "navigation.top", "search.suggest", "search.highlight", "content.code.copy", "content.code.annotate"], "search": "../../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.79ae519e.min.js"></script>
+      
+    
+  </body>
+</html>
