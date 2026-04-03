@@ -31,6 +31,7 @@ from procela.core.reasoning import (
 from procela.core.variable import (
     RangeDomain,
     StatisticalDomain,
+    ValueDomain,
     Variable,
     VariableEpistemic,
     VariableRole,
@@ -392,6 +393,24 @@ def test_add_candidates(real_variable):
 
     assert real_variable.validators is None
     real_variable.reset()
+
+
+def test_create_and_restore_checkpoint(real_variable):
+    "Test create and restore checkpoint method."
+    real_variable.set(VariableRecord(value=109.78, confidence=1.0))
+    checkpoint = real_variable.create_checkpoint()
+
+    assert checkpoint is not None
+    assert isinstance(checkpoint[0], ValueDomain)
+    assert real_variable.stats.count == 1
+
+    for i in range(200):
+        real_variable.set(VariableRecord(value=i, confidence=1.0))
+
+    assert real_variable.stats.count == 201
+
+    real_variable.restore_checkpoint(checkpoint)
+    assert real_variable.stats.count == 1
 
 
 def test_has_records(real_variable):

@@ -255,6 +255,7 @@ class TestSystemInvariant:
         )
 
         snapshot_mock = Mock(spec=VariableSnapshot)
+        snapshot_mock.step = 0
 
         # Should call on_violation but not raise
         invariant.check(snapshot_mock)
@@ -296,6 +297,7 @@ class TestSystemInvariant:
         invariant.handle_violation = Mock()
 
         snapshot_mock = Mock(spec=VariableSnapshot)
+        snapshot_mock.step = 0
         invariant.check(snapshot_mock)
 
         # Should call build_violation with snapshot
@@ -321,6 +323,7 @@ class TestSystemInvariantEdgeCases:
         """Test that condition return value is converted to bool."""
         # Condition returns truthy/falsy values
         snapshot_mock = Mock(spec=VariableSnapshot)
+        snapshot_mock.step = 0
 
         # Truthy condition
         invariant = SystemInvariant(name="Truthy", condition=lambda s: "truthy string")
@@ -354,6 +357,7 @@ class TestSystemInvariantEdgeCases:
         )
 
         snapshot_mock = Mock(spec=VariableSnapshot)
+        snapshot_mock.step = 0
         invariant.check(snapshot_mock)
         # Just verify it doesn't crash
 

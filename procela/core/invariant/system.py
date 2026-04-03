@@ -222,6 +222,9 @@ class SystemInvariant:
         self.severity = severity
         self.softness = softness
         self.message = message or f"Invariant violated: {name}"
+        self.action_count = 0
+        self.violation_count = 0
+        self.last_triggered = 0
 
     def check(self, snapshot: VariableSnapshot) -> None:
         """
@@ -237,10 +240,13 @@ class SystemInvariant:
         InvariantViolation
             If the invariant is violated and enforcement requires interruption.
         """
+        self.action_count += 1
         holds = bool(self.condition(snapshot))
 
         if holds:
             return
+
+        self.violation_count += 1
 
         violation = self.build_violation(snapshot)
 
@@ -248,6 +254,7 @@ class SystemInvariant:
             self.on_violation(violation, snapshot)
 
         self.handle_violation(violation)
+        self.last_triggered = snapshot.step
 
     def build_violation(self, snapshot: VariableSnapshot) -> InvariantViolation:
         """

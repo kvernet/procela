@@ -93,6 +93,9 @@ clean:  ## Clean build and cache artifacts
 	find . -type d -name __pycache__ -exec rm -rf {} +
 	find . -type f -name "*.pyc" -delete
 
+docs: docs-install ## Build documentation
+	mkdocs build --clean
+
 # --------------------------------------------------------------------
 # CI
 # --------------------------------------------------------------------

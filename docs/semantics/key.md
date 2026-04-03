@@ -1,11 +1,5 @@
 # Key Semantics
 
-* Version: 0.1.0
-* Status: **Locked**
-* Date: 2026-01-05
-
----
-
 ## 1. Definition
 A **Key** is a pure, atomic, opaque identity token that uniquely and persistently identifies exactly one entity within a Procela Universe. A Key carries no semantic content beyond identity and supports only binary equality as its meaningful operation.
 

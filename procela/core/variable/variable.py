@@ -102,6 +102,20 @@ from .domain.statistical import StatisticalDomain
 from .domain.value import ValueDomain
 from .role import VariableRole
 
+ValidatorType = Iterable[Callable[[HypothesisRecord], bool]]
+VariableCheckPointType = tuple[
+    ValueDomain,
+    VariableRole,
+    int | None,
+    ResolutionPolicy | None,
+    ValidatorType | None,
+    list[HypothesisRecord],
+    VariableRecord | None,
+    ReasoningResult | None,
+    VariableMemory | None,
+    MemoryStatistics,
+]
+
 
 @dataclass(frozen=True)
 class VariableEpistemic:
@@ -245,7 +259,7 @@ class Variable:
         config: dict[str, Any] | None = None,
         seed: int | None = None,
         policy: ResolutionPolicy | None = None,
-        validators: Iterable[Callable[[HypothesisRecord], bool]] | None = None,
+        validators: ValidatorType | None = None,
     ):
         """
         Instantiate a variable with identity and configuration.
@@ -651,6 +665,57 @@ class Variable:
         self.hypotheses.clear()
         self.conclusion = None
         self.reasoning = None
+
+    def create_checkpoint(
+        self,
+    ) -> VariableCheckPointType:
+        """
+        Create a checkpoint for the variable.
+
+        Returns
+        -------
+        VariableCheckPointType
+            A tuple containing the checkpoint details.
+        """
+        return (
+            self.domain,
+            self.role,
+            self.seed,
+            self.policy,
+            self.validators,
+            self.hypotheses,
+            self.conclusion,
+            self.reasoning,
+            self.memory,
+            self.stats,
+        )
+
+    def restore_checkpoint(
+        self,
+        checkpoint: VariableCheckPointType,
+    ) -> None:
+        """
+        Restore the variable from a checkpoint.
+
+        Parameters
+        ----------
+        checkpoint : VariableCheckPointType
+            The variable checkpoint to be restored.
+
+        Notes
+        -----
+            This method is usefull when restoring a checkpoint. Use with caution.
+        """
+        self.domain = checkpoint[0]
+        self.role = checkpoint[1]
+        self.seed = checkpoint[2]
+        self.policy = checkpoint[3]
+        self.validators = checkpoint[4]
+        self.hypotheses = checkpoint[5]
+        self.conclusion = checkpoint[6]
+        self.reasoning = checkpoint[7]
+        self.memory = checkpoint[8]
+        self.stats = checkpoint[9]
 
     def reset(self) -> None:
         """

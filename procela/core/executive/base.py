@@ -154,7 +154,7 @@ from __future__ import annotations
 
 import logging
 import random
-from typing import Callable, Sequence
+from typing import Any, Callable, Sequence
 
 import numpy as np
 
@@ -175,6 +175,20 @@ from ..logger import setup_logging
 from ..mechanism.base import Mechanism
 from ..process.base import Process
 from ..variable.variable import Variable
+
+ExecutiveCheckPointType = tuple[
+    list[Process],
+    list[Mechanism],
+    dict[Mechanism, Any],
+    set[Variable],
+    dict[Variable, Any],
+    list[SystemInvariant],
+    dict[SystemInvariant, Any],
+    random.Random | np.random.Generator | None,
+    int,
+    logging.Logger,
+    int,
+]
 
 
 class Executive:
@@ -326,6 +340,7 @@ class Executive:
         *,
         processes: Sequence[Process] = [],
         mechanisms: Sequence[Mechanism] = [],
+        rng: random.Random | np.random.Generator | None = None,
         logger: logging.Logger | None = None,
     ) -> None:
         """
@@ -337,6 +352,8 @@ class Executive:
             Processes participating in the world.
         mechanisms : Sequence[Mechanism]
             Mechanisms participating in the world.
+        rng : random.Random | np.random.Generator | None = None
+            Random Number Generator to use.
         logger : logging.Logger | None
             Logger to use.
 
@@ -486,13 +503,15 @@ class Executive:
         self._variables: set[Variable] = set()
         self._prepared: bool = False
         self._invariants: list[SystemInvariant] = []
-        self.rng: random.Random | np.random.Generator | None = None
+        self.rng = rng or random.Random()
         self._step_index: int = 0
         self.logger = logger or setup_logging(
             name="procela",
             log_file="logs/procela.log",
             json_file="logs/procela.jsonl",
         )
+        self.n_steps: int = -1  # Updated in run() method.
+        self.checkpoint: ExecutiveCheckPointType | None = None
         self.prepare()
 
     def add_process(self, process: Process) -> None:
@@ -643,10 +662,10 @@ class Executive:
             # Clear candidates
             variable.clear_hypotheses()
 
+        self._check_invariants(InvariantPhase.POST)
+
         # Increment step index
         self._step_index += 1
-
-        self._check_invariants(InvariantPhase.POST)
 
     def run(
         self,
@@ -664,20 +683,33 @@ class Executive:
            conflicts are collected, then resolution policy applied
         3. Call post_step event after simulation
 
+        Parameters
+        ----------
+        steps : int
+            The number of steps.
+        pre_step : Callable[[Executive, int], None] | None
+            The pre step hook. Default is None.
+        post_step : Callable[[Executive, int], None] | None
+            The post step hook. Default is None.
+
         Raises
         ------
         RuntimeError
             If the executive has not been prepared.
         """
+        self.n_steps = steps
         if not self._prepared:
             raise ExecutionError("Executive must be prepared before execution.")
 
-        for i in range(steps):
+        i = 0
+        while i < self.n_steps:
             if pre_step is not None:
                 pre_step(self, i)
             self.step()
             if post_step is not None:
                 post_step(self, i)
+
+            i += 1
 
     def key(self) -> Key:
         """
@@ -885,5 +917,136 @@ class Executive:
         -------
             A pseudo random number between 0 and 1.
         """
-        u = self.rng.random() if self.rng else np.random.default_rng().random()
+        u = self.rng.random()
         return float(u)
+
+    def create_checkpoint(
+        self,
+    ) -> ExecutiveCheckPointType:
+        """
+        Save checkpoint before experiment.
+
+        Returns
+        -------
+        ExecutiveCheckPointType
+            A tuple containing the checkpoint details.
+        """
+        self.checkpoint = (
+            self._processes.copy(),
+            self._mechanisms.copy(),
+            {
+                m: m.create_checkpoint()
+                for m in self._mechanisms
+                if hasattr(m, "create_checkpoint")
+            },
+            self._variables.copy(),
+            {var: var.create_checkpoint() for var in self._variables},
+            self._invariants.copy(),
+            {
+                inv: inv.create_checkpoint()
+                for inv in self._invariants
+                if hasattr(inv, "create_checkpoint")
+            },
+            self.get_rng_state(),
+            self._step_index,
+            self.logger,
+            self.n_steps,
+        )
+
+        return self.checkpoint
+
+    def run_experiment(
+        self,
+        steps: int,
+        pre_step: Callable[[Executive, int], None] | None = None,
+        post_step: Callable[[Executive, int], None] | None = None,
+    ) -> None:
+        """
+        Run experiment.
+
+        Parameters
+        ----------
+        steps : int
+            The number of steps.
+        pre_step : Callable[[Executive, int], None] | None
+            The pre step hook. Default is None.
+        post_step : Callable[[Executive, int], None] | None
+            The post step hook. Default is None.
+        """
+        self.run(steps=steps, pre_step=pre_step, post_step=post_step)
+        self.n_steps = (
+            self.checkpoint[10] - steps if self.checkpoint is not None else steps
+        )
+
+    def restore_checkpoint(self, checkpoint: ExecutiveCheckPointType) -> None:
+        """
+        Restore the executive from a checkpoint.
+
+        Parameters
+        ----------
+        checkpoint : ExecutiveCheckPointType
+            The executive checkpoint to be restored.
+        """
+        # Restore the processes
+        self._processes = checkpoint[0]
+
+        # Restore mechanisms
+        self._mechanisms = checkpoint[1]
+        for mech, chpoint in checkpoint[2].items():
+            if mech in self._mechanisms and hasattr(mech, "restore_checkpoint"):
+                mech.restore_checkpoint(chpoint)
+
+        # Restore variables
+        for var, chpoint in checkpoint[4].items():
+            if var in checkpoint[3]:
+                var.restore_checkpoint(chpoint)
+
+        # Restore invariants
+        self._invariants = checkpoint[5]
+        for inv, chpoint in checkpoint[6].items():
+            if inv in self._invariants and hasattr(inv, "restore_checkpoint"):
+                inv.restore_checkpoint(chpoint)
+
+        # Restore rng
+        # self.rng = checkpoint[8]
+        self.set_rng_state(checkpoint[7])
+
+        # Restore step index
+        self._step_index = checkpoint[8]
+
+        # Restore logger
+        self.logger = checkpoint[9]
+
+        # Restore n_steps
+        self.n_steps = checkpoint[10]
+
+        self.prepare()
+
+    def get_rng_state(self) -> Any:
+        """
+        Get the state of the random number generator.
+
+        Returns
+        -------
+        Any
+            The state of the random number generator.
+        """
+        if isinstance(self.rng, random.Random):
+            return ("python", self.rng.getstate())
+        elif isinstance(self.rng, np.random.Generator):
+            return ("numpy", self.rng.bit_generator.state)
+
+    def set_rng_state(self, state: Any) -> None:
+        """
+        Set the state of the random number generator.
+
+        Parameters
+        ----------
+        state : Any
+            The state of the random number generator to be set.
+        """
+        kind, value = state
+        if kind == "python" and isinstance(self.rng, random.Random):
+            self.rng.setstate(value)
+        elif isinstance(self.rng, np.random.Generator):
+            self.rng.bit_generator.state = value

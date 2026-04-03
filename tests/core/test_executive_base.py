@@ -21,8 +21,10 @@ from procela.core.invariant import (
 )
 from procela.core.logger import setup_logging
 from procela.core.mechanism import Mechanism
+from procela.core.memory import VariableRecord
+from procela.core.policy import HighestConfidencePolicy, WeightedConfidencePolicy
 from procela.core.process import Process
-from procela.core.variable import Variable
+from procela.core.variable import RangeDomain, Variable
 from procela.symbols.key import Key
 
 
@@ -503,3 +505,108 @@ class TestExecutive:
         exec.set_rng(rng=rng)
         assert exec.step_index() == 0
         assert abs(exec.random() - 0.773956048) < 1e-6
+
+    def test_get_and_set_rng_state(self):
+        """Test get and set rng_state."""
+        import random
+
+        for rng in [None, np.random.default_rng(), random.Random()]:
+            exec = Executive(rng=rng)
+
+            state = exec.get_rng_state()
+            u = exec.random()
+
+            for _ in range(37):
+                exec.random()
+
+            exec.set_rng_state(state)
+
+            assert exec.random() == u
+
+    def test_create_and_restore_checkpoint(self):
+        """Test create and restore checkpoint."""
+        X = Variable("X", RangeDomain(0, 100), policy=WeightedConfidencePolicy())
+
+        class MyMechanism(Mechanism):
+            def __init__(
+                self,
+                executive: Executive,
+                name: str,
+                value: float = 0,
+                delta: float = 0.05,
+            ):
+                super().__init__(reads=[X], writes=[X])
+                self.executive = executive
+                self.name = name
+                self.value = value
+                self.delta = delta
+
+            def transform(self):
+                self.writes()[0].add_hypothesis(
+                    VariableRecord(value=self.value, confidence=self.executive.random())
+                )
+                self.value += self.delta
+
+            def create_checkpoint(self):
+                print(f"Mechanism {self.name} has created a checkpoint.")
+                return self.value
+
+            def restore_checkpoint(self, checkpoint):
+                print(f"Mechanism {self.name} has restored a checkpoint.")
+                self.value = checkpoint
+
+        import numpy
+
+        rng = numpy.random.default_rng(1)
+        executive = Executive(rng=rng)
+        mechanisms = [
+            MyMechanism(executive=executive, name="Mech1", value=0.0, delta=0.05),
+            MyMechanism(executive=executive, name="Mech2", value=1.0, delta=-0.05),
+            MyMechanism(executive=executive, name="Mech3", value=2.0, delta=0.01),
+        ]
+        for mech in mechanisms:
+            executive.add_mechanism(mech)
+
+        class MyInvariant(SystemInvariant):
+            def __init__(self) -> None:
+                self.threshold = 0.5
+
+                def check(snapshot: VariableSnapshot) -> bool:
+                    return False  # Always violated to force event
+
+                def handle(
+                    invariant: InvariantViolation, snapshot: VariableSnapshot
+                ) -> None:
+                    self.threshold *= 0.95
+
+                super().__init__(
+                    "MyInvariant",
+                    condition=check,
+                    on_violation=handle,
+                    phase=InvariantPhase.RUNTIME,
+                    message="",
+                )
+
+            def create_checkpoint(self):
+                return 0.5
+
+            def restore_checkpoint(self, checkpoint):
+                self.threshold = checkpoint
+
+        executive.add_invariant(MyInvariant())
+
+        def pre_step(executive: Executive, step: int):
+            if step == 20:
+                checkpoint = executive.create_checkpoint()
+
+                # Run experiment
+                X.policy = HighestConfidencePolicy()
+                executive.run_experiment(steps=15)
+
+                # Experiment failed
+                executive.restore_checkpoint(checkpoint)
+
+        executive.run(steps=100, pre_step=pre_step)
+
+        assert X.stats.count == 100
+        assert abs(executive._invariants[0].threshold - 0.5 * 0.95**79) < 1e-3

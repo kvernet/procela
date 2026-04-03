@@ -1,0 +1,99 @@
+site_name: Procela
+site_description: Epistemic Governance in Mechanistic Simulations Under Structural Uncertainty
+site_url: https://docs.procela.org
+repo_url: https://github.com/kvernet/procela
+repo_name: kvernet/procela
+edit_uri: edit/main/docs/
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.code.annotate
+  icon:
+    repo: fontawesome/brands/github
+
+plugins:
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [procela]
+          options:
+            show_source: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_category_heading: true
+            heading_level: 2
+            docstring_style: google
+            separate_signature: true
+            show_signature_annotations: true
+  #- autorefs
+  - mkdocs-jupyter:
+      include_source: True
+      ignore_h1_titles: True
+  - git-revision-date-localized:
+      enable_creation_date: true
+      type: date
+  - mermaid2
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.tabbed:
+      alternate_style: true
+  - admonition
+  - pymdownx.details
+  - attr_list
+  - md_in_html
+  - tables
+  - footnotes
+
+nav:
+  - Home: index.md
+  - Getting Started:
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+      - First Simulation: getting-started/first-simulation.md
+  - Core Concepts:
+      - Variables: core-concepts/variables.md
+      - Mechanisms: core-concepts/mechanisms.md
+      - Governance: core-concepts/governance.md
+      - Epistemic Signals: core-concepts/epistemic-signals.md
+      - Executive: core-concepts/executive.md
+  - Advanced:
+      - Custom Policies: advanced/custom-policies.md
+      - Audit Trail: advanced/audit-trail.md
+      - Performance: advanced/performance.md
+  - Examples:
+      - Temperature: examples/temperature-simulation.md
+      - AMR Case Study: examples/amr-case-study.md
+      - Other Domains: examples/other-domains.md
+  - API Reference: api/reference.md
+  - Contributing: contributing.md
+  - Semantics:
+      - Key: semantics/key.md
+      - Time: semantics/time.md

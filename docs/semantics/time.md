@@ -1,9 +1,5 @@
 # TimePoint Semantics
 
-* Version: 0.1.0
-* Status: **Locked**
-* Date: 2026-01-05
-
 ### 1. Definition
 
 A **TimePoint** is a pure, immutable identity token representing a **declared temporal position** within a system.
