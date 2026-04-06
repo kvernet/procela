@@ -21,6 +21,10 @@ theme:
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
+    - scheme: default
+      primary: blue
+    - scheme: slate
+      primary: blue
   features:
     - navigation.instant
     - navigation.tracking
@@ -71,6 +75,11 @@ markdown_extensions:
   - md_in_html
   - tables
   - footnotes
+  - codehilite:
+      guess_lang: false
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.superfences
 
 nav:
   - Home: index.md
@@ -79,21 +88,35 @@ nav:
       - Quick Start: getting-started/quickstart.md
       - First Simulation: getting-started/first-simulation.md
   - Core Concepts:
-      - Variables: core-concepts/variables.md
-      - Mechanisms: core-concepts/mechanisms.md
-      - Governance: core-concepts/governance.md
-      - Epistemic Signals: core-concepts/epistemic-signals.md
-      - Executive: core-concepts/executive.md
+      - Variables: core/variables.md
+      - Mechanisms: core/mechanisms.md
+      - Governance: core/governance.md
+      - Epistemic Signals: core/epistemic-signals.md
+      - Executive: core/executive.md
   - Advanced:
       - Custom Policies: advanced/custom-policies.md
       - Audit Trail: advanced/audit-trail.md
       - Performance: advanced/performance.md
   - Examples:
-      - Temperature: examples/temperature-simulation.md
-      - AMR Case Study: examples/amr-case-study.md
-      - Other Domains: examples/other-domains.md
-  - API Reference: api/reference.md
+      - Home: examples/index.md
+      - Beginner:
+        - Temperature: examples/temperature-simulation.md
+      - Intermediate:
+        - Other Domains: examples/other-domains.md
+      - Advanced:
+        - AMR Case Study: examples/amr-case-study.md
+  - API Reference: api.md
   - Contributing: contributing.md
   - Semantics:
-      - Key: semantics/key.md
-      - Time: semantics/time.md
+      - Key: semantics/symbols/key.md
+      - KeyAuthority: semantics/core/key-authority.md
+      - Time: semantics/symbols/time.md
+      - Domain:
+        - Range: semantics/core/variable/domain/range.md
+        - Boolean: semantics/core/variable/domain/boolean.md
+        - Categorical: semantics/core/variable/domain/categorical.md
+        - Composite: semantics/core/variable/domain/composite.md
+        - Abstract class: semantics/core/variable/domain/value.md
+      - Memory:
+        - VariableRecord: semantics/core/memory/variable/record.md
+        - VariableMemory: semantics/core/memory/variable/memory.md

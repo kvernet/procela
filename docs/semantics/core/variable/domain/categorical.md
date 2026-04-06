@@ -1,11 +1,5 @@
 # CategoricalDomain — Semantic Specification
 
-* Version: 0.1.0
-* Status: **Draft**
-* Date: 2026-01-06
-
----
-
 ## 1. Definition
 
 A **CategoricalDomain** is a ValueDomain whose admissible values are drawn from a finite, explicitly enumerated set of symbols.

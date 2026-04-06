@@ -1,14 +1,8 @@
-# VariableHistory — Semantic Specification
-
-* Version: 0.1.0
-* Status: **Draft**
-* Date: 2026-01-06
-
----
+# VariableMemory — Semantic Specification
 
 ## 1. Definition
 
-A **VariableHistory** is an **ordered, immutable-append semantic structure** representing the complete factual history of a Variable as a sequence of VariableRecords.
+A **VariableMemory** is an **ordered, immutable-append semantic structure** representing the complete factual memory of a Variable as a sequence of VariableRecords.
 
 It defines **what has been observed or produced**, not how it is interpreted.
 
@@ -16,7 +10,7 @@ It defines **what has been observed or produced**, not how it is interpreted.
 
 ## 2. Declaration
 
-A VariableHistory exists if and only if it satisfies the following minimal structure:
+A VariableMemory exists if and only if it satisfies the following minimal structure:
 
 * A finite sequence of VariableRecords
 * Deterministic iteration order
@@ -28,16 +22,16 @@ Minimal declaration requirements:
 * All contained records must be valid VariableRecords
 * Records are append-only
 
-A VariableHistory may exist without records.
+A VariableMemory may exist without records.
 
 ---
 
 ## 3. Semantic Invariants
 
-Properties that MUST hold for all valid VariableHistory instances.
+Properties that MUST hold for all valid VariableMemory instances.
 
 * **I1: Record Validity**
-  Every element in a VariableHistory MUST be a valid VariableRecord.
+  Every element in a VariableMemory MUST be a valid VariableRecord.
 
 * **I2: Append-Only Structure**
   Once a VariableRecord is present, it MUST NOT be removed or modified.
@@ -46,18 +40,18 @@ Properties that MUST hold for all valid VariableHistory instances.
   The iteration order of records MUST reflect insertion order.
 
 * **I4: Historical Completeness**
-  The history represents all records that have been added to it.
+  The memory represents all records that have been added to it.
 
 * **I5: Referential Integrity**
-  Records retain their identity and semantics within the history.
+  Records retain their identity and semantics within the memory.
 
-Any violation invalidates the history.
+Any violation invalidates the memory.
 
 ---
 
 ## 4. Negative Definition
 
-A VariableHistory is NOT:
+A VariableMemory is NOT:
 
 * Not a Variable
 * Not a Record
@@ -72,11 +66,11 @@ A VariableHistory is NOT:
 
 States or operations that cannot occur.
 
-* A VariableHistory cannot modify an existing VariableRecord
-* A VariableHistory cannot reorder records
-* A VariableHistory cannot contain non-record entities
-* A VariableHistory cannot infer or compute values
-* A VariableHistory cannot discard historical facts
+* A VariableMemory cannot modify an existing VariableRecord
+* A VariableMemory cannot reorder records
+* A VariableMemory cannot contain non-record entities
+* A VariableMemory cannot infer or compute values
+* A VariableMemory cannot discard historical facts
 
 ---
 
@@ -85,13 +79,13 @@ States or operations that cannot occur.
 Defined behavior at semantic limits.
 
 * **Empty / null:**
-  An empty VariableHistory is valid and represents no known facts.
+  An empty VariableMemory is valid and represents no known facts.
 
 * **Degenerate:**
   Adding a non-VariableRecord is invalid.
 
 * **Temporal boundary:**
-  VariableHistory does not impose temporal ordering beyond insertion order.
+  VariableMemory does not impose temporal ordering beyond insertion order.
 
 * **Resource exhaustion:**
   Behavior is undefined if records can no longer be appended.
@@ -106,14 +100,14 @@ Semantic combination constraints.
 
 **Allowed**
 
-* VariableHistory ∘ VariableRecord → VariableHistory
-* Variable ∘ VariableHistory → Interpreted Variable State
+* VariableMemory ∘ VariableRecord → VariableMemory
+* Variable ∘ VariableMemory → Interpreted Variable State
 
 **Forbidden**
 
-* VariableHistory ∘ VariableHistory (histories do not merge)
-* VariableHistory ∘ Variable (histories do not define variables)
-* VariableHistory ∘ Key (identity is not reassigned)
+* VariableMemory ∘ VariableMemory (memories do not merge)
+* VariableMemory ∘ Variable (memories do not define variables)
+* VariableMemory ∘ Key (identity is not reassigned)
 
 ---
 
@@ -122,10 +116,10 @@ Semantic combination constraints.
 Examples do not define semantics.
 
 ```python
-from procela.core.memory import VariableHistory
+from procela.core.memory import VariableMemory
 
-history = VariableHistory()
-history = history.add_record(record)
+memory = VariableMemory()
+memory = memory.add_record(record)
 ```
 
 ---
@@ -141,7 +135,7 @@ How violations are detected.
   Attempts to mutate internal records raise errors.
 
 * **Structural:**
-  Any history containing invalid records is invalid.
+  Any memory containing invalid records is invalid.
 
 Validation enforces semantics; it does not define them.
 
@@ -149,7 +143,7 @@ Validation enforces semantics; it does not define them.
 
 ## 10. Semantic Notes (Non-Binding)
 
-* VariableHistory is deliberately minimal and non-intelligent
+* VariableMemory is deliberately minimal and non-intelligent
 * It separates factual accumulation from semantic reasoning
 * Conflict detection, explanation, and resolution occur at higher layers
 * Append-only design preserves traceability and auditability

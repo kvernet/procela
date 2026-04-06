@@ -1,11 +1,5 @@
 # VariableRecord — Semantic Specification
 
-* Version: 0.1.0
-* Status: **Draft**
-* Date: 2026-01-06
-
----
-
 ## 1. Definition
 
 A **VariableRecord** is an **immutable semantic fact** representing the value of a Variable at a specific moment, optionally attributed to a source and contextualized by metadata.

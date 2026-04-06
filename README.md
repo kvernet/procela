@@ -210,7 +210,7 @@ make pre-commit  # Run all checks
 ## 📖 Documentation
 
 - **User guide**: [https://docs.procela.org/](https://docs.procela.org/)
-- **API reference**: [https://docs.procela.org/api/procela.html](https://docs.procela.org/api/procela.html)
+- **API reference**: [https://docs.procela.org/api/](https://docs.procela.org/api/)
 - **Examples**: [https://docs.procela.org/examples](https://docs.procela.org/examples)
 
 ---
@@ -237,11 +237,13 @@ If you use Procela in your research, please cite:
 
 ```bibtex
 @software{procela_2026,
-  author = {Kinson Vernet},
-  title = {Procela: Epistemic Governance in Mechanistic Simulation Under Structural Uncertainty},
-  year = {2026},
-  url = {https://procela.org},
-  doi = {10.xxxx/xxxxx}
+    title={Procela: Epistemic Governance in Mechanistic Simulations Under Structural Uncertainty},
+    author={Kinson Vernet},
+    year={2026},
+    eprint={2604.00675},
+    archivePrefix={arXiv},
+    primaryClass={physics.comp-ph},
+    url={https://arxiv.org/abs/2604.00675},
 }
 ```
 

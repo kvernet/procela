@@ -103,18 +103,19 @@ from .domain.value import ValueDomain
 from .role import VariableRole
 
 ValidatorType = Iterable[Callable[[HypothesisRecord], bool]]
-VariableCheckPointType = tuple[
-    ValueDomain,
-    VariableRole,
-    int | None,
-    ResolutionPolicy | None,
-    ValidatorType | None,
-    list[HypothesisRecord],
-    VariableRecord | None,
-    ReasoningResult | None,
-    VariableMemory | None,
-    MemoryStatistics,
-]
+
+
+@dataclass
+class VariableCheckPoint:
+    """Variable checkpoint data."""
+
+    domain: ValueDomain
+    role: VariableRole
+    seed: int | None
+    policy: ResolutionPolicy | None
+    validators: ValidatorType | None
+    memory: VariableMemory | None
+    stats: MemoryStatistics
 
 
 @dataclass(frozen=True)
@@ -332,6 +333,7 @@ class Variable:
 
         self.memory: VariableMemory | None = None
         self.stats = MemoryStatistics()
+        self.checkpoint: VariableCheckPoint | None = None
 
     def key(self) -> Key:
         """
@@ -668,54 +670,49 @@ class Variable:
 
     def create_checkpoint(
         self,
-    ) -> VariableCheckPointType:
+    ) -> VariableCheckPoint:
         """
         Create a checkpoint for the variable.
 
         Returns
         -------
-        VariableCheckPointType
-            A tuple containing the checkpoint details.
+        VariableCheckPoint
+            The variable checkpoint.
         """
-        return (
-            self.domain,
-            self.role,
-            self.seed,
-            self.policy,
-            self.validators,
-            self.hypotheses,
-            self.conclusion,
-            self.reasoning,
-            self.memory,
-            self.stats,
+        self.checkpoint = VariableCheckPoint(
+            domain=self.domain,
+            role=self.role,
+            seed=self.seed,
+            policy=self.policy,
+            validators=self.validators,
+            memory=self.memory,
+            stats=self.stats,
         )
+        return self.checkpoint
 
     def restore_checkpoint(
         self,
-        checkpoint: VariableCheckPointType,
+        checkpoint: VariableCheckPoint,
     ) -> None:
         """
-        Restore the variable from a checkpoint.
+        Restore the variable checkpoint.
 
         Parameters
         ----------
-        checkpoint : VariableCheckPointType
+        checkpoint : VariableCheckPoint
             The variable checkpoint to be restored.
 
         Notes
         -----
             This method is usefull when restoring a checkpoint. Use with caution.
         """
-        self.domain = checkpoint[0]
-        self.role = checkpoint[1]
-        self.seed = checkpoint[2]
-        self.policy = checkpoint[3]
-        self.validators = checkpoint[4]
-        self.hypotheses = checkpoint[5]
-        self.conclusion = checkpoint[6]
-        self.reasoning = checkpoint[7]
-        self.memory = checkpoint[8]
-        self.stats = checkpoint[9]
+        self.domain = checkpoint.domain
+        self.role = checkpoint.role
+        self.seed = checkpoint.seed
+        self.policy = checkpoint.policy
+        self.validators = checkpoint.validators
+        self.memory = checkpoint.memory
+        self.stats = checkpoint.stats
 
     def reset(self) -> None:
         """

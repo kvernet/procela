@@ -1,11 +1,5 @@
 # ValueDomain — Semantic Specification
 
-* Version: 0.1.0
-* Status: **Draft**
-* Date: 2026-01-06
-
----
-
 ## 1. Definition
 
 A **ValueDomain** defines the set of admissible values for a Variable.

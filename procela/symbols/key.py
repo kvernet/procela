@@ -39,11 +39,12 @@ procela.core.exceptions.SemanticViolation: Keys cannot be intersected or merged
 
 Semantics Reference
 -------------------
-https://procela.org/docs/semantics/symbols/key.html
+https://docs.procela.org/semantics/symbols/key/
 
 Examples Reference
 ------------------
-https://procela.org/docs/examples/symbols/key.html
+https://docs.procela.org/examples/symbols/key/
+
 """
 
 from __future__ import annotations

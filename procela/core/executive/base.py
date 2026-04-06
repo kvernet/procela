@@ -154,6 +154,7 @@ from __future__ import annotations
 
 import logging
 import random
+from dataclasses import dataclass
 from typing import Any, Callable, Sequence
 
 import numpy as np
@@ -176,19 +177,22 @@ from ..mechanism.base import Mechanism
 from ..process.base import Process
 from ..variable.variable import Variable
 
-ExecutiveCheckPointType = tuple[
-    list[Process],
-    list[Mechanism],
-    dict[Mechanism, Any],
-    set[Variable],
-    dict[Variable, Any],
-    list[SystemInvariant],
-    dict[SystemInvariant, Any],
-    random.Random | np.random.Generator | None,
-    int,
-    logging.Logger,
-    int,
-]
+
+@dataclass
+class ExecutiveCheckPoint:
+    """Executive checkpoint data."""
+
+    processes: list[Process]
+    mechanisms: list[Mechanism]
+    mechanism_points: dict[Mechanism, Any]
+    variables: set[Variable]
+    variable_points: dict[Variable, Any]
+    invariants: list[SystemInvariant]
+    invariant_points: dict[SystemInvariant, Any]
+    rng: random.Random | np.random.Generator | None
+    step: int
+    logger: logging.Logger
+    n_steps: int
 
 
 class Executive:
@@ -511,7 +515,7 @@ class Executive:
             json_file="logs/procela.jsonl",
         )
         self.n_steps: int = -1  # Updated in run() method.
-        self.checkpoint: ExecutiveCheckPointType | None = None
+        self.checkpoint: ExecutiveCheckPoint | None = None
         self.prepare()
 
     def add_process(self, process: Process) -> None:
@@ -922,35 +926,35 @@ class Executive:
 
     def create_checkpoint(
         self,
-    ) -> ExecutiveCheckPointType:
+    ) -> ExecutiveCheckPoint:
         """
         Save checkpoint before experiment.
 
         Returns
         -------
         ExecutiveCheckPointType
-            A tuple containing the checkpoint details.
+            The executive checkpoint.
         """
-        self.checkpoint = (
-            self._processes.copy(),
-            self._mechanisms.copy(),
-            {
+        self.checkpoint = ExecutiveCheckPoint(
+            processes=self._processes.copy(),
+            mechanisms=self._mechanisms.copy(),
+            mechanism_points={
                 m: m.create_checkpoint()
                 for m in self._mechanisms
                 if hasattr(m, "create_checkpoint")
             },
-            self._variables.copy(),
-            {var: var.create_checkpoint() for var in self._variables},
-            self._invariants.copy(),
-            {
+            variables=self._variables.copy(),
+            variable_points={var: var.create_checkpoint() for var in self._variables},
+            invariants=self._invariants.copy(),
+            invariant_points={
                 inv: inv.create_checkpoint()
                 for inv in self._invariants
                 if hasattr(inv, "create_checkpoint")
             },
-            self.get_rng_state(),
-            self._step_index,
-            self.logger,
-            self.n_steps,
+            rng=self.get_rng_state(),
+            step=self._step_index,
+            logger=self.logger,
+            n_steps=self.n_steps,
         )
 
         return self.checkpoint
@@ -975,12 +979,12 @@ class Executive:
         """
         self.run(steps=steps, pre_step=pre_step, post_step=post_step)
         self.n_steps = (
-            self.checkpoint[10] - steps if self.checkpoint is not None else steps
+            self.checkpoint.n_steps - steps if self.checkpoint is not None else steps
         )
 
-    def restore_checkpoint(self, checkpoint: ExecutiveCheckPointType) -> None:
+    def restore_checkpoint(self, checkpoint: ExecutiveCheckPoint) -> None:
         """
-        Restore the executive from a checkpoint.
+        Restore the executive checkpoint.
 
         Parameters
         ----------
@@ -988,37 +992,37 @@ class Executive:
             The executive checkpoint to be restored.
         """
         # Restore the processes
-        self._processes = checkpoint[0]
+        self._processes = checkpoint.processes
 
         # Restore mechanisms
-        self._mechanisms = checkpoint[1]
-        for mech, chpoint in checkpoint[2].items():
+        self._mechanisms = checkpoint.mechanisms
+        for mech, chpoint in checkpoint.mechanism_points.items():
             if mech in self._mechanisms and hasattr(mech, "restore_checkpoint"):
                 mech.restore_checkpoint(chpoint)
 
         # Restore variables
-        for var, chpoint in checkpoint[4].items():
-            if var in checkpoint[3]:
+        for var, chpoint in checkpoint.variable_points.items():
+            if var in checkpoint.variables:
                 var.restore_checkpoint(chpoint)
 
         # Restore invariants
-        self._invariants = checkpoint[5]
-        for inv, chpoint in checkpoint[6].items():
+        self._invariants = checkpoint.invariants
+        for inv, chpoint in checkpoint.invariant_points.items():
             if inv in self._invariants and hasattr(inv, "restore_checkpoint"):
                 inv.restore_checkpoint(chpoint)
 
         # Restore rng
         # self.rng = checkpoint[8]
-        self.set_rng_state(checkpoint[7])
+        self.set_rng_state(checkpoint.rng)
 
         # Restore step index
-        self._step_index = checkpoint[8]
+        self._step_index = checkpoint.step
 
         # Restore logger
-        self.logger = checkpoint[9]
+        self.logger = checkpoint.logger
 
         # Restore n_steps
-        self.n_steps = checkpoint[10]
+        self.n_steps = checkpoint.n_steps
 
         self.prepare()
 

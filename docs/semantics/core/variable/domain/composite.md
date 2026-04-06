@@ -1,11 +1,5 @@
 # CompositeDomain — Semantic Specification
 
-* Version: 0.1.0
-* Status: **Draft**
-* Date: 2026-01-06
-
----
-
 ## 1. Definition
 
 A **CompositeDomain** is a ValueDomain that defines admissibility by combining multiple ValueDomains using explicit logical composition.

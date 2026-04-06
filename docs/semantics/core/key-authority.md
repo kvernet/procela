@@ -1,11 +1,5 @@
 # KeyAuthority — Semantic Specification
 
-* Version: 0.1.0
-* Status: **Locked**
-* Date: 2026-01-06
-
----
-
 ## 1. Definition
 
 **KeyAuthority** is the **single, process-global semantic authority** responsible for issuing, registering, and validating identity keys within a Procela runtime.

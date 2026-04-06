@@ -401,7 +401,7 @@ def test_create_and_restore_checkpoint(real_variable):
     checkpoint = real_variable.create_checkpoint()
 
     assert checkpoint is not None
-    assert isinstance(checkpoint[0], ValueDomain)
+    assert isinstance(checkpoint.domain, ValueDomain)
     assert real_variable.stats.count == 1
 
     for i in range(200):
