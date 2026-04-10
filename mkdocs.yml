@@ -100,11 +100,23 @@ nav:
   - Examples:
       - Home: examples/index.md
       - Beginner:
-        - Temperature: examples/temperature-simulation.md
+        - Simple Growth: examples/beginner/simple-growth.md
+        - Basic Governance: examples/beginner/basic-governance.md
+        - Multiple Variables: examples/beginner/multiple-variables.md
       - Intermediate:
-        - Other Domains: examples/other-domains.md
+        - Fragility Detection and Response: examples/intermediate/fragility-detection.md
+        - Coverage-Based Mechanism Selection: examples/intermediate/coverage-selection.md
+        - Multi-Variable Governance: examples/intermediate/multi-variable.md
+        - Custom Epistemic Signals: examples/intermediate/custom-signals.md
+        - Checkpoint and Restore: examples/intermediate/checkpoint-restore.md
       - Advanced:
-        - AMR Case Study: examples/amr-case-study.md
+        - AMR Case Study: examples/advanced/amr-case-study.md
+        - Ensemble Mechanisms: examples/advanced/ensemble-mechanisms.md
+        - Structural Probing: examples/advanced/structural-probing.md
+        - Performance Optimization: examples/advanced/performance.md
+        - Custom Resolution Policies: examples/advanced/custom-policies.md
+        - Distributed Simulation: examples/advanced/distributed.md
+        - Reinforcement Learning Integration: examples/advanced/rl-integration.md
   - API Reference: api.md
   - Contributing: contributing.md
   - Semantics:

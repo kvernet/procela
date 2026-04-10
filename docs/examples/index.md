@@ -29,8 +29,6 @@ The examples are organized by complexity to help you progress at your own pace:
 
 These examples introduce the fundamental abstractions: Variables, Mechanisms, and the Executive.
 
-- **[Temperature Simulation](./beginner/temperature-simulation.md)** - Your first complete simulation with a single variable and competing mechanisms
-
 - **[Simple Growth Model](./beginner/simple-growth.md)** - Population growth with two competing theories (linear vs logistic)
 
 - **[Basic Governance](./beginner/basic-governance.md)** - Adding a simple invariant that monitors prediction confidence
@@ -179,6 +177,6 @@ See [CONTRIBUTING.md](../contributing.md) for detailed guidelines.
 ## Next Steps
 
 - **New to Procela?** Start with the [Getting Started Guide](../getting-started/quickstart.md)
-- **Ready to build?** Jump to the [Beginner Examples](#-beginner-examples)
+- **Ready to build?** Jump to the [Beginner Examples](./beginner/simple-growth.md)
 - **Research application?** Check the [AMR Case Study](./advanced/amr-case-study.md)
 - **API questions?** Visit the [API Reference](../api/reference.md)
