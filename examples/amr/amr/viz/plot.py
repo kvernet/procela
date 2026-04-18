@@ -89,7 +89,7 @@ def create_observable_figure(
         _add_regime_background(ax=ax, steps=steps, y_max=max(values) * 1.1)
         ax.legend()
 
-        plt.savefig(f"{save_path}/{name}.pdf")
+        plt.savefig(f"{save_path}/{name}.png")
         plt.close()
 
 
@@ -130,7 +130,7 @@ def create_mechanisms_contrib_figure(
     plt.ylabel("Patients")
 
     plt.legend()
-    plt.savefig(f"{save_path}/mech_contrib_gov_{governance}.pdf")
+    plt.savefig(f"{save_path}/mech_contrib_gov_{governance}.png")
     plt.close()
 
     # Metrics
@@ -171,7 +171,7 @@ def create_mechanisms_contrib_figure(
     _add_regime_background(ax=axes[1, 1], steps=steps)
     axes[1, 1].legend()
 
-    plt.savefig(f"{save_path}/metrics_gov_{governance}.pdf")
+    plt.savefig(f"{save_path}/metrics_gov_{governance}.png")
     plt.close()
 
     # Coverage
@@ -186,7 +186,7 @@ def create_mechanisms_contrib_figure(
     # Create regime background
     _add_regime_background(ax=ax, steps=steps)
     ax.legend()
-    plt.savefig(f"{save_path}/coverage_{governance}.pdf")
+    plt.savefig(f"{save_path}/coverage_{governance}.png")
     plt.close()
 
 
@@ -259,7 +259,7 @@ def create_governance_stats_figure(
     axes[1].set_ylabel("Std error")
 
     # Save figure
-    plt.savefig(f"{save_path}/governance_stats.pdf")
+    plt.savefig(f"{save_path}/governance_stats.png")
     plt.close()
 
 
@@ -340,7 +340,7 @@ def create_governance_response_figure(
     _add_experiment_overlays(axes=[ax1, ax2])
 
     # Save figure
-    plt.savefig(f"{save_path}/governance_response_gov_{governance}.pdf")
+    plt.savefig(f"{save_path}/governance_response_gov_{governance}.png")
     plt.close()
 
     return fig
@@ -399,7 +399,7 @@ def create_cumulative_difference_figure(
     # Grid for readability
     ax.grid(True, alpha=0.3)
 
-    plt.savefig(f"{save_path}/cumulative_difference.pdf")
+    plt.savefig(f"{save_path}/cumulative_difference.png")
     plt.close()
 
     return fig
@@ -431,4 +431,4 @@ def create_topology_figure(
     plt.xlabel("Time step")
     plt.ylabel("Active mechanisms")
 
-    plt.savefig(f"{save_path}/topology_evolution.pdf")
+    plt.savefig(f"{save_path}/topology_evolution.png")

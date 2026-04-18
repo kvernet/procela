@@ -82,6 +82,7 @@ from ..assessment.reasoning import ReasoningResult
 from ..assessment.statistics import StatisticsResult
 from ..assessment.task import ReasoningTask
 from ..assessment.trend import TrendResult
+from ..key_authority import KeyAuthority
 from ..memory.base import VariableMemory
 from ..memory.hypothesis import HypothesisRecord
 from ..memory.record import VariableRecord
@@ -261,6 +262,7 @@ class Variable:
         seed: int | None = None,
         policy: ResolutionPolicy | None = None,
         validators: ValidatorType | None = None,
+        memory_pruner: Callable[[Variable], bool] | None = None,
     ):
         """
         Instantiate a variable with identity and configuration.
@@ -287,6 +289,9 @@ class Variable:
         validators: Iterable[Callable[[HypothesisRecord], bool]] | None
             The iterable validators to filter hypotheses before resolution.
             Default is None.
+        memory_pruner : Callable[[Variable], bool] | None
+            The memory pruner to manage variable memory usage in
+            long-running simulations.
 
         Examples
         --------
@@ -310,6 +315,12 @@ class Variable:
         Notes
         -----
         This constructor sets up memory and reasoning containers.
+
+        The memory_pruner method holds hypotheses in the variable's memory
+        based on user-defined criteria, helping to prevent unbounded memory growth
+        while preserving important historical information. It is called when
+        commiting changes to the variable's memory.
+
         Semantic interpretation of configuration and role is external.
         """
         self.name = name
@@ -321,8 +332,7 @@ class Variable:
         self.seed = seed
         self.policy = policy
         self.validators = validators
-
-        from ..key_authority import KeyAuthority
+        self.memory_pruner = memory_pruner
 
         self._key = KeyAuthority.issue(self)
 
@@ -602,6 +612,17 @@ class Variable:
         -----
         Only last change is committed.
         """
+        if self.memory_pruner and not self.memory_pruner(self):
+            for h in self.hypotheses:
+                if h.record is not None:
+                    KeyAuthority.remove(h.record.source)
+                    KeyAuthority.remove(h.record.key())
+                KeyAuthority.remove(h.key())
+            if self.conclusion is not None:
+                KeyAuthority.remove(self.conclusion.source)
+                KeyAuthority.remove(self.conclusion.key())
+            return
+
         if include_hypotheses:
             if not isinstance(self.hypotheses, list):
                 raise TypeError(

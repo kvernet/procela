@@ -94,6 +94,12 @@ class TestKeyAuthorityBasics:
         assert KeyAuthority.resolve(key2) is None
         assert key1 != key2
 
+    def test_remove_object(self):
+        """Test remove object."""
+        key = KeyAuthority.issue()
+        KeyAuthority.remove(key)
+        KeyAuthority.remove(None)
+
 
 class TestKeyAuthorityUniqueness:
     """Test Key uniqueness guarantees and collision handling."""

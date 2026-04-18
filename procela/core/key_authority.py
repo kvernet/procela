@@ -130,13 +130,22 @@ class KeyAuthority:
 
         Notes
         -----
-        This method is primarily for debugging, introspection, and
-        diagnostic purposes. Production code should generally not
-        depend on Key ownership resolution.
-
         The registry is append-only; once a Key is registered, it
-        remains in the registry for the lifetime of the process.
+        remains in the registry for the lifetime of the process until removed.
         """
         if key is None:
             return None
         return cls._registry.get(key)
+
+    @classmethod
+    def remove(cls, key: Key | None) -> None:
+        """
+        Remove the object associated with a Key, if any.
+
+        Parameters
+        ----------
+        key : Key | None
+            Key to remove from the registry.
+        """
+        if key in cls._registry:
+            del cls._registry[key]

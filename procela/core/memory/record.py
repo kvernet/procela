@@ -66,11 +66,11 @@ class VariableRecord:
     """
 
     value: Any = field(compare=False)
-    time: TimePoint | None = field(default=None, compare=False)
-    source: Key | None = None
     confidence: float | None = None
-    metadata: dict[str, Any] = field(default_factory=dict, compare=False)
+    source: Key | None = None
+    time: TimePoint | None = field(default=None, compare=False)
     explanation: str | None = field(default=None, compare=False)
+    metadata: dict[str, Any] = field(default_factory=dict, compare=False)
 
     _key: Key = field(
         init=False,

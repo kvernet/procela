@@ -323,6 +323,23 @@ def test_commit_with_includes(real_variable):
         )
 
 
+def test_commit_with_memory_pruner():
+    """Test commit with memory pruner."""
+    var = Variable(
+        "var",
+        RangeDomain(0, 100),
+        policy=HighestConfidencePolicy(),
+        memory_pruner=lambda v: all([h.record.confidence > 0.5 for h in v.hypotheses]),
+    )
+
+    for _ in range(1_000):
+        for j in range(5):
+            var.add_hypothesis(VariableRecord(1.89 + j / 5, confidence=(j + 1) / 5))
+        var.resolve_conflict()
+        var.commit()
+        var.clear_hypotheses()
+
+
 def test_key_method(real_variable):
     """Test key() returns a Key."""
     key = real_variable.key()

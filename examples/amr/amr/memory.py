@@ -15,7 +15,6 @@ from procela import (
     KeyAuthority,
     Mechanism,
     ReasoningTask,
-    ResolutionPolicy,
     Variable,
     VariableRecord,
 )
@@ -265,15 +264,15 @@ class MemoryVisualizer:
             return None
 
         policy = KeyAuthority.resolve(conclusion.source)
-        if not isinstance(policy, ResolutionPolicy | None):
-            return None
 
         return MemoryConclusion(
             value=conclusion.value,
             confidence=(
                 conclusion.confidence if conclusion.confidence is not None else 0.0
             ),
-            policy=policy.name if policy is not None else None,
+            policy=(
+                policy.name if policy is not None and hasattr(policy, "name") else None
+            ),
             considered_hypotheses=len(hypotheses),
             valid_hypotheses=len(
                 [
