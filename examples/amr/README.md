@@ -23,11 +23,14 @@ Regime shifts occur at steps 60 and 110, changing which ontology dominates.
 ## Installation
 
 ```bash
-# From the repository root
-pip install -e .
+# From the AMR example root
+python -m venv .venv
 
-# Or directly
-pip install procela
+source .venv/bin/activate
+
+pip install --upgrade pip
+
+pip install -r requirement.txt
 ```
 
 ## Running the Simulation
@@ -47,7 +50,7 @@ python main.py -r 50 -s 160 -o outputs/
 - `fragility` — PolicyFragility
 - `coverage` — CoverageDecay
 - `probe` — StructuralProbe
-- `all` — all governances active
+- `all` — all governances combined
 
 ## Directory Structure
 
@@ -93,10 +96,10 @@ Expected output (approximately):
 | Governance | Mean Error | Std Dev | Regret Improvement |
 |------------|------------|---------|-------------------|
 | none | 0.535 | 0.383 | — |
-| fragility | 0.544 | 0.386 | -9.8% |
-| coverage | 0.426 | 0.327 | 35.5% |
+| fragility | 0.544 | 0.386 | -9.6% |
+| coverage | 0.426 | 0.327 | 37.4% |
 | probe | 0.485 | 0.364 | 69.0% |
-| all | 0.491 | 0.378 | 61.6% |
+| all | 0.491 | 0.378 | 63.2% |
 
 ## License
 
