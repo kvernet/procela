@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "procela"
-version = "1.0.0"
+version = "1.0.1"
 description = "Epistemic Governance in Mechanistic Simulations Under Structural Uncertainty"
 authors = [
     { name = "Kinson Vernet", email = "kinson.vernet@gmail.com" }

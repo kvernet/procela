@@ -24,8 +24,7 @@ def get_true_regime() -> list:
     """Get the true regime."""
     if regime.memory is None:
         return []
-    true_regime = [r.value for _, r, _ in regime.memory.iter() if r is not None]
-    true_regime.reverse()
+    true_regime = [r.value for _, r, _ in regime.memory.records() if r is not None]
     return true_regime
 
 
@@ -60,7 +59,7 @@ def _add_experiment_overlays(axes: list[plt.Figure]) -> None:
     """Add experiment overlays."""
     # Add experiment overlays
     if experiment_status.memory:
-        for _, r, _ in experiment_status.memory.iter():
+        for _, r, _ in experiment_status.memory.records():
             if r is None:
                 continue
             data = r.metadata
@@ -284,8 +283,8 @@ def create_governance_response_figure(
 
     for step, (err, pred) in enumerate(
         zip(
-            error_colonized.memory.iter(),
-            predicted_colonized.memory.iter(),
+            error_colonized.memory.records(),
+            predicted_colonized.memory.records(),
         )
     ):
         steps.append(step)

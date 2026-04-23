@@ -20,7 +20,7 @@ def compute_cumulative_difference() -> np.ndarray | None:
     difference = np.zeros(count)
     cumulative = np.zeros(count)
     for step, (err, errb) in enumerate(
-        zip(error_colonized.memory.iter(), error_baseline_colonized.memory.iter())
+        zip(error_colonized.memory.records(), error_baseline_colonized.memory.records())
     ):
         if (
             err[1] is None
