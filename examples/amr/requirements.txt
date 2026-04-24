@@ -1,4 +1,4 @@
 pandas
 matplotlib
 tqdm
-procela
+procela>=1.0.1

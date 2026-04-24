@@ -21,7 +21,14 @@ plt.style.use("share/style.mplstyle")
 
 
 def get_true_regime() -> list:
-    """Get the true regime."""
+    """
+    Get the true regime.
+
+    Returns
+    -------
+    list
+        The list of regine values.
+    """
     if regime.memory is None:
         return []
     true_regime = [r.value for _, r, _ in regime.memory.records() if r is not None]
@@ -34,7 +41,20 @@ def _add_regime_background(
     y_min: float | None = None,
     y_max: float | None = None,
 ) -> None:
-    """Add regime background."""
+    """
+    Add regime background.
+
+    Parameters
+    ----------
+    ax : plt.Figure
+        The ax to get limits.
+    steps : list[float]
+        The list of the steps.
+    y_min : float | None
+        Optional minimum value of (Oy).
+    y_max : float | None
+        Optional maximum value of (Oy).
+    """
     # Add regime background
     colors = ["red", "green", "blue"]
     regime_names = ["Selection", "Environmental", "Contact"]
@@ -56,7 +76,14 @@ def _add_regime_background(
 
 
 def _add_experiment_overlays(axes: list[plt.Figure]) -> None:
-    """Add experiment overlays."""
+    """
+    Add experiment overlays.
+
+    Parameters
+    ----------
+    axes : list[plt.Figure]
+        The list of axes to add experiment overlays.
+    """
     # Add experiment overlays
     if experiment_status.memory:
         for _, r, _ in experiment_status.memory.records():
@@ -72,7 +99,16 @@ def create_observable_figure(
     df: pd.DataFrame,
     base_dir: str | Path,
 ) -> None:
-    """Create figure of observables."""
+    """
+    Create figure of observables.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        The dataframe to plot observable from.
+    base_dir : str | Path
+        The base directory to save figures.
+    """
     save_path = Path(base_dir)
     save_path.mkdir(parents=True, exist_ok=True)
 
@@ -96,7 +132,16 @@ def create_mechanisms_contrib_figure(
     result: dict[str, Any],
     base_dir: str | Path,
 ) -> None:
-    """Create mechanisms contrib figure."""
+    """
+    Create mechanisms contrib figure.
+
+    Parameters
+    ----------
+    result : dict[str, Any]
+        The dict containing the results.
+    base_dir : str | Path
+        The base directory to save figures.
+    """
     save_path = Path(base_dir)
     save_path.mkdir(parents=True, exist_ok=True)
 
@@ -193,7 +238,16 @@ def create_governance_stats_figure(
     results: dict[str, Any],
     base_dir: str | Path,
 ) -> None:
-    """Create governance stats figure."""
+    """
+    Create governance stats figure.
+
+    Parameters
+    ----------
+    results : dict[str, Any]
+        The dict containg the results.
+    base_dir : str | Path
+        The base directory to save figures.
+    """
     save_path = Path(base_dir)
     save_path.mkdir(parents=True, exist_ok=True)
 
@@ -266,7 +320,21 @@ def create_governance_response_figure(
     result: dict[str, Any],
     base_dir: str | Path,
 ) -> plt.Figure | None:
-    """Create governance response figure under regime shifts."""
+    """
+    Create governance response figure under regime shifts.
+
+    Parameters
+    ----------
+    results : dict[str, Any]
+        The dict containg the results.
+    base_dir : str | Path
+        The base directory to save figures.
+
+    Returns
+    -------
+    plt.Figure | None
+        The figure or None.
+    """
     save_path = Path(base_dir)
     save_path.mkdir(parents=True, exist_ok=True)
 
@@ -349,7 +417,21 @@ def create_cumulative_difference_figure(
     cumulatives: dict[str, np.ndarray],
     base_dir: str | Path,
 ) -> plt.Figure:
-    """Create cumulative difference comparison figure."""
+    """
+    Create cumulative difference comparison figure.
+
+    Parameters
+    ----------
+    cumulatives : dict[str, np.ndarray]
+        The dict containing the cumulative differences.
+    base_dir : str | Path
+        The base directory to save figures.
+
+    Returns
+    -------
+    plt.Figure
+        The figure.
+    """
     save_path = Path(base_dir)
     save_path.mkdir(parents=True, exist_ok=True)
 
@@ -408,7 +490,16 @@ def create_topology_figure(
     results: dict[str, Any],
     base_dir: str | Path,
 ) -> None:
-    """Create topology figure."""
+    """
+    Create topology figure.
+
+    Parameters
+    ----------
+    results : dict[str, Any]
+        The dict containg the results.
+    base_dir : str | Path
+        The base directory to save figures.
+    """
     save_path = Path(base_dir)
     save_path.mkdir(parents=True, exist_ok=True)
 

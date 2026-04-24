@@ -16,7 +16,23 @@ from amr import (
 def simulate(
     n_runs: int = 50, steps: int = 160, output_dir: str = "outputs/"
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
-    """Simulate the AMR case study."""
+    """
+    Simulate the AMR case study.
+
+    Parameters
+    ----------
+    n_runs : int
+        The nnumber of runs. Default is 50.
+    steps : int
+        The number of steps. Default is 160.
+    output_dir : str
+        The output directory. Default is "outputs/".
+
+    Returns
+    -------
+    tuple[dict[str, Any], dict[str, Any], dict[str, Any]]
+        A tuple of dictionaries containing results.
+    """
     results = {}
     df_stats = {}
     cumulatives = {}

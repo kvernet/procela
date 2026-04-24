@@ -19,12 +19,33 @@ class NoActiveFamiliesInvariant(SystemInvariant):
         executive: Executive,
         registry: FamilyRegistry,
     ) -> None:
-        """No active families invariant constructor."""
+        """
+        No active families invariant constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        registry : FamilyRegistry
+            The family registry.
+        """
         self.executive = executive
         self.registry = registry
 
         def check_condition(snapshot: VariableSnapshot) -> bool:
-            """Check condition."""
+            """
+            Check condition.
+
+            Parameters
+            ----------
+            snapshot : VariableSnapshot
+                The variable snapshot.
+
+            Returns
+            -------
+            bool
+                Whether violation occured or not.
+            """
             active_count = sum(
                 1
                 for f in self.registry.families.values()
@@ -35,7 +56,16 @@ class NoActiveFamiliesInvariant(SystemInvariant):
         def handle_violation(
             violation: InvariantViolation, snapshot: VariableSnapshot
         ) -> None:
-            """Handle violation."""
+            """
+            Handle violation.
+
+            Parameters
+            ----------
+            violation : InvariantViolation
+                The invariant violation.
+            snapshot : VariableSnapshot
+                The variable snapshot.
+            """
             for family in self.registry.families.values():
                 family.enable()
                 self.executive.logger.warning(

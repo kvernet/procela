@@ -48,7 +48,28 @@ class SelectionMechanism(Mechanism):
         description: str = "Antibiotic selection mechanism",
         name: str = "Selection",
     ) -> None:
-        """Mechanism selection constructor."""
+        """
+        Mechanism selection constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        theta : float
+            Theta parameters. Default is 0.05.
+        confidence : float
+            The confidence of the mechanism. Default is 0.8.
+        noise_scale : float
+            The noise scale. Default is 0.5.
+        bias : float
+            The bias. Default is 1.0.
+        stewardship_effect : float
+            The stewardship effect. Default is 0.6.
+        description : str
+            A description. Default is "Antibiotic selection mechanism".
+        name : str
+            The mechanism name. Default is "Selection".
+        """
         super().__init__(
             reads=[colonized, antibiotic_usage, intervention_code],
             writes=[predicted_colonized, intervention_code, baseline_colonized],
@@ -123,7 +144,14 @@ class SelectionNoisyMechanism(SelectionMechanism):
     """Higher noise variant."""
 
     def __init__(self, executive: Executive) -> None:
-        """Noisy selection mechanism constructor."""
+        """
+        Noisy selection mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        """
         super().__init__(
             executive,
             theta=0.05,
@@ -140,7 +168,14 @@ class SelectionBiasedMechanism(SelectionMechanism):
     """Consistently overestimates antibiotic effect."""
 
     def __init__(self, executive: Executive) -> None:
-        """Bias selection mechanism constructor."""
+        """
+        Bias selection mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        """
         super().__init__(
             executive,
             theta=0.05,
@@ -157,7 +192,14 @@ class SelectionUnderestimateMechanism(SelectionMechanism):
     """Consistently underestimates antibiotic effect."""
 
     def __init__(self, executive: Executive) -> None:
-        """Underestimate selection mechanism constructor."""
+        """
+        Underestimate selection mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        """
         super().__init__(
             executive,
             theta=0.05,
@@ -171,7 +213,19 @@ class SelectionUnderestimateMechanism(SelectionMechanism):
 
 
 def create_selection_family(executive: Executive) -> MechanismFamily:
-    """Create and populate the selection mechanism family."""
+    """
+    Create and populate the selection mechanism family.
+
+    Parameters
+    ----------
+    executive : Executive
+        The executive.
+
+    Returns
+    -------
+    MechanismFamily
+        The mechanism family.
+    """
     family = MechanismFamily("selection", sigma=5.0, alpha=0.2)
 
     family.add(SelectionMechanism(executive=executive))

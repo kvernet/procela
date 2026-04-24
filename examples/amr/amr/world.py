@@ -22,7 +22,14 @@ class AMRWorld:
     """
 
     def __init__(self, seed: int = 42) -> None:
-        """AMR World constructor."""
+        """
+        AMR World constructor.
+
+        Parameters
+        ----------
+        seed : int
+            The random seed for reproducibility. Default is 42.
+        """
         self.rng = np.random.default_rng(seed)
 
         # transmission coefficients
@@ -37,7 +44,19 @@ class AMRWorld:
         self.noise = 0.25
 
     def _regime(self, step: int) -> str:
-        """Regime at the current step."""
+        """
+        Regime at the current step.
+
+        Parameters
+        ----------
+        step : int
+            The current simulation step.
+
+        Returns
+        -------
+        str
+            The regime to that step.
+        """
         if step <= 60:
             return "selection"
         elif step <= 110:
@@ -45,7 +64,7 @@ class AMRWorld:
         else:
             return "contact"
 
-    def update_environment(self, step: int) -> None:
+    def update_environment(self) -> None:
         """
         Update antibiotic usage and environmental load.
 
@@ -58,8 +77,15 @@ class AMRWorld:
         environmental_load.set(VariableRecord(value=E_val, confidence=0.99))
 
     def step(self, step: int) -> None:
-        """Generate next colonization observation."""
-        self.update_environment(step)
+        """
+        Generate next colonization observation.
+
+        Parameters
+        ----------
+        step : int
+            The current simulation step.
+        """
+        self.update_environment()
 
         C_t = colonized.value
         A_t = antibiotic_usage.value

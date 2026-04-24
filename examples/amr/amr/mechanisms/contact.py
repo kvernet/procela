@@ -27,7 +27,28 @@ class ContactMechanism(Mechanism):
         description: str = "Contact transmission mechanism",
         name: str = "Contact",
     ) -> None:
-        """Contact mechanism constructor."""
+        """
+        Contact mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        theta : float
+            Theta parameters. Default is 0.03.
+        confidence : float
+            The confidence of the mechanism. Default is 0.8.
+        bias : float
+            The bias. Default is 1.0.
+        noise_scale : float
+            The noise scale. Default is 0.5.
+        isolation_effect : float
+            The isolation effect. Default is 0.3.
+        description : str
+            A description. Default is "Contact transmission mechanism".
+        name : str
+            The mechanism name. Default is "Contact".
+        """
         super().__init__(
             reads=[colonized, intervention_code],
             writes=[predicted_colonized, intervention_code, baseline_colonized],
@@ -115,7 +136,14 @@ class ContactNoisyMechanism(ContactMechanism):
     """Contact noisy mechanism."""
 
     def __init__(self, executive: Executive) -> None:
-        """Contact noisy mechanism constructor."""
+        """
+        Contact noisy mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        """
         super().__init__(
             executive,
             theta=0.03,
@@ -130,7 +158,14 @@ class ContactOverestimateMechanism(ContactMechanism):
     """Contact overestimate mechanism."""
 
     def __init__(self, executive: Executive) -> None:
-        """Contact overestimate mechanism constructor."""
+        """
+        Contact overestimate mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        """
         super().__init__(
             executive,
             theta=0.03,
@@ -142,7 +177,19 @@ class ContactOverestimateMechanism(ContactMechanism):
 
 
 def create_contact_family(executive: Executive) -> MechanismFamily:
-    """Create and populate the contact mechanism family."""
+    """
+    Create and populate the contact mechanism family.
+
+    Parameters
+    ----------
+    executive : Executive
+        The executive.
+
+    Returns
+    -------
+    MechanismFamily
+        The mechanism family.
+    """
     family = MechanismFamily("contact", sigma=5.0, alpha=0.2)
 
     family.add(ContactMechanism(executive=executive))

@@ -41,7 +41,24 @@ class PolicyFragilityInvariant(SystemInvariant):
         experiment_duration: int = 10,
         evaluation_window: int = 10,
     ) -> None:
-        """Policy fragility invariant constructor."""
+        """
+        Policy fragility invariant constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        registry : FamilyRegistry
+            The family registry.
+        fragility_threshold : float
+            The fragility threshold. Default is 1.0.
+        error_threshold : float
+            The error threshold. Default is 0.6.
+        experiment_duration : int
+            The experiment duration. Default is 10.
+        evaluation_window : int
+            The evaluation window. Default is 10.
+        """
         self.executive = executive
         self.registry = registry
         self.fragility_threshold = fragility_threshold
@@ -56,13 +73,27 @@ class PolicyFragilityInvariant(SystemInvariant):
         self.experiment_status: ExperimentStatus | None = None
 
         def _check_experiment(step: int) -> None:
-            """Call after each step to manage experiment lifecycle."""
+            """
+            Call after each step to manage experiment lifecycle.
+
+            Parameters
+            ----------
+            step : int
+                The current simulation step.
+            """
             if self.state == "experimenting" and self.experiment_start_step:
                 if step - self.experiment_start_step >= self.experiment_duration:
                     _evaluate_experiment(step)
 
         def _evaluate_experiment(step: int) -> None:
-            """Compare performance during experiment vs baseline."""
+            """
+            Compare performance during experiment vs baseline.
+
+            Parameters
+            ----------
+            step : int
+                The current simulation step.
+            """
             exp_error = _get_recent_error()
 
             if self.pre_error and exp_error < self.pre_error:
@@ -104,7 +135,14 @@ class PolicyFragilityInvariant(SystemInvariant):
             )
 
         def _get_recent_error() -> float:
-            """Get mean of the recent prediction errors."""
+            """
+            Get mean of the recent prediction errors.
+
+            Returns
+            -------
+            float
+                The reccent error.
+            """
             errors = [
                 c.value
                 for _, c, _ in error_colonized.recent(self.evaluation_window)
@@ -114,7 +152,19 @@ class PolicyFragilityInvariant(SystemInvariant):
             return float(np.mean(errors))
 
         def check_condition(snapshot: VariableSnapshot) -> bool:
-            """Check condition."""
+            """
+            Check condition.
+
+            Parameters
+            ----------
+            snapshot : VariableSnapshot
+                The variable snapshot.
+
+            Returns
+            -------
+            bool
+                Whether violation occured or not.
+            """
             # Check the experiment lifecycle
             _check_experiment(snapshot.step)
 
@@ -139,7 +189,16 @@ class PolicyFragilityInvariant(SystemInvariant):
         def handle_violation(
             violation: InvariantViolation, snapshot: VariableSnapshot
         ) -> None:
-            """Handle violation."""
+            """
+            Handle violation.
+
+            Parameters
+            ----------
+            violation : InvariantViolation
+                The invariant violation.
+            snapshot : VariableSnapshot
+                The variable snapshot.
+            """
             step = snapshot.step
 
             if self.state == "monitoring":

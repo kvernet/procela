@@ -11,7 +11,18 @@ class MechanismFamily:
     """Group of mechanisms sharing an ontology."""
 
     def __init__(self, name: str, sigma: float = 5.0, alpha: float = 0.2) -> None:
-        """Mechanism family constructor."""
+        """
+        Mechanism family constructor.
+
+        Parameters
+        ----------
+        name : str
+            The family name.
+        sigma : float
+            The parameter to control family decay.
+        alpha : float
+            The smoth paramter for the EWMA computation.
+        """
         self.name = name
         self.sigma = sigma
         self.alpha = alpha
@@ -31,11 +42,25 @@ class MechanismFamily:
         self._key = KeyAuthority.issue(self)
 
     def key(self) -> Key:
-        """Return a unique key of the mechanism family."""
+        """
+        Return a unique key of the mechanism family.
+
+        Returns
+        -------
+        Key
+            The unique key of the mechanism family.
+        """
         return self._key
 
     def add(self, mech: Mechanism) -> None:
-        """Add a mechanism."""
+        """
+        Add a mechanism.
+
+        Parameters
+        ----------
+        mech : Mechanism
+            The mechanism to add.
+        """
         if mech not in self.mechanisms:
             self.mechanisms.append(mech)
             self.mechanism_keys.append(mech.key())

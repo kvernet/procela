@@ -8,16 +8,16 @@ The simulation models the spread of resistant organisms in a hospital network wi
 
 | Ontology | Equation | Intervention |
 |----------|----------|--------------|
-| Contact | C(t+1) = C(t) + β·C(t)·(1 - η·1_{I=1}) | Isolation |
-| Environmental | C(t+1) = C(t) + β·E(t)·(1 - η·1_{I=2}) | Cleaning |
-| Selection | C(t+1) = C(t) + β·A(t)·(1 - η·1_{I=3}) | Stewardship |
+| Contact | $C(t+1) = C(t) + \beta \cdot C(t) \cdot (1 - \eta \cdot 1_{I=1})$ | Isolation |
+| Environmental | $C(t+1) = C(t) + \beta \cdot E(t) \cdot (1 - \eta \cdot 1_{I=2})$ | Cleaning |
+| Selection | $C(t+1) = C(t) + \beta \cdot A(t) \cdot (1 - \eta \cdot 1_{I=3})$ | Stewardship |
 
 Regime shifts occur at steps 60 and 110, changing which ontology dominates.
 
 ## Requirements
 
 - Python 3.10+
-- Procela (installed from parent directory or PyPI)
+- Procela framework (`pip install procela`)
 - NumPy
 
 ## Installation
@@ -28,29 +28,8 @@ python -m venv .venv
 
 source .venv/bin/activate
 
-pip install --upgrade pip
-
-pip install -r requirement.txt
+pip install -r requirements.txt
 ```
-
-## Running the Simulation
-
-### Help
-```bash
-python main.py --help
-```
-
-### Reproduce paper results
-```bash
-python main.py -r 50 -s 160 -o outputs/
-```
-
-### Governance
-- `none` — baseline, no governance
-- `fragility` — PolicyFragility
-- `coverage` — CoverageDecay
-- `probe` — StructuralProbe
-- `all` — all governances combined
 
 ## Directory Structure
 
@@ -89,6 +68,26 @@ python main.py -r 50 -s 160 -o outputs/
     └── style.mplstyle              # Matplot style for the figures
 ```
 
+## Running the Simulation
+
+### Help
+```bash
+python main.py --help
+```
+
+### Reproduce paper results
+```bash
+python main.py -r 50 -s 160 -o outputs/
+```
+
+### Governance
+- `none` — baseline, no governance
+- `fragility` — PolicyFragility
+- `coverage` — CoverageDecay
+- `probe` — StructuralProbe
+- `all` — all governances combined
+
+
 ## Paper Results
 
 Expected output (approximately):
@@ -100,6 +99,17 @@ Expected output (approximately):
 | coverage | 0.426 | 0.327 | 37.4% |
 | probe | 0.485 | 0.364 | 69.0% |
 | all | 0.491 | 0.378 | 63.2% |
+
+> **Key finding**: The case study has revealed a fundamental trade-off:
+
+- Prediction-optimal $\neq$ decision-optimal
+- Coverage decay makes better predictions but modest decisions (+20.42%, C.E=37.4%)
+- Probe makes better decisions but only modestly improves predictions (+9.31%, C.E=69.0%)
+
+Consider hybrid — probe for information, coverage for prediction.
+
+### Topology dynamics
+Procela ensures complete auditability. The memories of variables can be used to visualize the topology dynamics. As illustrated in the following figure, the topology evolution for each governance in the AMR study is illustrated. The contact family has three mechanisms, while the environmental and selection families have four each. In total, the AMR case study has eleven competing mechanisms that governance restructures over time.
 
 ## License
 

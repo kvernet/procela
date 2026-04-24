@@ -15,7 +15,14 @@ class FamilyRegistry:
     """Family registry."""
 
     def __init__(self, window: int = 5) -> None:
-        """Family registry constructor."""
+        """
+        Family registry constructor.
+
+        Parameters
+        ----------
+        window : int
+            The window size to compute policy fragility. Default is 5.
+        """
         self.window = window
         self.fragility_history: Deque[float] = deque(maxlen=window)
         self.families: dict[str, MechanismFamily] = {}
@@ -30,11 +37,25 @@ class FamilyRegistry:
         )
 
     def register(self, family: MechanismFamily) -> None:
-        """Register a family with the registry."""
+        """
+        Register a family with the registry.
+
+        Parameters
+        ----------
+        family : MechanismFamily
+            The mechanism family to register.
+        """
         self.families[family.name] = family
 
     def unregister(self, family_name: str) -> None:
-        """Remove a family from registry."""
+        """
+        Remove a family from registry.
+
+        Parameters
+        ----------
+        family_name : str
+            The family name to unregister.
+        """
         if family_name in self.families:
             del self.families[family_name]
 

@@ -38,7 +38,28 @@ class EnvironmentalMechanism(Mechanism):
         description: str = "Environmental transmission mechanism",
         name: str = "Environmental",
     ) -> None:
-        """Environmental mechanism constructor."""
+        """
+        Environmental mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        theta : float
+            Theta parameters. Default is 0.08.
+        confidence : float
+            The confidence of the mechanism. Default is 0.8.
+        noise_scale : float
+            The noise scale. Default is 0.5.
+        bias : float
+            The bias. Default is 1.0.
+        cleaning_effect : float
+            The cleaning effect. Default is 0.5.
+        description : str
+            A description. Default is "Environmental transmission mechanism".
+        name : str
+            The mechanism name. Default is "Environmental".
+        """
         super().__init__(
             reads=[colonized, environmental_load, intervention_code],
             writes=[predicted_colonized, intervention_code, baseline_colonized],
@@ -113,7 +134,14 @@ class EnvironmentalNoisyMechanism(EnvironmentalMechanism):
     """Environmental noisy mechanism."""
 
     def __init__(self, executive: Executive) -> None:
-        """Environmental noisy mechanism constructor."""
+        """
+        Environmental noisy mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        """
         super().__init__(
             executive,
             theta=0.08,
@@ -130,7 +158,14 @@ class EnvironmentalLaggedMechanism(EnvironmentalMechanism):
     """Environmental lagged mechanism."""
 
     def __init__(self, executive: Executive) -> None:
-        """Environmental lagged mechanism constructor."""
+        """
+        Environmental lagged mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        """
         super().__init__(
             executive,
             theta=0.08,
@@ -147,7 +182,14 @@ class EnvironmentalOverestimateMechanism(EnvironmentalMechanism):
     """Environmental overestimate mechanism."""
 
     def __init__(self, executive: Executive) -> None:
-        """Environmental overestimate mechanism constructor."""
+        """
+        Environmental overestimate mechanism constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        """
         super().__init__(
             executive,
             theta=0.08,
@@ -161,7 +203,19 @@ class EnvironmentalOverestimateMechanism(EnvironmentalMechanism):
 
 
 def create_environment_family(executive: Executive) -> MechanismFamily:
-    """Create and populate the environmental mechanism family."""
+    """
+    Create and populate the environmental mechanism family.
+
+    Parameters
+    ----------
+    executive : Executive
+        The executive.
+
+    Returns
+    -------
+    MechanismFamily
+        The mechanism family.
+    """
     family = MechanismFamily("environmental", sigma=5.0, alpha=0.2)
 
     family.add(EnvironmentalMechanism(executive=executive))

@@ -29,11 +29,26 @@ class StructuralProbeInvariant(SystemInvariant):
         self,
         executive: Executive,
         registry: FamilyRegistry,
-        probe_interval: int = 30,
+        probe_interval: int = 25,
         probe_duration: int = 10,
         evaluation_window: int = 10,
     ) -> None:
-        """Structural probe invariant constructor."""
+        """
+        Structural probe invariant constructor.
+
+        Parameters
+        ----------
+        executive : Executive
+            The executive.
+        registry : FamilyRegistry
+            The family registry.
+        probe_interval : int
+            The probe interval. Default is 25.
+        probe_duration : int
+            The probe duration. Default is 10.
+        evaluation_window : int
+            The evaluation window. Default is 10.
+        """
         self.executive = executive
         self.registry = registry
         self.probe_interval = probe_interval
@@ -49,14 +64,28 @@ class StructuralProbeInvariant(SystemInvariant):
         self.experiment_status: ExperimentStatus | None = None
 
         def check_probe_complete(step: int) -> None:
-            """Call after each step to manage probe lifecycle."""
+            """
+            Call after each step to manage probe lifecycle.
+
+            Parameters
+            ----------
+            step : int
+                The current simulation step.
+            """
             if self.state == "experimenting" and self.probe_start_step:
                 # Check if probe is complete
                 if step - self.probe_start_step >= self.probe_duration:
                     _end_probe(step)
 
         def _end_probe(step: int) -> None:
-            """End the current probe and restore all families."""
+            """
+            End the current probe and restore all families.
+
+            Parameters
+            ----------
+            step : int
+                The current simulation step.
+            """
             exp_error = _get_recent_error()
 
             self.executive.logger.info(
@@ -97,7 +126,14 @@ class StructuralProbeInvariant(SystemInvariant):
             )
 
         def _get_recent_error() -> float:
-            """Get mean of the recent prediction errors."""
+            """
+            Get mean of the recent prediction errors.
+
+            Returns
+            -------
+            float
+                The reccent error.
+            """
             errors = [
                 c.value
                 for _, c, _ in error_colonized.recent(self.evaluation_window)
@@ -107,7 +143,19 @@ class StructuralProbeInvariant(SystemInvariant):
             return float(np.mean(errors))
 
         def check_condition(snapshot: VariableSnapshot) -> bool:
-            """Check condition."""
+            """
+            Check condition.
+
+            Parameters
+            ----------
+            snapshot : VariableSnapshot
+                The variable snapshot.
+
+            Returns
+            -------
+            bool
+                Whether violation occured or not.
+            """
             current_step = snapshot.step
             # Check if probe is complete
             check_probe_complete(current_step)
@@ -120,7 +168,16 @@ class StructuralProbeInvariant(SystemInvariant):
         def handle_violation(
             violation: InvariantViolation, snapshot: VariableSnapshot
         ) -> None:
-            """Handle violation."""
+            """
+            Handle violation.
+
+            Parameters
+            ----------
+            violation : InvariantViolation
+                The invariant violation.
+            snapshot : VariableSnapshot
+                The variable snapshot.
+            """
             step = snapshot.step
             self.current_probe_family = next(self.family_cycle)
 

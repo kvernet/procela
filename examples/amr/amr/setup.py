@@ -45,6 +45,13 @@ def create_simulation(
         "none", "fragility", "coverage", "probe", or "all". Default is "none".
     seed : int
         The random seed. Default is 42.
+    output_dir : str | Path
+        The output directory. Default is "outputs/".
+
+    Returns
+    -------
+    tuple[Executive, FamilyRegistry, AMRWorld]
+        The Executive, FamilyRegistry and AMRWorld.
     """
     logger = setup_logging(
         console=False,
@@ -135,7 +142,26 @@ def run_experiment(
     seed: int = 42,
     output_dir: str | Path = "outputs/",
 ) -> dict[str, Any]:
-    """Run a single experiment with given governance strategy."""
+    """
+    Run a single experiment with given governance strategy.
+
+    Parameters
+    ----------
+    governance : str
+        The governance strategy:
+        "none", "fragility", "coverage", "probe", or "all". Default is "none".
+    steps : int
+        The number of steps. Default is 160.
+    seed : int
+        The random seed. Default is 42.
+    output_dir : str | Path
+        The output directory. Default is "outputs/".
+
+    Returns
+    -------
+    dict[str, Any]
+        A dict containing run results.
+    """
     with Timer() as timer:
         executive, registry, world = create_simulation(
             governance=governance,
@@ -179,11 +205,30 @@ def run_experiment(
 
 def run_multiple_experiments(
     governance: str = "none",
-    n_runs: int = 10,
+    n_runs: int = 50,
     steps: int = 160,
     output_dir: str | Path = "outputs/",
 ) -> tuple[list[dict[str, Any]], pd.DataFrame, list[np.ndarray | None]]:
-    """Run multiple experiments with different random seeds."""
+    """
+    Run multiple experiments with different random seeds.
+
+    Parameters
+    ----------
+    governance : str
+        The governance strategy:
+        "none", "fragility", "coverage", "probe", or "all". Default is "none".
+    n_runs : int
+        The number of runs. Default is 50.
+    seed : int
+        The random seed. Default is 42.
+    output_dir : str | Path
+        The output directory. Default is "outputs/".
+
+    Returns
+    -------
+    tuple[list[dict[str, Any]], pd.DataFrame, list[np.ndarray | None]]
+        A tuple containing the run results.
+    """
     results = []
     error = []
     cumulatives = []

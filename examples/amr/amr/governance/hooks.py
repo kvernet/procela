@@ -17,7 +17,19 @@ from ..world import AMRWorld
 
 
 def compute_error(variable: Variable) -> float:
-    """Compute prediction error."""
+    """
+    Compute prediction error.
+
+    Parameters
+    ----------
+    variable : Variable
+        The variable to compute the prediction error.
+
+    Returns
+    -------
+    float
+        The prediction error.
+    """
     # Get previous step's resolved conclusion
     result = variable.get(start=-2, size=1)
 
@@ -45,7 +57,19 @@ def compute_error(variable: Variable) -> float:
 
 
 def create_pre_step(world: AMRWorld) -> Callable[[Executive, int], None]:
-    """Create pre_step."""
+    """
+    Create pre_step.
+
+    Parameters
+    ----------
+    world : AMRWorld
+        The hidden AMR world.
+
+    Returns
+    -------
+    Callable[[Executive, int], None]
+        The pre step event or None.
+    """
 
     def pre_step(executive: Executive, step: int) -> None:
         if step == 0:
@@ -56,7 +80,19 @@ def create_pre_step(world: AMRWorld) -> Callable[[Executive, int], None]:
 
 
 def create_post_step(registry: FamilyRegistry) -> Callable[[Executive, int], None]:
-    """Create post_step."""
+    """
+    Create post_step.
+
+    Parameters
+    ----------
+    registry: FamilyRegistry
+        The family registry.
+
+    Returns
+    -------
+    Callable[[Executive, int], None]
+        The post step event or None.
+    """
 
     def post_step(executive: Executive, step: int) -> None:
         if step > 0:

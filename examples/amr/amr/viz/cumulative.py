@@ -12,6 +12,11 @@ def compute_cumulative_difference() -> np.ndarray | None:
     cumulative = sum(|counterfactual_error| - |actual_error|)
     where counterfactual_error is what error WOULD HAVE BEEN
     with optimal intervention.
+
+    Returns
+    -------
+    np.ndarray | None
+        A numpy array containing the cumulative differences or None.
     """
     if error_colonized.memory is None or error_baseline_colonized.memory is None:
         return None

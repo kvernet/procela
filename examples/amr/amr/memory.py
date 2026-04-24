@@ -98,6 +98,17 @@ class MemoryVisualizer:
         end_step : int | None
             The optional executive step to end to. Default is None.
             When it is None, it means all up to the end.
+        source : Key | None
+            A optional source key.
+        task : ReasoningTask | None
+            A optonal reasoning task.
+        success : bool | None
+            Succeed or failed reasoning result.
+
+        Returns
+        -------
+        list[MemoryRecord]
+            The list to the record from the variable memories.
         """
         history: list[MemoryRecord] = []
 
@@ -154,6 +165,20 @@ class MemoryVisualizer:
 
         Parameters
         ----------
+        start_step : int
+            The executive step to start from. Default is 0.
+        end_step : int | None
+            The optional executive step to end to. Default is None.
+            When it is None, it means all up to the end.
+        source : Key | None
+            A optional source key.
+        task : ReasoningTask | None
+            A optonal reasoning task.
+        success : bool | None
+            Succeed or failed reasoning result.
+
+        Returns
+        -------
         pd.DataFrame
             The DataFrame containing relevant details of the executive.
         """
