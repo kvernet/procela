@@ -10,7 +10,7 @@ Examples Reference
 https://procela.org/docs/examples/
 """
 
-__version__ = "1.0.1"
+__version__ = "1.0.2"
 
 __author__ = "Kinson Vernet"
 __email__ = "kinson.vernet@gmail.com"

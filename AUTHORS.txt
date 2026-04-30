@@ -5,8 +5,8 @@ Project Lead
 Kinson Vernet <kinson.vernet@gmail.com> (0009-0009-7535-3357)
   - Project architecture
   - Mechanistic core engine
-  - Variables epistemic authorities
-  - System invariant abstraction
+  - Variables memory-bearing epistemic authorities
+  - System governance abstraction
 
 
 Core Contributors

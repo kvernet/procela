@@ -132,7 +132,7 @@ print(f"Final value: {X.value:.2f}")
 
 ## 📚 Case study: AMR spread in hospital networks
 
-See
+See the [AMR](https://github.com/kvernet/procela/tree/main/examples/amr)
 
 ---
 
@@ -186,8 +186,8 @@ make pre-commit  # Run all checks
 
 We welcome contributions! Please see:
 
-- [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines
-- [AUTHORS.txt](AUTHORS.txt) for the list of contributors
+- [CONTRIBUTING.md](https://github.com/kvernet/procela) for detailed guidelines
+- [AUTHORS.txt](https://github.com/kvernet/procela) for the list of contributors
 
 **Areas where contributions are especially welcome:**
 - Additional governance invariants (regret-based, multi-objective)
@@ -218,7 +218,7 @@ If you use Procela in your research, please cite:
 
 ## 📋 License
 
-Procela is licensed under the **Apache License 2.0**. See [LICENSE](LICENSE) for details.
+Procela is licensed under the **Apache License 2.0**. See [LICENSE](https://github.com/kvernet/procela) for details.
 
 ---
 
