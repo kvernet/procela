@@ -34,7 +34,7 @@ def compute_error(variable: Variable) -> float:
     result = variable.get(start=-2, size=1)
 
     if result:
-        _, conclusion, _ = result[0]
+        _, conclusion, _, _ = result[0]
 
         if conclusion:
             # Current observed value

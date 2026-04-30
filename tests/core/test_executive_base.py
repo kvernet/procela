@@ -143,7 +143,7 @@ class TestExecutive:
         mock_process.step.assert_called_once()
         mock_mechanism.run.assert_called_once()
         mock_variable.resolve_conflict.assert_called_once()
-        mock_variable.commit.assert_called_once_with()
+        mock_variable.commit.assert_called_once()
         mock_variable.clear_hypotheses.assert_called_once()
 
         # Verify trace was updated

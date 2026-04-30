@@ -82,7 +82,7 @@ class MechanismFamily:
         if not prev_hypotheses_list:
             return
 
-        prev_hypotheses, _, _ = prev_hypotheses_list[0]
+        prev_hypotheses, _, _, _ = prev_hypotheses_list[0]
 
         # Current observed value
         observed = colonized.value

@@ -351,7 +351,7 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
 
     # 2. Confidence analysis
     confidences = [
-        r.confidence for _, r, _ in temperature.memory.records() if r is not None
+        r.confidence for _, r, _, _ in temperature.memory.records() if r is not None
     ]
     print("\n💪 Confidence Statistics:")
     print(f"   Mean confidence: {np.mean(confidences):.3f}")
@@ -365,7 +365,9 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
         switch_step = governance.action_log[0]["step"]
 
         # Calculate volatility before and after
-        values = [r.value for _, r, _ in temperature.memory.records() if r is not None]
+        values = [
+            r.value for _, r, _, _ in temperature.memory.records() if r is not None
+        ]
 
         before_switch = values[:switch_step]
         after_switch = values[switch_step:]
@@ -390,7 +392,7 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
     # 4. Model influence
     sources = [
         KeyAuthority.resolve(r.source).__class__.__name__
-        for _, r, _ in temperature.memory.records()
+        for _, r, _, _ in temperature.memory.records()
         if r is not None
         and r.source is not None
         and KeyAuthority.resolve(r.source) is not None
@@ -417,8 +419,8 @@ def plot_with_governance(
     if memory is None:
         return
 
-    values = [r.value for _, r, _ in memory.records() if r is not None]
-    confidences = [r.confidence for _, r, _ in memory.records() if r is not None]
+    values = [r.value for _, r, _, _ in memory.records() if r is not None]
+    confidences = [r.confidence for _, r, _, _ in memory.records() if r is not None]
     steps = list(range(len(values)))
 
     _, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10))

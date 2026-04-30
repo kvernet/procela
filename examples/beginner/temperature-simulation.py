@@ -285,12 +285,14 @@ def analyze_results(variable: Variable) -> None:
     print("-" * 40)
 
     # Basic statistics
-    values = [record.value for _, record, _ in memory.records() if record is not None]
+    values = [
+        record.value for _, record, _, _ in memory.records() if record is not None
+    ]
     confidences = [
-        record.confidence for _, record, _ in memory.records() if record is not None
+        record.confidence for _, record, _, _ in memory.records() if record is not None
     ]
     policies: list[tuple[int, ResolutionPolicy]] = []
-    for step, (_, record, _) in enumerate(
+    for step, (_, record, _, _) in enumerate(
         memory.records(task=ReasoningTask.CONFLICT_RESOLUTION)
     ):
         if record and record.source is not None:
@@ -320,7 +322,7 @@ def analyze_results(variable: Variable) -> None:
 
     # Hypothesis diversity
     all_hypotheses: list[str] = []
-    for step, (hypotheses, _, _) in enumerate(memory.records()):
+    for step, (hypotheses, _, _, _) in enumerate(memory.records()):
         if record and record.source:
             # all_hypotheses.extend(
             #    KeyAuthority.resolve(hy.record.source).name
@@ -357,9 +359,11 @@ def plot_simulation(variable: Variable) -> None:
         return
 
     steps = range(variable.stats.count)
-    values = [record.value for _, record, _ in memory.records() if record is not None]
+    values = [
+        record.value for _, record, _, _ in memory.records() if record is not None
+    ]
     confidences = [
-        record.confidence for _, record, _ in memory.records() if record is not None
+        record.confidence for _, record, _, _ in memory.records() if record is not None
     ]
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))

@@ -138,7 +138,7 @@ class CoverageDecayInvariant(SystemInvariant):
             """
             errors = [
                 c.value
-                for _, c, _ in error_colonized.recent(self.evaluation_window)
+                for _, c, _, _ in error_colonized.recent(self.evaluation_window)
                 if c is not None and c.value is not None
             ]
 

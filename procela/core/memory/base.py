@@ -64,6 +64,7 @@ from dataclasses import dataclass, field
 from typing import Any, Iterable
 
 from ...symbols.key import Key
+from ...symbols.time import TimePoint
 from ..assessment.reasoning import ReasoningResult, ReasoningTask
 from ..key_authority import KeyAuthority
 from .hypothesis import HypothesisRecord
@@ -141,6 +142,7 @@ class VariableMemory:
     hypotheses: tuple[HypothesisRecord, ...]
     conclusion: VariableRecord | None
     reasoning: ReasoningResult | None
+    time: TimePoint | None = None
     config: dict[str, Any] = field(default_factory=dict, repr=False)
     previous: Key | None = field(default=None, repr=False)
 
@@ -166,6 +168,7 @@ class VariableMemory:
             hypotheses=self.hypotheses,
             conclusion=self.conclusion,
             reasoning=self.reasoning,
+            time=self.time,
         )
 
         if not isinstance(self.config, dict):
@@ -185,6 +188,7 @@ class VariableMemory:
         hypotheses: tuple[HypothesisRecord, ...],
         conclusion: VariableRecord | None,
         reasoning: ReasoningResult | None,
+        time: TimePoint | None = None,
     ) -> VariableMemory:
         """
         Append a new node to the variable memory.
@@ -197,6 +201,8 @@ class VariableMemory:
             The conclusion of the new node.
         reasoning : ReasoningResult | None
             The reasoning of the new node.
+        time : TimePoint | None
+            The time point of the new node.
 
         Returns
         -------
@@ -211,6 +217,7 @@ class VariableMemory:
             hypotheses=hypotheses,
             conclusion=conclusion,
             reasoning=reasoning,
+            time=time,
             previous=self._key,
             config=self.config,
         )
@@ -241,12 +248,14 @@ class VariableMemory:
         self,
         source: Key | None = None,
         task: ReasoningTask | None = None,
+        time: TimePoint | None = None,
         success: bool | None = None,
     ) -> Iterable[
         tuple[
             tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
+            TimePoint | None,
         ]
     ]:
         """
@@ -258,6 +267,8 @@ class VariableMemory:
             The source of the conclusion if provided. Default is None.
         task : ReasoningTask | None
             The reasoning task if provided. Default is None.
+        time : TimePoint | None
+            The time point if provided. Default is None.
         success : bool | None
             (Un)Successful reasoning if provided. Default is None.
 
@@ -267,6 +278,7 @@ class VariableMemory:
             tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
+            TimePoint | None
         ]
             Nodes in reverse chronological order.
         """
@@ -280,6 +292,7 @@ class VariableMemory:
             hypotheses = current.hypotheses
             conclusion = current.conclusion
             reasoning = current.reasoning
+            _time = current.time
 
             prev_key = current.previous
             current = previous(prev_key)
@@ -292,6 +305,8 @@ class VariableMemory:
                 continue
             if task is not None and reasoning is not None and reasoning.task != task:
                 continue
+            if time is not None and _time is not None and _time != time:
+                continue
             if (
                 success is not None
                 and reasoning is not None
@@ -299,7 +314,7 @@ class VariableMemory:
             ):
                 continue
 
-            yield (hypotheses, conclusion, reasoning)
+            yield (hypotheses, conclusion, reasoning, _time)
 
             if prev_key is None:
                 break
@@ -309,12 +324,14 @@ class VariableMemory:
         *,
         source: Key | None = None,
         task: ReasoningTask | None = None,
+        time: TimePoint | None = None,
         success: bool | None = None,
     ) -> list[
         tuple[
             tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
+            TimePoint | None,
         ]
     ]:
         """
@@ -326,6 +343,8 @@ class VariableMemory:
             The source of the conclusion if provided. Default is None.
         task : ReasoningTask | None
             The reasoning task if provided. Default is None.
+        time : TimePoint | None
+            The time point if provided. Default is None.
         success : bool | None
             (Un)Successful reasoning if provided. Default is None.
 
@@ -336,11 +355,12 @@ class VariableMemory:
                 tuple[HypothesisRecord, ...],
                 VariableRecord | None,
                 ReasoningResult | None,
+                TimePoint | None
             ]
         ]
             Nodes matching the given criteria.
         """
-        nodes = list(self.iter(source=source, task=task, success=success))
+        nodes = list(self.iter(source=source, task=task, time=time, success=success))
         nodes.reverse()
         return nodes
 
@@ -350,6 +370,7 @@ class VariableMemory:
         tuple[HypothesisRecord, ...],
         VariableRecord | None,
         ReasoningResult | None,
+        TimePoint | None,
     ]:
         """
         Return the most recent node.
@@ -360,10 +381,11 @@ class VariableMemory:
             tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
+            TimePoint | None
         ]
             The latest node in the memory.
         """
-        return (self.hypotheses, self.conclusion, self.reasoning)
+        return (self.hypotheses, self.conclusion, self.reasoning, self.time)
 
     def reset(self) -> None:
         """
@@ -389,6 +411,7 @@ class VariableMemory:
         object.__setattr__(self, "hypotheses", ())
         object.__setattr__(self, "conclusion", None)
         object.__setattr__(self, "reasoning", None)
+        object.__setattr__(self, "time", None)
         object.__setattr__(self, "previous", None)
         object.__setattr__(self, "config", {})
 
@@ -397,6 +420,7 @@ class VariableMemory:
         hypotheses: tuple[HypothesisRecord, ...],
         conclusion: VariableRecord | None,
         reasoning: ReasoningResult | None,
+        time: TimePoint | None = None,
     ) -> None:
         """
         Perform type checking on the attributes of a variable node.
@@ -409,6 +433,8 @@ class VariableMemory:
             The conclusion to validate
         reasoning : ReasoningResult | None
             The reasoning to validate.
+        time : TimePoint | None
+            The time point to validate.
 
         Raises
         ------
@@ -437,4 +463,9 @@ class VariableMemory:
             raise TypeError(
                 "`reasoning` should be a ReasoningResult or None, "
                 f"got {type(reasoning)}"
+            )
+
+        if not isinstance(time, TimePoint | None):
+            raise TypeError(
+                "`time` should be a TimePoint or None, " f"got {type(time)}"
             )

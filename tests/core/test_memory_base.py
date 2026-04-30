@@ -4,6 +4,7 @@ from procela.core.assessment import ReasoningResult, ReasoningTask
 from procela.core.memory import HypothesisRecord, VariableMemory, VariableRecord
 from procela.core.variable import Variable
 from procela.symbols.key import Key
+from procela.symbols.time import TimePoint
 
 
 @pytest.fixture
@@ -24,6 +25,12 @@ def sample_reasoning_result() -> ReasoningResult:
     return ReasoningResult(
         task=ReasoningTask.ANOMALY_DETECTION, success=False, result=None
     )
+
+
+@pytest.fixture
+def sample_time_point() -> TimePoint:
+    """Sample time point"""
+    return TimePoint()
 
 
 @pytest.fixture
@@ -101,7 +108,11 @@ class TestVariableMemory:
         assert memory2.key() != memory1.key()
 
     def test_latest_returns_current_state(
-        self, sample_candidate_record, sample_variable_record, sample_reasoning_result
+        self,
+        sample_candidate_record,
+        sample_variable_record,
+        sample_reasoning_result,
+        sample_time_point,
     ):
         """Test that latest() returns the current node's data."""
         hypotheses = (sample_candidate_record,)
@@ -110,13 +121,17 @@ class TestVariableMemory:
             hypotheses=hypotheses,
             conclusion=sample_variable_record,
             reasoning=sample_reasoning_result,
+            time=sample_time_point,
         )
 
-        latest_hypotheses, latest_conclusion, latest_reasoning = memory.latest()
+        latest_hypotheses, latest_conclusion, latest_reasoning, latest_time = (
+            memory.latest()
+        )
 
         assert latest_hypotheses == hypotheses
         assert latest_conclusion == sample_variable_record
         assert latest_reasoning == sample_reasoning_result
+        assert latest_time == sample_time_point
 
     def test_reset_method(self, sample_candidate_record, sample_variable_record):
         """Test that reset() clears the memory state."""
@@ -146,14 +161,14 @@ class TestVariableMemory:
 
         nodes = list(memory.iter())
         assert len(nodes) == 1
-        assert nodes[0] == ((), None, None)
+        assert nodes[0] == ((), None, None, None)
 
     def test_iter_method_with_filtering(
         self,
         sample_candidate_record,
         sample_variable_record,
         sample_reasoning_result,
-        sample_key,
+        sample_time_point,
     ):
         """Test iter() with source filtering."""
         # Create a memory with a specific source
@@ -161,6 +176,7 @@ class TestVariableMemory:
             hypotheses=(sample_candidate_record,),
             conclusion=sample_variable_record,
             reasoning=sample_reasoning_result,
+            time=sample_time_point,
         )
 
         # Test with matching source filter
@@ -179,9 +195,20 @@ class TestVariableMemory:
             hypotheses=(sample_candidate_record,),
             conclusion=None,
             reasoning=sample_reasoning_result,
+            time=sample_time_point,
         )
 
         nodes = list(memory.iter(task=None, success=True))
+        assert len(nodes) == 0
+
+        nodes = list(memory.iter(time=sample_time_point))
+        assert len(nodes) == 1
+
+        nodes = list(
+            memory.iter(
+                time=TimePoint(),
+            )
+        )
         assert len(nodes) == 0
 
     def test_records_method_reverses_order(self, sample_candidate_record):
@@ -260,6 +287,15 @@ class TestVariableMemory:
                 hypotheses=(sample_candidate_record,),
                 conclusion=sample_variable_record,
                 reasoning="not_reasoning",  # Wrong type
+            )
+
+        # Test invalid time point
+        with pytest.raises(TypeError):
+            VariableMemory(
+                hypotheses=(sample_candidate_record,),
+                conclusion=sample_variable_record,
+                reasoning=None,
+                time="not_a_time",  # Wrong type
             )
 
         # Test invalid config type

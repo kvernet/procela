@@ -118,7 +118,7 @@ class MemoryVisualizer:
         count = variable.stats.count
 
         # Backward iter
-        for step, (hypotheses, conclusion, reasoning) in enumerate(
+        for step, (hypotheses, conclusion, reasoning, _) in enumerate(
             variable.memory.iter(source=source, task=task, success=success)
         ):
             if step == 0:

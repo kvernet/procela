@@ -71,7 +71,7 @@ class FamilyRegistry:
         # Get current hypotheses for intervention_code
         if intervention_code.memory is None:
             return None
-        hypotheses, _, _ = intervention_code.memory.latest()
+        hypotheses, _, _, _ = intervention_code.memory.latest()
 
         values = [
             h.record.value

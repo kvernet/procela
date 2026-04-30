@@ -75,6 +75,7 @@ from dataclasses import dataclass
 from typing import Any, Callable, Iterable
 
 from ...symbols.key import Key
+from ...symbols.time import TimePoint
 from ..assessment.anomaly import AnomalyResult
 from ..assessment.diagnosis import DiagnosisResult
 from ..assessment.prediction import PredictionResult
@@ -386,7 +387,10 @@ class Variable:
         self.clear_hypotheses()
 
     def set(
-        self, record: VariableRecord, reasoning: ReasoningResult | None = None
+        self,
+        record: VariableRecord,
+        reasoning: ReasoningResult | None = None,
+        time: TimePoint | None = None,
     ) -> None:
         """
         Set a variable with a record.
@@ -395,6 +399,10 @@ class Variable:
         ----------
         record : VariableRecord
             The record to set the variable with.
+        reasoning : ReasoningResult | None
+            The reasoning result. Default is None.
+        time : TimePoint | None
+            The time point. Default is None.
 
         Notes
         -----
@@ -411,7 +419,7 @@ class Variable:
         self.hypotheses.append(HypothesisRecord(record=record))
         self.conclusion = record
         self.reasoning = reasoning
-        self.commit()
+        self.commit(time=time)
         self.clear_hypotheses()
 
     def get(self, start: int, size: int = 1, reverse: bool = False) -> list[
@@ -419,6 +427,7 @@ class Variable:
             tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
+            TimePoint | None,
         ]
     ]:
         """
@@ -441,6 +450,7 @@ class Variable:
                 tuple[HypothesisRecord, ...],
                 VariableRecord | None,
                 ReasoningResult | None,
+                TimePoint | None
             ]
         ]
             The list of tuple containing the node details from the start.
@@ -464,9 +474,9 @@ class Variable:
 
         result = []
 
-        for i, (h, c, r) in enumerate(self.memory.iter()):
+        for i, (h, c, r, t) in enumerate(self.memory.iter()):
             if i > loop - size:
-                result.append((h, c, r))
+                result.append((h, c, r, t))
 
             if i == loop:
                 break
@@ -481,6 +491,7 @@ class Variable:
             tuple[HypothesisRecord, ...],
             VariableRecord | None,
             ReasoningResult | None,
+            TimePoint | None,
         ]
     ]:
         """
@@ -501,6 +512,7 @@ class Variable:
                 tuple[HypothesisRecord, ...],
                 VariableRecord | None,
                 ReasoningResult | None,
+                TimePoint | None
             ]
         ]
             The list of tuple containing the recent node details.
@@ -568,16 +580,16 @@ class Variable:
 
     def records(self) -> Iterable[VariableRecord | None]:
         """
-        Iterate over resolved records for this variable.
+        Iterate backwards over resolved records for this variable.
 
         Returns
         -------
         Iterable[VariableRecord]
-            Sequence of records from resolved observations.
+            Sequence of backward records from resolved observations.
         """
         if self.memory is None:
             return iter(())
-        return (record for _, record, _ in self.memory.iter())
+        return (record for _, record, _, _ in self.memory.iter())
 
     def add_hypothesis(self, record: VariableRecord) -> None:
         """
@@ -592,6 +604,7 @@ class Variable:
 
     def commit(
         self,
+        time: TimePoint | None = None,
         include_hypotheses: bool = True,
         include_conclusion: bool = True,
         include_reasonning: bool = True,
@@ -601,6 +614,8 @@ class Variable:
 
         Parameters
         ----------
+        time : TimePoint | None
+            The time point of the commit. Default is None.
         include_hypotheses : bool
             If proposed hypotheses should be included in the commit.
         include_conclusion : bool
@@ -665,6 +680,7 @@ class Variable:
                 hypotheses=tuple(self.hypotheses) if include_hypotheses else (),
                 conclusion=self.conclusion if include_conclusion else None,
                 reasoning=self.reasoning if include_reasonning else None,
+                time=time,
                 config=self.config,
                 previous=None,
             )
@@ -677,6 +693,7 @@ class Variable:
                 hypotheses=tuple(self.hypotheses) if include_hypotheses else (),
                 conclusion=self.conclusion if include_conclusion else None,
                 reasoning=self.reasoning if include_reasonning else None,
+                time=time,
             )
             self.stats = self.stats.update(
                 record=self.conclusion,
@@ -900,7 +917,7 @@ class Variable:
         # Optional reasoning summary (last 3 actions)
         lines.append("Recent reasoning steps:")
         if self.memory is not None:
-            for _, _, res in self.memory.records()[-recent_reasoning:]:
+            for _, _, res, _ in self.memory.records()[-recent_reasoning:]:
                 lines.append(self._explain_reasoning(res))
 
         return "\n".join(lines)

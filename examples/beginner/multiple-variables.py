@@ -345,8 +345,10 @@ def analyze_coupled_system() -> None:
     if rabbits.memory is None or foxes.memory is None:
         return
 
-    rabbits_history = [r.value for _, r, _ in rabbits.memory.records() if r is not None]
-    foxes_history = [r.value for _, r, _ in foxes.memory.records() if r is not None]
+    rabbits_history = [
+        r.value for _, r, _, _ in rabbits.memory.records() if r is not None
+    ]
+    foxes_history = [r.value for _, r, _, _ in foxes.memory.records() if r is not None]
 
     print("\n📊 Ecosystem Dynamics Analysis")
     print("-" * 40)
@@ -424,8 +426,10 @@ def plot_coupled_dynamics(stability_gov: EcosystemStabilityGovernance) -> None:
     if rabbits.memory is None or foxes.memory is None:
         return
 
-    rabbits_history = [r.value for _, r, _ in rabbits.memory.records() if r is not None]
-    foxes_history = [r.value for _, r, _ in foxes.memory.records() if r is not None]
+    rabbits_history = [
+        r.value for _, r, _, _ in rabbits.memory.records() if r is not None
+    ]
+    foxes_history = [r.value for _, r, _, _ in foxes.memory.records() if r is not None]
 
     steps = list(range(len(rabbits_history)))
 

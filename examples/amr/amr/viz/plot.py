@@ -31,7 +31,7 @@ def get_true_regime() -> list:
     """
     if regime.memory is None:
         return []
-    true_regime = [r.value for _, r, _ in regime.memory.records() if r is not None]
+    true_regime = [r.value for _, r, _, _ in regime.memory.records() if r is not None]
     return true_regime
 
 
@@ -86,7 +86,7 @@ def _add_experiment_overlays(axes: list[plt.Figure]) -> None:
     """
     # Add experiment overlays
     if experiment_status.memory:
-        for _, r, _ in experiment_status.memory.records():
+        for _, r, _, _ in experiment_status.memory.records():
             if r is None:
                 continue
             data = r.metadata

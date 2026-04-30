@@ -160,6 +160,7 @@ from typing import Any, Callable, Sequence
 import numpy as np
 
 from ...symbols.key import Key
+from ...symbols.time import TimePoint
 from ..exceptions import ExecutionError
 from ..invariant.exceptions import (
     InvariantViolation,
@@ -653,6 +654,9 @@ class Executive:
 
         self._check_invariants(InvariantPhase.RUNTIME)
 
+        # Same time point
+        time = TimePoint()
+
         for variable in self.writable():
             if not isinstance(variable, Variable):
                 raise TypeError(f"Expected `Variable`, got {type(variable)}")
@@ -661,7 +665,7 @@ class Executive:
             variable.resolve_conflict()
 
             # Commit resolved candidate
-            variable.commit()
+            variable.commit(time=time)
 
             # Clear candidates
             variable.clear_hypotheses()

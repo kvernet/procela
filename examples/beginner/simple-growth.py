@@ -145,14 +145,14 @@ def analyze_growth_simulation(population: Variable) -> None:
         return
 
     # Track confidence over time
-    confidences = [r.confidence for _, r, _ in memory.records() if r is not None]
+    confidences = [r.confidence for _, r, _, _ in memory.records() if r is not None]
     print("\nConfidence statistics:")
     print(f"  Mean confidence: {np.mean(confidences):.3f}")
     print(f"  Min confidence:  {np.min(confidences):.3f}")
     print(f"  Max confidence:  {np.max(confidences):.3f}")
 
     # Growth analysis
-    values = [r.value for _, r, _ in memory.records() if r is not None]
+    values = [r.value for _, r, _, _ in memory.records() if r is not None]
     initial = values[0]
     final = values[-1]
     total_growth = final - initial
@@ -183,8 +183,8 @@ def plot_growth_simulation(population: Variable) -> None:
         return
 
     records = memory.records()
-    values = [r.value for _, r, _ in records if r is not None]
-    confidences = [r.confidence for _, r, _ in records if r is not None]
+    values = [r.value for _, r, _, _ in records if r is not None]
+    confidences = [r.confidence for _, r, _, _ in records if r is not None]
     steps = list(range(len(values)))
 
     # Identify which model was closest to the resolved conclusion at each step
@@ -204,7 +204,7 @@ def plot_growth_simulation(population: Variable) -> None:
         return str(model)
 
     models = []
-    for h, r, _ in records:
+    for h, r, _, _ in records:
         models.append(closest_model(h, r))
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10.0, 10.0))
