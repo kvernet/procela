@@ -509,6 +509,7 @@ class Executive:
         self._prepared: bool = False
         self._invariants: list[SystemInvariant] = []
         self.rng = rng or random.Random()
+        self._time_points: dict[int, TimePoint] = {}
         self._step_index: int = 0
         self.logger = logger or setup_logging(
             name="procela",
@@ -592,6 +593,38 @@ class Executive:
         """
         self.rng = rng
 
+    def time_point(self, index: int = 0) -> TimePoint:
+        """
+        Get a global unique time point at a simualtion index.
+
+        Parameters
+        ----------
+        index : int
+            The simulation index to get and/or create that time point.
+
+        Returns
+        -------
+        TimePoint
+            A global unique time point at that simualtion index.
+        """
+        if index in self._time_points:
+            return self._time_points[index]
+
+        time = TimePoint()
+        self._time_points[index] = time
+        return time
+
+    def time_points(self) -> dict[int, TimePoint]:
+        """
+        Get all the current time points.
+
+        Returns
+        -------
+        dict[int, TimePoint]
+            The dict containing all the current time points.
+        """
+        return self._time_points
+
     def set_logger(self, logger: logging.Logger) -> None:
         """
         Set logger.
@@ -655,7 +688,7 @@ class Executive:
         self._check_invariants(InvariantPhase.RUNTIME)
 
         # Same time point
-        time = TimePoint()
+        time = self.time_point(self._step_index)
 
         for variable in self.writable():
             if not isinstance(variable, Variable):

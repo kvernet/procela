@@ -26,6 +26,7 @@ from procela.core.policy import HighestConfidencePolicy, WeightedConfidencePolic
 from procela.core.process import Process
 from procela.core.variable import RangeDomain, Variable
 from procela.symbols.key import Key
+from procela.symbols.time import TimePoint
 
 
 class TestExecutive:
@@ -499,12 +500,19 @@ class TestExecutive:
             executive._check_invariants(InvariantPhase.RUNTIME)
 
     def test_random_generation(self):
-        "Test random generation"
+        "Test random generation."
         rng = np.random.default_rng(42)
         exec = Executive()
         exec.set_rng(rng=rng)
         assert exec.step_index() == 0
         assert abs(exec.random() - 0.773956048) < 1e-6
+
+    def test_time_point(self):
+        "Test time point."
+        exec = Executive()
+        time = exec.time_point()
+        assert isinstance(time, TimePoint)
+        assert len(exec.time_points()) == 1
 
     def test_get_and_set_rng_state(self):
         """Test get and set rng_state."""

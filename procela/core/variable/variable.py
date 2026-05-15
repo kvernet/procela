@@ -374,8 +374,8 @@ class Variable:
         if not self.validate(record):
             why = self.domain.explain(record.value)
             raise ValueError(
-                f"The variable [{self.name}] set() method fails "
-                f"domain constraint in init(): {why}"
+                f"The value of the variable [{self.name}] "
+                f"fails domain constraint in init(): {why}"
             )
         self.memory = None
         self.clear_hypotheses()
@@ -413,7 +413,8 @@ class Variable:
         if not self.validate(record):
             why = self.domain.explain(record.value)
             raise ValueError(
-                f"The variable [{self.name}] fails domain constraint in set(): {why}"
+                f"The value of the variable [{self.name}] "
+                f"fails domain constraint in set(): {why}"
             )
         self.clear_hypotheses()
         self.hypotheses.append(HypothesisRecord(record=record))
