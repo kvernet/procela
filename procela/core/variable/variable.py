@@ -520,6 +520,52 @@ class Variable:
         """
         return self.get(start=-size, size=size, reverse=reverse)
 
+    def prediction_errors(
+        self, mech_key: Key, window: int = 10, reverse: bool = False
+    ) -> list[float]:
+        """
+        Return the last `window` absolute errors.
+
+        Compute the errors between a mechanism's
+        hypotheses and the variable's resolved conclusions.
+
+        Parameters
+        ----------
+        mech_key : Key
+            The mechanism key to compute prediction errors.
+        window : int
+            Last window to compute errors. Default is 10.
+        reverse : bool
+            Reverse the result in chronological order or not.
+            Default is False.
+
+        Returns
+        -------
+        list[float]
+            List of the absolute errors between the mechanism's hypotheses
+            and the variable's resolved conclusions.
+        """
+        errors = []
+        records = self.recent(size=window, reverse=reverse)
+
+        for hypotheses, resolved, _, _ in records:
+            # Find the mechanism's hypothesis
+            hypothesis = next(
+                (
+                    h
+                    for h in hypotheses
+                    if h.record is not None and h.record.source == mech_key
+                ),
+                None,
+            )
+            if hypothesis is None or hypothesis.record is None or resolved is None:
+                continue  # mechanism wasn't active that step or resolution failed
+
+            error = abs(hypothesis.record.value - resolved.value)
+            errors.append(error)
+
+        return errors
+
     @property
     def value(self) -> Any:
         """

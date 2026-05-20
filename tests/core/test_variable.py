@@ -214,6 +214,43 @@ def test_recent(real_value_domain):
     assert len(records) == 3
 
 
+def test_prediction_errors(real_value_domain):
+    """Test prediction errors."""
+    var = Variable(
+        name="minimal", domain=real_value_domain, policy=HighestConfidencePolicy()
+    )
+    mech1_key = Key()
+    mech2_key = Key()
+
+    errors = var.prediction_errors(mech_key=mech1_key, window=10, reverse=False)
+    assert len(errors) == 0
+
+    var.add_hypothesis(VariableRecord(17.45, 0.78, source=mech1_key))
+    var.add_hypothesis(VariableRecord(10.92, 0.85, source=mech2_key))
+    var.resolve_conflict()
+    var.commit()
+    var.clear_hypotheses()
+
+    var.add_hypothesis(VariableRecord(45, 0.78, source=mech1_key))
+    var.add_hypothesis(VariableRecord(92, 0.85, source=mech2_key))
+    var.resolve_conflict()
+    var.commit()
+    var.clear_hypotheses()
+
+    errors = var.prediction_errors(mech_key=mech1_key, window=10, reverse=False)
+    assert len(errors) == 2
+
+    mech3_key = Key()
+    var.add_hypothesis(VariableRecord(5, 0.78, source=mech1_key))
+    var.add_hypothesis(VariableRecord(2, 0.85, source=mech2_key))
+    var.add_hypothesis(VariableRecord(-2, 0.93, source=mech3_key))
+    var.commit()  # conclusion=None
+    var.clear_hypotheses()
+
+    errors = var.prediction_errors(mech_key=mech1_key, window=10, reverse=False)
+    assert len(errors) == 2
+
+
 def test_variable_epistemic(real_variable):
     """Test post init."""
     with pytest.raises(

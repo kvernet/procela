@@ -77,7 +77,7 @@ class TestTimerContextManager:
             time.sleep(0.001)
 
         with timer2:
-            time.sleep(0.002)
+            time.sleep(0.005)
 
         # Each timer should have its own independent measurements
         assert timer1.elapsed < timer2.elapsed
