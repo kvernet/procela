@@ -42,6 +42,7 @@ temperature = variable.value  # Resolved by policy, not direct mutation
 ```
 
 This separation enables:
+
 - **Competing theories** to coexist
 - **Auditability** of all proposals
 - **Governance** to intervene before state changes
@@ -659,4 +660,4 @@ class TestMyMechanism(unittest.TestCase):
 - Learn how [Governance](governance.md) observes and restructures mechanisms
 - Explore [Epistemic Signals](epistemic-signals.md) for evaluating mechanism performance
 - See the [AMR Case Study](../examples/amr-case-study.md) with competing mechanisms
-- Check the [API Reference](../api/reference.md) for complete Mechanism documentation
+- Check the [API Reference](../api.md) for complete Mechanism documentation

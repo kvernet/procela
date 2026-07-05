@@ -168,6 +168,7 @@ record = HypothesisRecord(
     state=HypothesisState.PROPOSED  # State status
 )
 
+print(record)
 ```
 
 ### Memory Management
@@ -226,10 +227,10 @@ print(len(current_record[0]), current_record[1].value, current_record[2].explana
 
 
 # Memory introspection
-for i, (_, record, _) in enumerate(X.get(-10, 10, reverse=True)):  # Last 10 hypotheses
-    print(f"Step {i}: value={record.value:.2f}, "
-          f"conf={record.confidence:.2f}, "
-          f"source={record.source}")
+for i, record in enumerate(X.get(-10, 10, reverse=True)):  # Last 10 hypotheses
+    print(f"Step {i}: value={record[1].value:.2f}, "
+          f"conf={record[1].confidence:.2f}, "
+          f"source={record[1].source}")
 ```
 
 ## Policy Resolution
@@ -524,8 +525,8 @@ class AnomalyDetectingVariable(Variable):
         # Check for anomalies before adding
         if self.memory:
             records = self.memory.records()
-            mean = np.mean([r.value for _, r, _ in records[-10:]])
-            std = np.std([r.value for _, r, _ in records[-10:]])
+            mean = np.mean([r[1].value for r in records[-10:]])
+            std = np.std([r[1].value for r in records[-10:]])
 
             if abs(record.value - mean) > 3 * std:
                 # Anomaly detected - reduce confidence
@@ -557,4 +558,4 @@ for _ in range(5):
 - Learn about [Mechanisms](mechanisms.md) that propose hypotheses to variables
 - Understand [Governance](governance.md) that observes variable signals
 - Explore [Epistemic Signals](epistemic-signals.md) for monitoring variable states
-- See the [API Reference](../api/reference.md) for complete Variable documentation
+- See the [API Reference](../api.md) for complete Variable documentation

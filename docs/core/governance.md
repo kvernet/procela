@@ -25,6 +25,7 @@ Procela encodes the scientific method as executable code:
 ```
 
 Each governance unit is a **first-class citizen** that can:
+
 - **Observe** epistemic signals (coverage, fragility, conflict)
 - **Hypothesize** changes
 - **Experiment** by temporarily modifying the system
@@ -559,5 +560,4 @@ class EfficientGovernance(SystemInvariant):
 
 - Learn about [Epistemic Signals](epistemic-signals.md) for monitoring system health
 - See governance in action in the [AMR Case Study](../examples/amr-case-study.md)
-- Explore [Advanced Governance Patterns](../advanced/governance-patterns.md)
-- Check the [API Reference](../api/reference.md) for complete Governance documentation
+- Check the [API Reference](../api.md) for complete Governance documentation

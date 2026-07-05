@@ -346,8 +346,6 @@ class EcosystemStabilityGovernance(SystemInvariant):
             phase=InvariantPhase.POST,
         )
 
-
-# We'll integrate this into the executive step
 ```
 
 ---
@@ -366,7 +364,7 @@ mechanisms = [
 stability_gov = EcosystemStabilityGovernance(rabbits, foxes, min_population=10)
 
 # Create executive
-executive = Executive(mechanisms=mechanisms)
+executive = Executive(mechanisms=mechanisms, rng=rng)
 executive.add_invariant(stability_gov)
 
 print("\n" + "=" * 60)
@@ -400,8 +398,8 @@ def analyze_coupled_system() -> None:
     if rabbits.memory is None or foxes.memory is None:
         return
 
-    rabbits_history = [r.value for _, r, _ in rabbits.memory.records() if r is not None]
-    foxes_history = [r.value for _, r, _ in foxes.memory.records() if r is not None]
+    rabbits_history = [record[1].value for record in rabbits.memory.records() if record[1] is not None]
+    foxes_history = [record[1].value for record in foxes.memory.records() if record[1] is not None]
 
     print("\n📊 Ecosystem Dynamics Analysis")
     print("-" * 40)
@@ -467,7 +465,6 @@ def analyze_coupled_system() -> None:
     print(f"   Rabbits: {rabbit_extinction_risk*100:.1f}%")
     print(f"   Foxes:   {fox_extinction_risk*100:.1f}%")
 
-
 # Run analysis
 analyze_coupled_system()
 ```
@@ -482,8 +479,8 @@ def plot_coupled_dynamics(stability_gov: EcosystemStabilityGovernance) -> None:
     if rabbits.memory is None or foxes.memory is None:
         return
 
-    rabbits_history = [r.value for _, r, _ in rabbits.memory.records() if r is not None]
-    foxes_history = [r.value for _, r, _ in foxes.memory.records() if r is not None]
+    rabbits_history = [record[1].value for record in rabbits.memory.records() if record[1] is not None]
+    foxes_history = [record[1].value for record in foxes.memory.records() if record[1] is not None]
 
     steps = list(range(len(rabbits_history)))
 
@@ -588,9 +585,7 @@ def plot_coupled_dynamics(stability_gov: EcosystemStabilityGovernance) -> None:
     plt.savefig("predator_prey_dynamics.png", dpi=150)
     plt.show()
 
-
-# Uncomment to visualize
-#plot_coupled_dynamics(stability_gov)
+plot_coupled_dynamics(stability_gov)
 ```
 
 ---
@@ -600,7 +595,6 @@ def plot_coupled_dynamics(stability_gov: EcosystemStabilityGovernance) -> None:
 Here's the complete, runnable example:
 
 ```python
-#!/usr/bin/env python3
 """Multiple Variables - Predator-Prey Ecosystem with Competing Models"""
 
 from typing import Any
@@ -627,8 +621,6 @@ from procela import (
 rng = np.random.default_rng(42)
 INITIAL_SOURCE = Key()
 
-# ========================================================
-
 # Prey population (Rabbits) - range 0 to 1000
 rabbits = Variable(
     name="Rabbits", domain=RangeDomain(0, 1000), policy=WeightedConfidencePolicy()
@@ -644,10 +636,6 @@ rabbits.init(VariableRecord(100.0, confidence=1.0, source=INITIAL_SOURCE))
 foxes.init(VariableRecord(20.0, confidence=1.0, source=INITIAL_SOURCE))
 
 print(f"Initial ecosystem: {rabbits.value:.0f} rabbits, {foxes.value:.0f} foxes")
-
-
-# ===========================================================
-
 
 class LotkaVolterraMechanism(Mechanism):
     """
@@ -724,10 +712,6 @@ class LotkaVolterraMechanism(Mechanism):
             f"F:{new_foxes:.0f} (conf:{fox_confidence:.2f})"
         )
 
-
-# ============================================================
-
-
 class LogisticPreyMechanism(Mechanism):
     """
     Alternative model.
@@ -795,10 +779,6 @@ class LogisticPreyMechanism(Mechanism):
             f"F:{new_foxes:.0f}"
         )
 
-
-# =========================================================
-
-
 class RatioMechanism(Mechanism):
     """
     Simple model based on predator-prey ratio.
@@ -844,10 +824,6 @@ class RatioMechanism(Mechanism):
             f"  ⚖️ Ratio Model: R:{new_rabbits:.0f}, "
             f"F:{new_foxes:.0f} (conf:{confidence:.2f})"
         )
-
-
-# ===============================================================
-
 
 class EcosystemStabilityGovernance(SystemInvariant):
     """Monitor ecosystem health and prevents extinction."""
@@ -902,10 +878,6 @@ class EcosystemStabilityGovernance(SystemInvariant):
         )
 
 
-# We'll integrate this into the executive step
-
-# ===========================================================
-
 # Create all mechanisms
 mechanisms = [
     LotkaVolterraMechanism(alpha=0.08, beta=0.02, delta=0.01, gamma=0.06),
@@ -917,7 +889,7 @@ mechanisms = [
 stability_gov = EcosystemStabilityGovernance(rabbits, foxes, min_population=10)
 
 # Create executive
-executive = Executive(mechanisms=mechanisms)
+executive = Executive(mechanisms=mechanisms, rng=rng)
 executive.add_invariant(stability_gov)
 
 print("\n" + "=" * 60)
@@ -940,16 +912,13 @@ if stability_gov.interventions:
     print(f"Ecosystem interventions: {len(stability_gov.interventions)}")
 print("=" * 60)
 
-# ===========================================================
-
-
 def analyze_coupled_system() -> None:
     """Analyze the coupled predator-prey dynamics."""
     if rabbits.memory is None or foxes.memory is None:
         return
 
-    rabbits_history = [r.value for _, r, _ in rabbits.memory.records() if r is not None]
-    foxes_history = [r.value for _, r, _ in foxes.memory.records() if r is not None]
+    rabbits_history = [record[1].value for record in rabbits.memory.records() if record[1] is not None]
+    foxes_history = [record[1].value for record in foxes.memory.records() if record[1] is not None]
 
     print("\n📊 Ecosystem Dynamics Analysis")
     print("-" * 40)
@@ -1015,11 +984,8 @@ def analyze_coupled_system() -> None:
     print(f"   Rabbits: {rabbit_extinction_risk*100:.1f}%")
     print(f"   Foxes:   {fox_extinction_risk*100:.1f}%")
 
-
 # Run analysis
 analyze_coupled_system()
-
-# ===============================================================
 
 
 def plot_coupled_dynamics(stability_gov: EcosystemStabilityGovernance) -> None:
@@ -1027,8 +993,8 @@ def plot_coupled_dynamics(stability_gov: EcosystemStabilityGovernance) -> None:
     if rabbits.memory is None or foxes.memory is None:
         return
 
-    rabbits_history = [r.value for _, r, _ in rabbits.memory.records() if r is not None]
-    foxes_history = [r.value for _, r, _ in foxes.memory.records() if r is not None]
+    rabbits_history = [record[1].value for record in rabbits.memory.records() if record[1] is not None]
+    foxes_history = [record[1].value for record in foxes.memory.records() if record[1] is not None]
 
     steps = list(range(len(rabbits_history)))
 
@@ -1133,9 +1099,7 @@ def plot_coupled_dynamics(stability_gov: EcosystemStabilityGovernance) -> None:
     plt.savefig("predator_prey_dynamics.png", dpi=150)
     plt.show()
 
-
-# Uncomment to visualize
-#plot_coupled_dynamics(stability_gov)
+plot_coupled_dynamics(stability_gov)
 ```
 
 ---

@@ -6,6 +6,7 @@
 .venv/
 venv/
 env/
+site/
 
 # ─────────────────────────────────────────────
 # Python artifacts

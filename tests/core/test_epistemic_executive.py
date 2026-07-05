@@ -3,6 +3,7 @@ Pytest suite with 100% coverage for ExecutiveView dataclass.
 Uses the actual Key and ExecutiveView implementations as specified.
 """
 
+import dataclasses
 from dataclasses import FrozenInstanceError, asdict, astuple, fields, replace
 from datetime import datetime, timezone
 
@@ -281,7 +282,7 @@ class TestExecutiveViewSlots:
         """Test that slots prevent adding new attributes."""
         view = ExecutiveView(key=Key(), step=1, process_keys=(Key(),))
 
-        with pytest.raises(TypeError):
+        with pytest.raises((TypeError, dataclasses.FrozenInstanceError)):
             view.new_attribute = "test"
 
     def test_slots_contain_all_fields(self):

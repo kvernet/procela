@@ -234,9 +234,3 @@ We thank the open-source community for Pyodide, NumPy, and the Python scientific
 - **GitHub Issues**: [github.com/kvernet/procela/issues](https://github.com/kvernet/procela/issues)
 
 ---
-
-<div align="center">
-  <sub>Built with ❤️ for epistemic governance in simulation.</sub>
-</div>
-
----

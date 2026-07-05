@@ -121,35 +121,33 @@ def setup_logging(
     logger.setLevel(level)
     logger.propagate = False
 
-    # Avoid duplicate handlers
-    if logger.handlers:
-        return logger
-
-    text_formatter = TextFormatter()
-    json_formatter = JsonFormatter()
+    # ALWAYS clear existing handlers
+    for handler in logger.handlers[:]:
+        logger.removeHandler(handler)
+        handler.close()
 
     if console:
-        console_handler = logging.StreamHandler(sys.stdout)
-        console_handler.setFormatter(text_formatter)
-        console_handler.setLevel(level)
-        logger.addHandler(console_handler)
+        handler = logging.StreamHandler(sys.stdout)
+        handler.setFormatter(TextFormatter())
+        handler.setLevel(level)
+        logger.addHandler(handler)
 
     if log_file:
-        log_path = Path(log_file)
-        log_path.parent.mkdir(parents=True, exist_ok=True)
+        path = Path(log_file)
+        path.parent.mkdir(parents=True, exist_ok=True)
 
-        file_handler = logging.FileHandler(log_path)
-        file_handler.setFormatter(text_formatter)
-        file_handler.setLevel(level)
-        logger.addHandler(file_handler)
+        handler = logging.FileHandler(path)
+        handler.setFormatter(TextFormatter())
+        handler.setLevel(level)
+        logger.addHandler(handler)
 
     if json_file:
-        json_path = Path(json_file)
-        json_path.parent.mkdir(parents=True, exist_ok=True)
+        path = Path(json_file)
+        path.parent.mkdir(parents=True, exist_ok=True)
 
-        json_handler = logging.FileHandler(json_path)
-        json_handler.setFormatter(json_formatter)
-        json_handler.setLevel(level)
-        logger.addHandler(json_handler)
+        handler = logging.FileHandler(path)
+        handler.setFormatter(JsonFormatter())
+        handler.setLevel(level)
+        logger.addHandler(handler)
 
     return logger

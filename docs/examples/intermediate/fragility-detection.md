@@ -27,16 +27,25 @@ This example builds an **adaptive fragility detection system** that:
 
 ```python
 import numpy as np
-from typing import List, Dict, Tuple
 from dataclasses import dataclass
 from collections import deque
 
 from procela import (
     Executive, Mechanism, Variable, RangeDomain, VariableRecord,
-    WeightedVotingPolicy, HighestConfidencePolicy, MedianPolicy,
-    MeanPolicy, Policy, SystemInvariant, InvariantPhase,
-    InvariantViolation, VariableSnapshot
+    WeightedVotingPolicy, HighestConfidencePolicy, ResolutionPolicy,
+    SystemInvariant, InvariantPhase,
+    InvariantViolation, VariableSnapshot, Key
 )
+
+INITIAL_KEY= Key()
+
+class MedianPolicy(ResolutionPolicy):
+    # To be implemented by the user as exercice
+    pass
+
+class MeanPolicy(ResolutionPolicy):
+    # To be implemented by the user as exercice
+    pass
 ```
 
 ---
@@ -56,7 +65,7 @@ class FragileTemperatureSystem:
             domain=RangeDomain(-10, 50),
             policy=WeightedVotingPolicy()
         )
-        temp.init(VariableRecord(20.0, confidence=1.0, source="initial"))
+        temp.init(VariableRecord(20.0, confidence=1.0, source=INITIAL_KEY))
         return temp
 
     @staticmethod
@@ -71,7 +80,7 @@ class FragileTemperatureSystem:
                 # Artificially high confidence despite extreme prediction
                 confidence = 0.95
                 temp.add_hypothesis(
-                    VariableRecord(new_temp, confidence, source="extreme_warming")
+                    VariableRecord(new_temp, confidence, source=self.key())
                 )
 
         class ExtremeCoolingMechanism(Mechanism):
@@ -81,7 +90,7 @@ class FragileTemperatureSystem:
                 new_temp = current - np.random.uniform(0.3, 0.8)
                 confidence = 0.95
                 temp.add_hypothesis(
-                    VariableRecord(new_temp, confidence, source="extreme_cooling")
+                    VariableRecord(new_temp, confidence, source=self.key())
                 )
 
         class ModerateMechanism(Mechanism):
@@ -91,7 +100,7 @@ class FragileTemperatureSystem:
                 new_temp = current + np.random.normal(0, 0.2)
                 confidence = 0.6
                 temp.add_hypothesis(
-                    VariableRecord(new_temp, confidence, source="moderate")
+                    VariableRecord(new_temp, confidence, source=self.key())
                 )
 
         class RandomMechanism(Mechanism):
@@ -101,14 +110,14 @@ class FragileTemperatureSystem:
                 new_temp = current + np.random.normal(0, 1.0)
                 confidence = 0.3
                 temp.add_hypothesis(
-                    VariableRecord(new_temp, confidence, source="random")
+                    VariableRecord(new_temp, confidence, source=self.key())
                 )
 
         return [
-            ExtremeWarmingMechanism(),
-            ExtremeCoolingMechanism(),
-            ModerateMechanism(),
-            RandomMechanism()
+            ExtremeWarmingMechanism(reads=[temp], writes=[temp]),
+            ExtremeCoolingMechanism(reads=[temp], writes=[temp]),
+            ModerateMechanism(reads=[temp], writes=[temp]),
+            RandomMechanism(reads=[temp], writes=[temp])
         ]
 ```
 
@@ -123,7 +132,7 @@ class FragilityCalculator:
     changes under different resolution policies.
     """
 
-    def __init__(self, policies: List[Policy] = None):
+    def __init__(self, policies: list[ResolutionPolicy] = None):
         """
         Args:
             policies: List of policies to test for fragility.
@@ -139,7 +148,7 @@ class FragilityCalculator:
         else:
             self.policies = policies
 
-    def calculate_fragility(self, snapshot: VariableSnapshot) -> Dict:
+    def calculate_fragility(self, snapshot: VariableSnapshot) -> dict:
         """
         Calculate fragility metrics for the current snapshot.
 
@@ -412,7 +421,7 @@ class AdaptiveFragilityGovernance(SystemInvariant):
             'avg_fragility': avg_recent
         })
 
-    def get_report(self) -> Dict:
+    def get_report(self) -> dict:
         """Generate comprehensive fragility report"""
         if not self.fragility_history:
             return {'message': 'No fragility data collected'}
@@ -759,71 +768,6 @@ def compare_results(with_gov_temp, without_gov_temp):
 
 ---
 
-## Expected Output
-
-```
-============================================================
-FRAGILITY DETECTION SIMULATION
-============================================================
-
-🔧 Initial Configuration:
-   Initial policy: WeightedVotingPolicy
-   Fragility threshold: 0.3
-   Number of mechanisms: 4
-
-------------------------------------------------------------
-Starting simulation with adaptive fragility detection...
-------------------------------------------------------------
-
-📊 MODERATE FRAGILITY: 0.342
-   Logging for analysis (no immediate action)
-
-⚠️ HIGH FRAGILITY: 0.487
-   Switching to HighestConfidencePolicy
-
-🚨 CRITICAL FRAGILITY: 0.723
-   Immediate policy switch to HighestConfidencePolicy
-
-[Simulation continues...]
-
-============================================================
-FRAGILITY DETECTION REPORT
-============================================================
-
-📊 Monitoring Summary:
-   Steps monitored: 100
-   Threshold adaptation events: 8
-
-🎯 Threshold Evolution:
-   Initial threshold: 0.300
-   Final threshold: 0.365
-   Change: +0.065 (+21.7%)
-
-📈 Fragility Statistics:
-   Mean: 0.287
-   Std:  0.156
-   Min:  0.042
-   Max:  0.723
-   Median: 0.261
-   IQR: 0.198
-
-⚡ Governance Actions:
-   Total: 24
-   By severity:
-     - Critical: 2
-     - High: 5
-     - Moderate: 8
-     - Low: 9
-
-✅ Governance Effectiveness:
-   Early fragility (first 20 steps): 0.342
-   Late fragility (last 20 steps): 0.187
-   Improvement: +45.3%
-   → Governance successfully reduced fragility
-```
-
----
-
 ## Key Takeaways
 
 1. **Fragility quantifies epistemic uncertainty** - How much policy choice affects outcomes
@@ -853,7 +797,7 @@ FRAGILITY DETECTION REPORT
 - Explore [Custom Epistemic Signals](./custom-signals.md) for advanced monitoring
 - See [Structural Probing](../advanced/structural-probing.md) for active experimentation
 - Study [Performance Optimization](../advanced/performance.md) for large-scale fragility detection
-- Learn about [Multi-Objective Governance](./multi-objective.md) balancing fragility with other metrics
+- Learn about [Multi-Objective Governance](../advanced/multi-objective.md) balancing fragility with other metrics
 
 ---
 

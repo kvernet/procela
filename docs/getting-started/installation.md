@@ -31,7 +31,7 @@ pip install procela
 To install a specific version:
 
 ```bash
-pip install procela==1.0.0
+pip install procela==1.0.2
 ```
 
 ### Method 2: From GitHub (Development Version)
@@ -105,6 +105,7 @@ pip install -e ".[dev]"
 ```
 
 The development dependencies include:
+
 - **Testing**: `pytest`, `pytest-cov`
 - **Linting**: `ruff`, `black`
 - **Type checking**: `mypy`
@@ -232,7 +233,7 @@ docker run procela-app
 
 After successful installation:
 - Follow the [Quick Start Guide](quickstart.md) to create your first simulation
-- Explore the [Core Concepts](../core-concepts/variables.md) to understand Procela's architecture
+- Explore the [Core Concepts](../core/variables.md) to understand Procela's architecture
 - Check out the [AMR Case Study](../examples/amr-case-study.md) for a real-world example
 
 ## Getting Help

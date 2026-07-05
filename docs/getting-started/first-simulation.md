@@ -34,7 +34,9 @@ from procela import (
     ReasoningTask,
     KeyAuthority
 )
-np.random.seed(1) # for reproducibility
+
+# Reproducibility
+rng = np.random.default_rng(1)
 ```
 
 ## Step 2: Define the Variable
@@ -62,6 +64,7 @@ print(f"Initial temperature: {temperature.value:.2f}°C")
 ```
 
 **Key Concepts:**
+
 - **Domain**: Defines valid value ranges (prevents impossible values)
 - **Policy**: Determines how competing hypotheses are resolved
 - **VariableRecord**: A hypothesis record with value, confidence, and source tracking
@@ -81,9 +84,9 @@ class OptimisticMechanism(Mechanism):
     def transform(self):
         current = self.reads()[0].value
         # Propose a warming trend
-        proposed = current + self.drift + np.random.normal(0, 0.3)
+        proposed = current + self.drift + rng.normal(0, 0.3)
         # Moderate confidence
-        confidence = np.clip(0.6 + np.random.normal(0, 0.1), 0, 1)
+        confidence = np.clip(0.6 + rng.normal(0, 0.1), 0, 1)
 
         self.writes()[0].add_hypothesis(
             VariableRecord(
@@ -103,8 +106,8 @@ class PessimisticMechanism(Mechanism):
     def transform(self):
         current = self.reads()[0].value
         # Propose a cooling trend
-        proposed = current + self.drift + np.random.normal(0, 0.3)
-        confidence = np.clip(0.6 + np.random.normal(0, 0.1), 0, 1)
+        proposed = current + self.drift + rng.normal(0, 0.3)
+        confidence = np.clip(0.6 + rng.normal(0, 0.1), 0, 1)
 
         self.writes()[0].add_hypothesis(
             VariableRecord(
@@ -123,9 +126,9 @@ class RandomMechanism(Mechanism):
     def transform(self):
         current = self.reads()[0].value
         # Propose random changes
-        proposed = current + np.random.normal(0, 0.5)
+        proposed = current + rng.normal(0, 0.5)
         # Lower confidence due to randomness
-        confidence = np.clip(0.4 + np.random.normal(0, 0.1), 0, 1)
+        confidence = np.clip(0.4 + rng.normal(0, 0.1), 0, 1)
 
         self.writes()[0].add_hypothesis(
             VariableRecord(
@@ -144,9 +147,9 @@ class ConservativeMechanism(Mechanism):
     def transform(self):
         current = self.reads()[0].value
         # Propose minimal changes
-        proposed = current + np.random.normal(0, 0.1)
+        proposed = current + rng.normal(0, 0.1)
         # High confidence in stability
-        confidence = np.clip(0.8 + np.random.normal(0, 0.1), 0, 1)
+        confidence = np.clip(0.8 + rng.normal(0, 0.1), 0, 1)
 
         self.writes()[0].add_hypothesis(
             VariableRecord(
@@ -175,9 +178,9 @@ mechanisms = [
 ]
 
 # Create executive
-executive = Executive(mechanisms=mechanisms)
+executive = Executive(mechanisms=mechanisms, rng=rng)
 
-print(f"Executive created with {len(mechanisms)} mechanisms")
+print(f"Executive created with {len(executive.mechanisms())} mechanisms")
 ```
 
 ## Step 5: Create Governance
@@ -300,17 +303,19 @@ def analyze_results(variable: Variable):
     print("-" * 40)
 
     # Basic statistics
-    values = [record.value for _, record, _ in memory.records()]
-    confidences = [record.confidence for _, record, _ in memory.records()]
+    time_points = {time: step for (step, time) in executive.time_points().items()}
+    values = [record[1].value for record in memory.records()]
+    confidences = [record[1].confidence for record in memory.records()]
     policies = []
-    for step, (_, record, _) in enumerate(memory.records(task=ReasoningTask.CONFLICT_RESOLUTION)):
-        if record.source is not None:
-            policy = KeyAuthority.resolve(record.source)
+    for record in memory.records(task=ReasoningTask.CONFLICT_RESOLUTION):
+        step = time_points.get(record[3], -1)
+        if record[1].source is not None:
+            policy = KeyAuthority.resolve(record[1].source)
             if len(policies) <= 0:
                 policies.append((step, policy))
                 continue
 
-            if record.source != policies[-1][1].key():
+            if record[1].source != policies[-1][1].key():
                 policies.append((step, policy))
 
 
@@ -330,7 +335,8 @@ def analyze_results(variable: Variable):
 
     # Hypothesis diversity
     all_hypotheses = []
-    for step, (hypotheses, _, _) in enumerate(memory.records()):
+    for records in memory.records():
+        hypotheses, record = records[0], records[1]
         if record.source:
             all_hypotheses.extend(
                 KeyAuthority.resolve(hy.record.source).name for hy in hypotheses
@@ -347,7 +353,7 @@ def analyze_results(variable: Variable):
 analyze_results(temperature)
 ```
 
-## Step 8: Visualization (Optional)
+## Step 8: Visualization - Requires matplotlib
 
 Add simple visualization to see the dynamics:
 
@@ -359,8 +365,8 @@ def plot_simulation(variable: Variable):
 
     memory = variable.memory
     steps = range(variable.stats.count)
-    values = [record.value for _, record, _ in memory.records()]
-    confidences = [record.confidence for _, record, _ in memory.records()]
+    values = [record[1].value for record in memory.records()]
+    confidences = [record[1].confidence for record in memory.records()]
 
     fig, (ax1, ax2) = plt.subplots(2, 1, figsize=(10, 8))
 
@@ -388,15 +394,8 @@ def plot_simulation(variable: Variable):
     plt.savefig('simulation_results.png', dpi=150)
     plt.show()
 
-# Uncomment to plot (requires matplotlib)
-#plot_simulation(temperature)
+plot_simulation(temperature)
 ```
-
-## Complete Script
-
-The complete simulation script with all components is available [here](../examples/temperature-simulation.md)
-
-
 
 ## Expected Output
 
@@ -410,21 +409,24 @@ Governance units added
 ==================================================
 Starting simulation...
 ==================================================
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 13 - High prediction error: 0.20°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 19 - High prediction error: 0.27°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | INFO     | procela |   Step 25 - Mechanism RandomMechanism has been disabled.
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 29 - High prediction error: 0.22°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 35 - High prediction error: 0.20°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 37 - High prediction error: 0.27°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 44 - High prediction error: 0.21°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 48 - High prediction error: 0.35°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 60 - High prediction error: 0.34°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 63 - High prediction error: 0.24°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 68 - High prediction error: 0.24°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 72 - High prediction error: 0.36°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | INFO     | procela |   Step 75 - Mechanism RandomMechanism has been enabled.
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 75 - High prediction error: 0.31°C (threshold: 0.2°C)
 
-⚠️  Step 5 - Fragility detected! Confidence spread > 0.6 - Switching to HighestConfidencePolicy...
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 19 - High prediction error: 0.51°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | INFO     | procela |   Step 25 - Mechanism RandomMechanism has been disabled.
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 25 - High prediction error: 0.32°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 26 - High prediction error: 0.49°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 33 - High prediction error: 0.28°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 41 - High prediction error: 0.33°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 42 - High prediction error: 0.23°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 47 - High prediction error: 0.20°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 52 - High prediction error: 0.22°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 70 - High prediction error: 0.21°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | INFO     | procela |   Step 75 - Mechanism RandomMechanism has been enabled.
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 83 - High prediction error: 0.29°C (threshold: 0.2°C)
-2026-03-31 20:11:28 | WARNING  | procela |   📊 Step 94 - High prediction error: 0.67°C (threshold: 0.2°C)
+⚠️  Step 81 - Fragility detected! Confidence spread > 0.6 - Switching to HighestConfidencePolicy...
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 88 - High prediction error: 0.29°C (threshold: 0.2°C)
+2026-07-04 13:58:30 | WARNING  | procela |   📊 Step 91 - High prediction error: 0.25°C (threshold: 0.2°C)
 
 ==================================================
 Simulation complete!
@@ -433,21 +435,21 @@ Simulation complete!
 📈 Simulation Analysis
 ----------------------------------------
 Start value: 20.00°C
-End value: 20.09°C
-Change: +0.09°C
-Mean confidence: 0.820
-Min confidence: 0.481
+End value: 20.03°C
+Change: +0.03°C
+Mean confidence: 0.680
+Min confidence: 0.469
 Max confidence: 1.000
 
 📋 Policy changes (2):
   Step 0: WeightedConfidencePolicy
-  Step 5: HighestConfidencePolicy
+  Step 81: HighestConfidencePolicy
 
 🔬 Active mechanisms: 4
   PessimisticMechanism: 100 hypotheses
+  OptimisticMechanism: 100 hypotheses
   ConservativeMechanism: 100 hypotheses
   RandomMechanism: 50 hypotheses
-  OptimisticMechanism: 100 hypotheses
 ```
 
 ## Key Takeaways
@@ -461,10 +463,10 @@ Max confidence: 1.000
 
 Now that you've built your first simulation:
 
-- Explore [Core Concepts](../core-concepts/variables.md) to understand the architecture
+- Explore [Core Concepts](../core/variables.md) to understand the architecture
 - Study the [AMR Case Study](../examples/amr-case-study.md) for a real-world application
 - Learn about [Custom Policies](../advanced/custom-policies.md) for advanced resolution strategies
-- Check the [API Reference](../api/reference.md) for detailed class documentation
+- Check the [API Reference](../api.md) for detailed class documentation
 
 ## Troubleshooting
 

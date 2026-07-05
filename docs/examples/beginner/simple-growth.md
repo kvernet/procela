@@ -19,6 +19,7 @@ This example provides:
 ## Overview
 
 This example demonstrates a classic population growth scenario with two competing theories:
+
 - **Linear Growth** - Assumes unlimited exponential growth
 - **Logistic Growth** - Assumes growth limited by carrying capacity
 
@@ -223,14 +224,14 @@ def analyze_growth_simulation(population: Variable) -> None:
         return
 
     # Track confidence over time
-    confidences = [r.confidence for _, r, _ in memory.records() if r is not None]
+    confidences = [record[1].confidence for record in memory.records() if record is not None]
     print("\nConfidence statistics:")
     print(f"  Mean confidence: {np.mean(confidences):.3f}")
     print(f"  Min confidence:  {np.min(confidences):.3f}")
     print(f"  Max confidence:  {np.max(confidences):.3f}")
 
     # Growth analysis
-    values = [r.value for _, r, _ in memory.records() if r is not None]
+    values = [record[1].value for record in memory.records() if record is not None]
     initial = values[0]
     final = values[-1]
     total_growth = final - initial
@@ -256,7 +257,7 @@ analyze_growth_simulation(population)
 
 ---
 
-## Step 6: Visualization (Optional)
+## Step 6: Visualization - Requires matplotlib
 
 For a clearer picture of the competition:
 
@@ -268,8 +269,8 @@ def plot_growth_simulation(population: Variable) -> None:
         return
 
     records = memory.records()
-    values = [r.value for _, r, _ in records if r is not None]
-    confidences = [r.confidence for _, r, _ in records if r is not None]
+    values = [record[1].value for record in records if record is not None]
+    confidences = [record[1].confidence for record in records if record is not None]
     steps = list(range(len(values)))
 
     # Identify which model was closest to the resolved conclusion at each step
@@ -289,7 +290,8 @@ def plot_growth_simulation(population: Variable) -> None:
         return str(model)
 
     models = []
-    for h, r, _ in records:
+    for record in records:
+        h, r = record[0], record[1]
         models.append(closest_model(h, r))
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10.0, 10.0))
@@ -345,8 +347,7 @@ def plot_growth_simulation(population: Variable) -> None:
     plt.show()
 
 
-# Uncomment to visualize
-#plot_growth_simulation(population)
+plot_growth_simulation(population)
 ```
 
 ---
@@ -356,7 +357,6 @@ def plot_growth_simulation(population: Variable) -> None:
 Here's the complete, runnable example:
 
 ```python
-#!/usr/bin/env python3
 """Simple Growth Model - Competing population growth theories"""
 
 import matplotlib.pyplot as plt
@@ -385,7 +385,6 @@ population = Variable(
 population.init(VariableRecord(value=100.0, confidence=1.0, source=None))
 
 print(f"Initial population: {population.value}")
-
 
 class LinearGrowthMechanism(Mechanism):
     """Assumes population grows exponentially without limits."""
@@ -491,7 +490,6 @@ print("Simulation Complete!")
 print(f"Final population: {population.value:.1f}")
 print("=" * 50)
 
-
 def analyze_growth_simulation(population: Variable) -> None:
     """Analyze and visualize the competition between growth models."""
     print("\n📊 Growth Model Competition Analysis")
@@ -503,14 +501,14 @@ def analyze_growth_simulation(population: Variable) -> None:
         return
 
     # Track confidence over time
-    confidences = [r.confidence for _, r, _ in memory.records() if r is not None]
+    confidences = [record[1].confidence for record in memory.records() if record is not None]
     print("\nConfidence statistics:")
     print(f"  Mean confidence: {np.mean(confidences):.3f}")
     print(f"  Min confidence:  {np.min(confidences):.3f}")
     print(f"  Max confidence:  {np.max(confidences):.3f}")
 
     # Growth analysis
-    values = [r.value for _, r, _ in memory.records() if r is not None]
+    values = [record[1].value for record in memory.records() if record is not None]
     initial = values[0]
     final = values[-1]
     total_growth = final - initial
@@ -529,10 +527,8 @@ def analyze_growth_simulation(population: Variable) -> None:
         if stability < 0.05:
             print(f"  Population stabilized at ≈ {np.mean(recent):.0f}")
 
-
 # Run analysis
 analyze_growth_simulation(population)
-
 
 def plot_growth_simulation(population: Variable) -> None:
     """Plot population growth and model competition."""
@@ -541,8 +537,8 @@ def plot_growth_simulation(population: Variable) -> None:
         return
 
     records = memory.records()
-    values = [r.value for _, r, _ in records if r is not None]
-    confidences = [r.confidence for _, r, _ in records if r is not None]
+    values = [record[1].value for record in records if record is not None]
+    confidences = [record[1].confidence for record in records if record is not None]
     steps = list(range(len(values)))
 
     # Identify which model was closest to the resolved conclusion at each step
@@ -562,7 +558,8 @@ def plot_growth_simulation(population: Variable) -> None:
         return str(model)
 
     models = []
-    for h, r, _ in records:
+    for record in records:
+        h, r = record[0], record[1]
         models.append(closest_model(h, r))
 
     fig, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(10.0, 10.0))
@@ -614,12 +611,10 @@ def plot_growth_simulation(population: Variable) -> None:
     ax3.grid(True, alpha=0.3)
 
     plt.tight_layout()
-    plt.savefig("growth_simulation.pdf", dpi=150)
+    plt.savefig("growth_simulation.png", dpi=150)
     plt.show()
 
-
-# Uncomment to visualize
-#plot_growth_simulation(population)
+plot_growth_simulation(population)
 ```
 
 ---

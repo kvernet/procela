@@ -413,7 +413,7 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
 
     # 2. Confidence analysis
     confidences = [
-        r.confidence for _, r, _ in temperature.memory.records() if r is not None
+        record[1].confidence for record in temperature.memory.records() if record[1] is not None
     ]
     print("\n💪 Confidence Statistics:")
     print(f"   Mean confidence: {np.mean(confidences):.3f}")
@@ -427,7 +427,7 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
         switch_step = governance.action_log[0]["step"]
 
         # Calculate volatility before and after
-        values = [r.value for _, r, _ in temperature.memory.records() if r is not None]
+        values = [record[1].value for record in temperature.memory.records() if record[1] is not None]
 
         before_switch = values[:switch_step]
         after_switch = values[switch_step:]
@@ -451,11 +451,11 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
 
     # 4. Model influence
     sources = [
-        KeyAuthority.resolve(r.source).__class__.__name__
-        for _, r, _ in temperature.memory.records()
-        if r is not None
-        and r.source is not None
-        and KeyAuthority.resolve(r.source) is not None
+        KeyAuthority.resolve(record[1].source).__class__.__name__
+        for record in temperature.memory.records()
+        if record[1] is not None
+        and record[1].source is not None
+        and KeyAuthority.resolve(record[1].source) is not None
     ]
     if sources:
         from collections import Counter
@@ -484,8 +484,8 @@ def plot_with_governance(
     if memory is None:
         return
 
-    values = [r.value for _, r, _ in memory.records() if r is not None]
-    confidences = [r.confidence for _, r, _ in memory.records() if r is not None]
+    values = [record[1].value for record in memory.records() if record[1] is not None]
+    confidences = [record[1].confidence for record in memory.records() if record[1] is not None]
     steps = list(range(len(values)))
 
     _, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10))
@@ -585,12 +585,10 @@ def plot_with_governance(
     ax3.legend(handles=[blue_patch, orange_patch], loc="upper right")
 
     plt.tight_layout()
-    plt.savefig("governance_simulation.pdf", dpi=150)
+    plt.savefig("governance_simulation.png", dpi=150)
     plt.show()
 
-
-# Uncomment to visualize
-#plot_with_governance(temperature, fragility_gov)
+plot_with_governance(temperature, fragility_gov)
 ```
 
 ---
@@ -600,7 +598,6 @@ def plot_with_governance(
 Here's the complete, runnable example:
 
 ```python
-#!/usr/bin/env python3
 """Basic Governance - Monitoring and adapting to hypothesis disagreement"""
 
 from typing import Any
@@ -820,7 +817,6 @@ class FragilityGovernance(SystemInvariant):
             message="Hypothesis disagreement exceeded threshold",
         )
 
-
 class CoverageMonitor(SystemInvariant):
     """
     Monitor prediction accuracy but doesn't take action.
@@ -896,7 +892,6 @@ class CoverageMonitor(SystemInvariant):
             message="Monitoring prediction coverage",
         )
 
-
 # Create mechanisms
 mechanisms = [WarmingMechanism(), CoolingMechanism(), StableMechanism()]
 
@@ -954,7 +949,7 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
 
     # 2. Confidence analysis
     confidences = [
-        r.confidence for _, r, _ in temperature.memory.records() if r is not None
+        record[1].confidence for record in temperature.memory.records() if record[1] is not None
     ]
     print("\n💪 Confidence Statistics:")
     print(f"   Mean confidence: {np.mean(confidences):.3f}")
@@ -968,7 +963,7 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
         switch_step = governance.action_log[0]["step"]
 
         # Calculate volatility before and after
-        values = [r.value for _, r, _ in temperature.memory.records() if r is not None]
+        values = [record[1].value for record in temperature.memory.records() if record[1] is not None]
 
         before_switch = values[:switch_step]
         after_switch = values[switch_step:]
@@ -992,11 +987,11 @@ def analyze_governance(temperature: Variable, governance: FragilityGovernance) -
 
     # 4. Model influence
     sources = [
-        KeyAuthority.resolve(r.source).__class__.__name__
-        for _, r, _ in temperature.memory.records()
-        if r is not None
-        and r.source is not None
-        and KeyAuthority.resolve(r.source) is not None
+        KeyAuthority.resolve(record[1].source).__class__.__name__
+        for record in temperature.memory.records()
+        if record[1] is not None
+        and record[1].source is not None
+        and KeyAuthority.resolve(record[1].source) is not None
     ]
     if sources:
         from collections import Counter
@@ -1020,8 +1015,8 @@ def plot_with_governance(
     if memory is None:
         return
 
-    values = [r.value for _, r, _ in memory.records() if r is not None]
-    confidences = [r.confidence for _, r, _ in memory.records() if r is not None]
+    values = [record[1].value for record in memory.records() if record[1] is not None]
+    confidences = [record[1].confidence for record in memory.records() if record[1] is not None]
     steps = list(range(len(values)))
 
     _, (ax1, ax2, ax3) = plt.subplots(3, 1, figsize=(12, 10))
@@ -1121,11 +1116,9 @@ def plot_with_governance(
     ax3.legend(handles=[blue_patch, orange_patch], loc="upper right")
 
     plt.tight_layout()
-    plt.savefig("governance_simulation.pdf", dpi=150)
+    plt.savefig("governance_simulation.png", dpi=150)
     plt.show()
 
-
-# Uncomment to visualize
 plot_with_governance(temperature, fragility_gov)
 ```
 
@@ -1251,7 +1244,7 @@ Try modifying the example to explore:
 
 - Learn about [Multiple Variables](./multiple-variables.md) with interconnected systems
 - Explore [Epistemic Signals](../../core/epistemic-signals.md) for more monitoring options
-- See [Fragility Detection](../intermediate/fragility-detection.md) for advanced governance patterns
+- See [Fragility Detection](../intermediate/fragility-detection.md) for intermediate governance patterns
 - Study the [AMR Case Study](../advanced/amr-case-study.md) for real-world governance
 
 ---

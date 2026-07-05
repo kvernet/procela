@@ -711,4 +711,4 @@ print(f"Execution time: {timer.elapsed:.2f}s")
 - Learn about [Variables](variables.md) that the Executive orchestrates
 - Explore [Mechanisms](mechanisms.md) that the Executive executes
 - Understand [Governance](governance.md) that the Executive triggers
-- See the [API Reference](../api/reference.md) for complete Executive documentation
+- See the [API Reference](../api.md) for complete Executive documentation

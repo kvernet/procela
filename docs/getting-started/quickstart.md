@@ -36,7 +36,7 @@ temperature.init(VariableRecord(20.0, confidence=1.0))
 ```python
 import numpy as np
 from procela import Mechanism
-np.random.seed(1)
+rng = np.random.default_rng(1)
 
 class TemperatureMechanism(Mechanism):
     def __init__(self, sigma=1.0):
@@ -48,11 +48,11 @@ class TemperatureMechanism(Mechanism):
         current = self.reads()[0].value
 
         # Propose a new hypothesis
-        new_value = current + np.random.normal(0, self.sigma)
+        new_value = current + rng.normal(0, self.sigma)
 
         # Add hypothesis with confidence
         self.writes()[0].add_hypothesis(
-            VariableRecord(new_value, confidence=np.random.uniform(0.5, 0.95), source=self.key())
+            VariableRecord(new_value, confidence=rng.uniform(0.5, 0.95), source=self.key())
         )
 ```
 
@@ -62,22 +62,27 @@ class TemperatureMechanism(Mechanism):
 from procela import Executive
 
 # Create executive with our mechanism
-executive = Executive(mechanisms=[
-    TemperatureMechanism(sigma=1.0),
-    TemperatureMechanism(sigma=0.5),
-    TemperatureMechanism(sigma=0.1)
-])
+executive = Executive(
+    mechanisms=[
+        TemperatureMechanism(sigma=1.0),
+        TemperatureMechanism(sigma=0.5),
+        TemperatureMechanism(sigma=0.1)
+    ],
+    rng=rng
+)
 
 # Run for 100 steps
 executive.run(steps=100)
 print(f"Final temperature: {temperature.value:.2f}")
 
 # Memory
-hypotheses, conclusion, reasoning = temperature.get(50)[0]
+record = temperature.get(50)[0]
+hypotheses, conclusion, reasoning = record[0], record[1], record[2]
 print(f"hypotheses: {len(hypotheses)}")
 print(f"{conclusion.value}  {conclusion.confidence}")
 
-hypotheses, conclusion, reasoning = temperature.get(-10, size=5, reverse=True)[3]
+records = temperature.get(-10, size=5, reverse=True)[3]
+hypotheses, conclusion, reasoning = records[0], records[1], records[2]
 print(f"hypotheses: {len(hypotheses)}")
 print(f"{conclusion.value}  {conclusion.confidence}")
 ```
@@ -129,23 +134,23 @@ class ConfidenceInvariant(SystemInvariant):
 executive.add_invariant(ConfidenceInvariant())
 
 # Run with governance
-executive.run(steps=100)
+executive.run(steps=150)
 print(f"Final temperature (with governance): {temperature.value:.2f}")
 ```
 
 ## Expected Output
 ```text
-Final temperature: 27.90
+Final temperature: 15.14
 hypotheses: 3
-22.800063776097407  0.6932732490133824
+13.548910281762097  0.6823264804401091
 hypotheses: 3
-26.358564888683674  0.6906402975273261
-Step 104 - Confidence spread too high! Switching to highest-confidence policy
-Final temperature (with governance): 23.99
+15.36531787137074  0.6316550271455733
+Step 100 - Confidence spread too high! Switching to highest-confidence policy
+Final temperature (with governance): 11.26
 ```
 
 ## What's Next?
 
-- Learn about [Core Concepts](../core-concepts/variables.md)
+- Learn about [Core Concepts](../core/variables.md)
 - Explore the [AMR Case Study](../examples/amr-case-study.md)
-- Check the [API Reference](../api/reference.md)
+- Check the [API Reference](../api.md)

@@ -1,6 +1,7 @@
 """
 Pytest module for procela.core.assessment.statistics."""
 
+import dataclasses
 import math
 from dataclasses import FrozenInstanceError, replace
 
@@ -100,7 +101,7 @@ class TestStatisticsResult:
         result = StatisticsResult()
 
         # With slots, we shouldn't be able to add new attributes
-        with pytest.raises(TypeError):
+        with pytest.raises((TypeError, dataclasses.FrozenInstanceError)):
             result.new_attribute = "test"
 
         # Verify __slots__ is defined

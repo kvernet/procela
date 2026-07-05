@@ -15,6 +15,7 @@ This guide covers:
 ## What are Epistemic Signals?
 
 Epistemic signals answer questions like:
+
 - **Coverage**: How accurate are our predictions?
 - **Fragility**: How sensitive are decisions to resolution policies?
 - **Conflict**: How much do mechanisms disagree?
@@ -554,7 +555,8 @@ class MechanismSelector(SystemInvariant):
 
         def _evaluate_mechanisms(snapshot: VariableSnapshot) -> None:
             """Evaluate each mechanism's contribution to signals"""
-            hypotheses, conclusion, _ = variable.memory.latest()
+            record = variable.memory.latest()
+            hypotheses, conclusion = record[0], record[1]
             if conclusion is not None and conclusion.value is not None:
                 for hypothesis in hypotheses:
                     mech_key = hypothesis.record.key
@@ -827,7 +829,8 @@ print(f"Decision: {decision}")
 
 ## Next Steps
 
+- Learn about [Executive](executive.md) for orchestrating the system
 - Learn how [Governance](governance.md) uses signals to make decisions
 - See signals in action in the [AMR Case Study](../examples/amr-case-study.md)
 - Explore [Advanced Signal Processing](../advanced/signal-processing.md)
-- Check the [API Reference](../api/reference.md) for complete Signal documentation
+- Check the [API Reference](../api.md) for complete Signal documentation
