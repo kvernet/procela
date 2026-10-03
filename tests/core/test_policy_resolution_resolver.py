@@ -166,7 +166,7 @@ class TestResolverPolicyValidators:
         # Policy should receive only the first hypothesis
         mock_policy.resolve.assert_called_once()
         filtered = mock_policy.resolve.call_args[1]["hypotheses"]
-        assert len(filtered) == 2
+        assert len(filtered) == 1
         assert filtered[0] == mock_hypothesis
 
     def test_multiple_validators_all_pass(
@@ -207,7 +207,7 @@ class TestResolverPolicyValidators:
         # Only first hypothesis should pass both validators
         mock_policy.resolve.assert_called_once()
         filtered = mock_policy.resolve.call_args[1]["hypotheses"]
-        assert len(filtered) == 2
+        assert len(filtered) == 1
         assert filtered[0] == mock_hypothesis
 
     def test_all_hypotheses_rejected(

@@ -19,8 +19,6 @@ __copyright__ = "Copyright 2026"
 
 from .core import (
     _ANOMALY_DETECTORS,
-    _DIAGNOSER_REGISTRY,
-    _PREDICTOR_REGISTRY,
     AnomalyDetector,
     AnomalyDiagnoser,
     AnomalyOperator,
@@ -206,7 +204,6 @@ __all__ = [
     "available_diagnosers",
     "clear_diagnoser_registry",
     "has_diagnoser",
-    "_DIAGNOSER_REGISTRY",
     "Predictor",
     "EWMAPredictor",
     "LastPredictor",
@@ -221,7 +218,6 @@ __all__ = [
     "available_predictors",
     "clear_predictor_registry",
     "has_predictor",
-    "_PREDICTOR_REGISTRY",
     "Timer",
     "BooleanDomain",
     "CategoricalDomain",

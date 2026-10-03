@@ -143,6 +143,8 @@ class ResolverPolicy:
                     f"got {type(hypotheses)}"
                 )
 
+            hypotheses = list(hypotheses)
+
             for i, hypothesis in enumerate(hypotheses):
                 if not isinstance(hypothesis, HypothesisRecord):
                     raise TypeError(
@@ -156,6 +158,8 @@ class ResolverPolicy:
                         f"`validators` should be an Iterable instance, "
                         f"got {validators!r}"
                     )
+
+                validators = list(validators)
 
                 for i, validator in enumerate(validators):
                     if not callable(validator):
@@ -197,7 +201,7 @@ class ResolverPolicy:
                     f"`policy` should be a ResolutionPolicy, got {type(policy)}"
                 )
 
-            resolved = policy.resolve(hypotheses=hypotheses)
+            resolved = policy.resolve(hypotheses=hypotheses_validated)
 
             if resolved is None:
                 return (
